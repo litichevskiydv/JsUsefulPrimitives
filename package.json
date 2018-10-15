@@ -1,0 +1,24 @@
+{
+  "name": "js-useful-primitives",
+  "version": "0.1.0",
+  "description": "Primitives for comfort coding with Node.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/litichevskiydv/JsUsefulPrimitives.git"
+  },
+  "author": "dmitriy.litichevskiy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/litichevskiydv/JsUsefulPrimitives/issues"
+  },
+  "homepage": "https://github.com/litichevskiydv/JsUsefulPrimitives#readme",
+  "devDependencies": {
+    "jest": "^23.6.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
