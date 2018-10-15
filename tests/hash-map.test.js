@@ -190,3 +190,28 @@ test("Should get entries",
     expect(entries.map(x => x[1])).toContain(firstKeyValue);
     expect(entries.map(x => x[1])).toContain(secondKeyValue);
 });
+
+test("Should iterate collection",
+() => {
+    // Given
+    let map = new HashMap(new KeysComparer());
+
+    let firstKey = new Key(1, 1);
+    let firstKeyValue = 1;
+
+    let secondKey = new Key(2, 2);
+    let secondKeyValue = 2;
+
+    // When
+    map.set(firstKey, firstKeyValue);
+    map.set(secondKey, secondKeyValue);
+
+    let entries = Array.from(map);
+    
+    // Then
+    expect(entries.map(x => x[0])).toContain(firstKey);
+    expect(entries.map(x => x[0])).toContain(secondKey);
+
+    expect(entries.map(x => x[1])).toContain(firstKeyValue);
+    expect(entries.map(x => x[1])).toContain(secondKeyValue);
+});

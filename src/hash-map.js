@@ -78,4 +78,7 @@ module.exports = class HashMap{
             }
         }
     }
+    [Symbol.iterator](){
+        return this.entries();
+    }
 }
