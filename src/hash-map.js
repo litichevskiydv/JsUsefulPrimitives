@@ -52,31 +52,25 @@ module.exports = class HashMap{
         this._data.forEach(bucket => bucket.forEach(value => callbackfn(value[1], value[0], this)));
     }
 
-    *keys(){
+    *_iterateElements(selector){
         for(let bucket of this._data.values())
         {
             for(let pair of bucket){
-                yield pair[0];                
+                yield selector(pair);                
             }
         }
     }
 
-    *values(){
-        for(let bucket of this._data.values())
-        {
-            for(let pair of bucket){
-                yield pair[1];                
-            }
-        }
+    keys(){
+        return this._iterateElements(pair => pair[0]);
     }
 
-    *entries(){
-        for(let bucket of this._data.values())
-        {
-            for(let pair of bucket){
-                yield pair;                
-            }
-        }
+    values(){
+        return this._iterateElements(pair => pair[1]);
+    }
+
+    entries(){
+        return this._iterateElements(pair => pair);
     }
     [Symbol.iterator](){
         return this.entries();
