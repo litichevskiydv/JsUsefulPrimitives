@@ -16,9 +16,11 @@
   },
   "homepage": "https://github.com/litichevskiydv/JsUsefulPrimitives#readme",
   "devDependencies": {
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "jest-extended": "^0.11.0"
   },
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupTestFrameworkScriptFile": "jest-extended"
   }
 }
