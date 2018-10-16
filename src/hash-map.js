@@ -60,16 +60,16 @@ module.exports = class HashMap {
     }
   }
 
+  entries() {
+    return this._iterateElements(pair => pair);
+  }
+
   keys() {
     return this._iterateElements(pair => pair[0]);
   }
 
   values() {
     return this._iterateElements(pair => pair[1]);
-  }
-
-  entries() {
-    return this._iterateElements(pair => pair);
   }
 
   [Symbol.iterator]() {
