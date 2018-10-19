@@ -30,6 +30,21 @@ test("Should add value", () => {
 
     // Then
     expect(hashSet.has(value)).toBeTrue();
+    expect(hashSet.size).toBe(1);
+});
+
+test("Should add existed value", () => {
+    // Given
+    let hashSet = new HashSet(new BigNumbersComparer());
+    let value = new BigNumber(1, 1);
+
+    // When
+    hashSet.add(value);
+    hashSet.add(value);
+
+    // Then
+    expect(hashSet.has(value)).toBeTrue();
+    expect(hashSet.size).toBe(1);
 });
 
 test("Should delete existed value", () => {
@@ -46,6 +61,7 @@ test("Should delete existed value", () => {
     expect(hashSet.delete(firstValue)).toBeTrue();
     expect(hashSet.has(firstValue)).toBeFalse();
     expect(hashSet.has(secondValue)).toBeTrue();
+    expect(hashSet.size).toBe(1);
 });
 
 test("Should delete not existed value", () => {
@@ -60,6 +76,7 @@ test("Should delete not existed value", () => {
     // Then
     expect(hashSet.delete(firstValue)).toBeFalse();
     expect(hashSet.has(secondValue)).toBeTrue();
+    expect(hashSet.size).toBe(1);
 });
 
 test("Should clear collection", () => {
@@ -76,6 +93,7 @@ test("Should clear collection", () => {
     // Then
     expect(hashSet.has(firstValue)).toBeFalse();
     expect(hashSet.has(secondValue)).toBeFalse();
+    expect(hashSet.size).toBe(0);
 });
 
 test("Should collect values", () => {

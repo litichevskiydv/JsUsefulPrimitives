@@ -2,6 +2,11 @@ module.exports = class HashSet {
     constructor(equalityComparer) {
         this._equalityComparer = equalityComparer;
         this._data = new Map();
+        this._size = 0;
+    }
+
+    get size() {
+        return this._size;
     }
 
     add(value) {
@@ -12,7 +17,10 @@ module.exports = class HashSet {
             this._data.set(hashCode, bucket);
         }
 
-        if (bucket.some(x => this._equalityComparer.equals(x, value)) === false) bucket.push(value);
+        if (bucket.some(x => this._equalityComparer.equals(x, value)) === false) {
+            bucket.push(value);
+            this._size++;
+        }
         return this;
     }
 
@@ -31,11 +39,13 @@ module.exports = class HashSet {
         if (i === bucket.length) return false;
 
         bucket.splice(i, 1);
+        this._size--;
         return true;
     }
 
     clear() {
         this._data.clear();
+        this._size = 0;
     }
 
     forEach(callback) {
