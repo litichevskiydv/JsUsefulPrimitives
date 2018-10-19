@@ -2,6 +2,11 @@ module.exports = class HashMap {
     constructor(equalityComparer) {
         this._equalityComparer = equalityComparer;
         this._data = new Map();
+        this._size = 0;
+    }
+
+    get size() {
+        return this._size;
     }
 
     get(key) {
@@ -23,8 +28,10 @@ module.exports = class HashMap {
         }
 
         let pair = bucket.find(x => this._equalityComparer.equals(x[0], key));
-        if (!pair) bucket.push([key, value]);
-        else pair[1] = value;
+        if (!pair) {
+            bucket.push([key, value]);
+            this._size++;
+        } else pair[1] = value;
 
         return this;
     }
@@ -41,11 +48,13 @@ module.exports = class HashMap {
         if (i === bucket.length) return false;
 
         bucket.splice(i, 1);
+        this._size--;
         return true;
     }
 
     clear() {
         this._data.clear();
+        this._size = 0;
     }
 
     forEach(callbackfn) {

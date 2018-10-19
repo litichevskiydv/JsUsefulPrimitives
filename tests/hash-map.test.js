@@ -33,6 +33,7 @@ test("Should set and get value", () => {
     // Then
     let secondKey = new Key(firstKey.hi, firstKey.lo);
     expect(map.get(secondKey)).toBe(firstKeyValue);
+    expect(map.size).toBe(1);
 });
 
 test("Should override existed value", () => {
@@ -49,6 +50,7 @@ test("Should override existed value", () => {
 
     // Then
     expect(map.get(firstKey)).toBe(firstKeyAnotherValue);
+    expect(map.size).toBe(1);
 });
 
 test("Should confirm key existence", () => {
@@ -82,16 +84,23 @@ test("Should delete existed key", () => {
     // Then
     expect(map.delete(firstKey)).toBeTrue();
     expect(map.get(secondKey)).toBe(secondKeyValue);
+    expect(map.size).toBe(1);
 });
 
 test("Should delete not existed key", () => {
     // Given
     let map = new HashMap(new KeysComparer());
 
-    let key = new Key(1, 1);
+    let firstKey = new Key(1, 1);
+    let firstKeyValue = 1;
+
+    let secondKey = new Key(2, 2);
 
     // When, Then
-    expect(map.delete(key)).toBeFalse();
+    map.set(firstKey, firstKeyValue);
+    expect(map.delete(secondKey)).toBeFalse();
+    expect(map.has(firstKey)).toBeTrue();
+    expect(map.size).toBe(1);
 });
 
 test("Should clear collection", () => {
@@ -112,6 +121,7 @@ test("Should clear collection", () => {
     // Then
     expect(map.has(firstKey)).toBeFalse();
     expect(map.has(secondKey)).toBeFalse();
+    expect(map.size).toBe(0);
 });
 
 test("Should collect values", () => {
