@@ -1,4 +1,4 @@
-const HashSet = require("./../src/hash-set.js");
+const HashSet = require("../../src/collections/hash-set.js");
 
 class BigNumber {
     constructor(hi, lo) {

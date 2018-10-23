@@ -1,4 +1,4 @@
-const HashMap = require("./../src/hash-map.js");
+const HashMap = require("../../src/collections/hash-map.js");
 
 class Key {
     constructor(hi, lo) {
