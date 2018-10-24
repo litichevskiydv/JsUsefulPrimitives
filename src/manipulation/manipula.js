@@ -1,3 +1,5 @@
+const HashSet = require("../collections/hashSet");
+
 const Manipula = class Manipula {
     static from(iterable) {
         return new FromIterator(iterable);
@@ -17,6 +19,10 @@ const Manipula = class Manipula {
 
     concat(second) {
         return new ConcatIterator(this, second);
+    }
+
+    union(second, comparer) {
+        return new UnionIterator(this, second, comparer);
     }
 };
 module.exports = Manipula;
@@ -68,5 +74,28 @@ class ConcatIterator extends Manipula {
     *[Symbol.iterator]() {
         yield* this._first;
         yield* this._second;
+    }
+}
+
+class UnionIterator extends Manipula {
+    constructor(first, second, comparer) {
+        super();
+        this._first = first;
+        this._second = second;
+        this._comparer = comparer;
+    }
+
+    *_iterate(set, source) {
+        for (let item of source)
+            if (set.has(item) === false) {
+                set.add(item);
+                yield item;
+            }
+    }
+
+    *[Symbol.iterator]() {
+        let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+        yield* this._iterate(set, this._first);
+        yield* this._iterate(set, this._second);
     }
 }

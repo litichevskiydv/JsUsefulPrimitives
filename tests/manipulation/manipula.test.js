@@ -1,5 +1,25 @@
 const Manipula = require("../../src/manipulation/manipula");
 
+class Key {
+    constructor(hi, lo) {
+        this.hi = hi;
+        this.lo = lo;
+    }
+}
+
+class KeysComparer {
+    getHashCode(obj) {
+        let hash = 17;
+        hash = hash * 31 + obj.hi;
+        hash = hash * 31 + obj.lo;
+        return hash;
+    }
+
+    equals(a, b) {
+        return a.hi === b.hi && a.lo === b.lo;
+    }
+}
+
 test("Should convert manipula to array", () => {
     // Given
     const expectedArray = [1, 2, 3, 4, 5];
@@ -72,5 +92,33 @@ test("Should concat collections", () => {
 
     // Then
     const expectedArray = [1, 2, 3, 4, 5, 6];
+    expect(actualArray).toIncludeSameMembers(expectedArray);
+});
+
+test("Should union collections of primitive type", () => {
+    // Given
+    const manipula = Manipula.from([5, 3, 9, 7, 5, 9, 3, 7]);
+
+    // When
+    const actualArray = manipula.union([8, 3, 6, 4, 4, 9, 1, 0]).toArray();
+
+    // Then
+    const expectedArray = [5, 3, 9, 7, 8, 6, 4, 1, 0];
+    expect(actualArray).toIncludeSameMembers(expectedArray);
+});
+
+test("Should union collections of complex type", () => {
+    // Given
+    let firstKey = new Key(1, 1);
+    let secondKey = new Key(2, 2);
+    let thirdKey = new Key(2, 2);
+    let fourthKey = new Key(1, 1);
+    const manipula = Manipula.from([firstKey, secondKey]);
+
+    // When
+    const actualArray = manipula.union([thirdKey, fourthKey], new KeysComparer()).toArray();
+
+    // Then
+    const expectedArray = [firstKey, secondKey];
     expect(actualArray).toIncludeSameMembers(expectedArray);
 });
