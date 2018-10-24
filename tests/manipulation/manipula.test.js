@@ -59,3 +59,18 @@ test("Should filter collection depends on element number", () => {
     const expectedArray = [1, 3, 5];
     expect(actualArray).toIncludeSameMembers(expectedArray);
 });
+
+test("Should concat collections", () => {
+    // Given
+    const manipula = Manipula.from([1, 2]);
+
+    // When
+    const actualArray = manipula
+        .concat([3, 4])
+        .concat([5, 6])
+        .toArray();
+
+    // Then
+    const expectedArray = [1, 2, 3, 4, 5, 6];
+    expect(actualArray).toIncludeSameMembers(expectedArray);
+});

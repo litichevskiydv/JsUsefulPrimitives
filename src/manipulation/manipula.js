@@ -14,6 +14,10 @@ const Manipula = class Manipula {
     where(predicate) {
         return new WhereIterator(this, predicate);
     }
+
+    concat(second) {
+        return new ConcatIterator(this, second);
+    }
 };
 module.exports = Manipula;
 
@@ -51,5 +55,18 @@ class WhereIterator extends Manipula {
     *[Symbol.iterator]() {
         let i = 0;
         for (let item of this._iterable) if (this._predicate(item, i++)) yield item;
+    }
+}
+
+class ConcatIterator extends Manipula {
+    constructor(first, second) {
+        super();
+        this._first = first;
+        this._second = second;
+    }
+
+    *[Symbol.iterator]() {
+        yield* this._first;
+        yield* this._second;
     }
 }
