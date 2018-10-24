@@ -10,6 +10,10 @@ const Manipula = class Manipula {
     select(selector) {
         return new SelectIterator(this, selector);
     }
+
+    where(predicate) {
+        return new WhereIterator(this, predicate);
+    }
 };
 module.exports = Manipula;
 
@@ -34,5 +38,18 @@ class SelectIterator extends Manipula {
     *[Symbol.iterator]() {
         let i = 0;
         for (let item of this._iterable) yield this._selector(item, i++);
+    }
+}
+
+class WhereIterator extends Manipula {
+    constructor(iterable, predicate) {
+        super();
+        this._iterable = iterable;
+        this._predicate = predicate;
+    }
+
+    *[Symbol.iterator]() {
+        let i = 0;
+        for (let item of this._iterable) if (this._predicate(item, i++)) yield item;
     }
 }
