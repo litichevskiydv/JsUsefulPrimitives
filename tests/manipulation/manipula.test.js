@@ -122,3 +122,31 @@ test("Should union collections of complex type", () => {
     const expectedArray = [firstKey, secondKey];
     expect(actualArray).toIncludeSameMembers(expectedArray);
 });
+
+test("Should subtracts sets of primitive type", () => {
+    // Given
+    const manipula = Manipula.from([2.0, 2.0, 2.1, 2.2, 2.3, 2.3, 2.4, 2.5]);
+
+    // When
+    const actualArray = manipula.except([2.2]).toArray();
+
+    // Then
+    const expectedArray = [2.0, 2.1, 2.3, 2.4, 2.5];
+    expect(actualArray).toIncludeSameMembers(expectedArray);
+});
+
+test("Should subtracts sets of complex type", () => {
+    // Given
+    let firstKey = new Key(1, 1);
+    let secondKey = new Key(2, 2);
+    let thirdKey = new Key(2, 2);
+    let fourthKey = new Key(1, 1);
+    const manipula = Manipula.from([firstKey, secondKey, thirdKey]);
+
+    // When
+    const actualArray = manipula.except([fourthKey], new KeysComparer()).toArray();
+
+    // Then
+    const expectedArray = [secondKey];
+    expect(actualArray).toIncludeSameMembers(expectedArray);
+});

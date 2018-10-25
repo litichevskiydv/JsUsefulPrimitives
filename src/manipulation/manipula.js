@@ -24,6 +24,10 @@ const Manipula = class Manipula {
     union(second, comparer) {
         return new UnionIterator(this, second, comparer);
     }
+
+    except(second, comparer) {
+        return new ExceptIterator(this, second, comparer);
+    }
 };
 module.exports = Manipula;
 
@@ -34,7 +38,7 @@ class FromIterator extends Manipula {
     }
 
     *[Symbol.iterator]() {
-        for (let item of this._iterable) yield item;
+        for (let element of this._iterable) yield element;
     }
 }
 
@@ -47,7 +51,7 @@ class SelectIterator extends Manipula {
 
     *[Symbol.iterator]() {
         let i = 0;
-        for (let item of this._iterable) yield this._selector(item, i++);
+        for (let element of this._iterable) yield this._selector(element, i++);
     }
 }
 
@@ -60,7 +64,7 @@ class WhereIterator extends Manipula {
 
     *[Symbol.iterator]() {
         let i = 0;
-        for (let item of this._iterable) if (this._predicate(item, i++)) yield item;
+        for (let element of this._iterable) if (this._predicate(element, i++)) yield element;
     }
 }
 
@@ -86,10 +90,10 @@ class UnionIterator extends Manipula {
     }
 
     *_iterate(set, source) {
-        for (let item of source)
-            if (set.has(item) === false) {
-                set.add(item);
-                yield item;
+        for (let element of source)
+            if (set.has(element) === false) {
+                set.add(element);
+                yield element;
             }
     }
 
@@ -97,5 +101,25 @@ class UnionIterator extends Manipula {
         let set = !this._comparer ? new Set() : new HashSet(this._comparer);
         yield* this._iterate(set, this._first);
         yield* this._iterate(set, this._second);
+    }
+}
+
+class ExceptIterator extends Manipula {
+    constructor(first, second, comparer) {
+        super();
+        this._first = first;
+        this._second = second;
+        this._comparer = comparer;
+    }
+
+    *[Symbol.iterator]() {
+        let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+        for (let element of this._second) set.add(element);
+
+        for (let element of this._first)
+            if (set.has(element) === false) {
+                set.add(element);
+                yield element;
+            }
     }
 }
