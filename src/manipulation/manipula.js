@@ -28,6 +28,10 @@ const Manipula = class Manipula {
     except(second, comparer) {
         return new ExceptIterator(this, second, comparer);
     }
+
+    distinct(comparer) {
+        return new DistinctIterator(this, comparer);
+    }
 };
 module.exports = Manipula;
 
@@ -117,6 +121,24 @@ class ExceptIterator extends Manipula {
         for (let element of this._second) set.add(element);
 
         for (let element of this._first)
+            if (set.has(element) === false) {
+                set.add(element);
+                yield element;
+            }
+    }
+}
+
+class DistinctIterator extends Manipula {
+    constructor(source, comparer) {
+        super();
+        this._source = source;
+        this._comparer = comparer;
+    }
+
+    *[Symbol.iterator]() {
+        let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+
+        for (let element of this._source)
             if (set.has(element) === false) {
                 set.add(element);
                 yield element;
