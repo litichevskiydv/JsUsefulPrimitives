@@ -1,147 +1,161 @@
 const HashSet = require("../collections/hashSet");
+const lengthPropertyName = "length";
 
 const Manipula = class Manipula {
-    static from(iterable) {
-        return new FromIterator(iterable);
-    }
+  static from(iterable) {
+    return new FromIterator(iterable);
+  }
 
-    toArray() {
-        return Array.from(this);
-    }
+  count(predicate) {
+    if (!predicate && lengthPropertyName in this) return this[lengthPropertyName];
 
-    select(selector) {
-        return new SelectIterator(this, selector);
-    }
+    let count = 0;
+    for (let element of this) if (!predicate || predicate(element)) count++;
+    return count;
+  }
 
-    where(predicate) {
-        return new WhereIterator(this, predicate);
-    }
+  toArray() {
+    return Array.from(this);
+  }
 
-    concat(second) {
-        return new ConcatIterator(this, second);
-    }
+  select(selector) {
+    return new SelectIterator(this, selector);
+  }
 
-    union(second, comparer) {
-        return new UnionIterator(this, second, comparer);
-    }
+  where(predicate) {
+    return new WhereIterator(this, predicate);
+  }
 
-    except(second, comparer) {
-        return new ExceptIterator(this, second, comparer);
-    }
+  concat(second) {
+    return new ConcatIterator(this, second);
+  }
 
-    distinct(comparer) {
-        return new DistinctIterator(this, comparer);
-    }
+  union(second, comparer) {
+    return new UnionIterator(this, second, comparer);
+  }
+
+  except(second, comparer) {
+    return new ExceptIterator(this, second, comparer);
+  }
+
+  distinct(comparer) {
+    return new DistinctIterator(this, comparer);
+  }
 };
 module.exports = Manipula;
 
 class FromIterator extends Manipula {
-    constructor(iterable) {
-        super();
-        this._iterable = iterable;
-    }
+  constructor(iterable) {
+    super();
+    this._iterable = iterable;
 
-    *[Symbol.iterator]() {
-        for (let element of this._iterable) yield element;
-    }
+    if (lengthPropertyName in iterable)
+      Object.defineProperty(this, lengthPropertyName, {
+        get: () => this._iterable[lengthPropertyName]
+      });
+  }
+
+  *[Symbol.iterator]() {
+    for (let element of this._iterable) yield element;
+  }
 }
 
 class SelectIterator extends Manipula {
-    constructor(iterable, selector) {
-        super();
-        this._iterable = iterable;
-        this._selector = selector;
-    }
+  constructor(iterable, selector) {
+    super();
+    this._iterable = iterable;
+    this._selector = selector;
+  }
 
-    *[Symbol.iterator]() {
-        let i = 0;
-        for (let element of this._iterable) yield this._selector(element, i++);
-    }
+  *[Symbol.iterator]() {
+    let i = 0;
+    for (let element of this._iterable) yield this._selector(element, i++);
+  }
 }
 
 class WhereIterator extends Manipula {
-    constructor(iterable, predicate) {
-        super();
-        this._iterable = iterable;
-        this._predicate = predicate;
-    }
+  constructor(iterable, predicate) {
+    super();
+    this._iterable = iterable;
+    this._predicate = predicate;
+  }
 
-    *[Symbol.iterator]() {
-        let i = 0;
-        for (let element of this._iterable) if (this._predicate(element, i++)) yield element;
-    }
+  *[Symbol.iterator]() {
+    let i = 0;
+    for (let element of this._iterable) if (this._predicate(element, i++)) yield element;
+  }
 }
 
 class ConcatIterator extends Manipula {
-    constructor(first, second) {
-        super();
-        this._first = first;
-        this._second = second;
-    }
+  constructor(first, second) {
+    super();
+    this._first = first;
+    this._second = second;
+  }
 
-    *[Symbol.iterator]() {
-        yield* this._first;
-        yield* this._second;
-    }
+  *[Symbol.iterator]() {
+    yield* this._first;
+    yield* this._second;
+  }
 }
 
 class UnionIterator extends Manipula {
-    constructor(first, second, comparer) {
-        super();
-        this._first = first;
-        this._second = second;
-        this._comparer = comparer;
-    }
+  constructor(first, second, comparer) {
+    super();
+    this._first = first;
+    this._second = second;
+    this._comparer = comparer;
+  }
 
-    *_iterate(set, source) {
-        for (let element of source)
-            if (set.has(element) === false) {
-                set.add(element);
-                yield element;
-            }
-    }
+  *_iterate(set, source) {
+    for (let element of source)
+      if (set.has(element) === false) {
+        set.add(element);
+        yield element;
+      }
+  }
 
-    *[Symbol.iterator]() {
-        let set = !this._comparer ? new Set() : new HashSet(this._comparer);
-        yield* this._iterate(set, this._first);
-        yield* this._iterate(set, this._second);
-    }
+  *[Symbol.iterator]() {
+    let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+    yield* this._iterate(set, this._first);
+    yield* this._iterate(set, this._second);
+  }
 }
 
 class ExceptIterator extends Manipula {
-    constructor(first, second, comparer) {
-        super();
-        this._first = first;
-        this._second = second;
-        this._comparer = comparer;
-    }
+  constructor(first, second, comparer) {
+    super();
+    this._first = first;
+    this._second = second;
+    this._comparer = comparer;
+  }
 
-    *[Symbol.iterator]() {
-        let set = !this._comparer ? new Set() : new HashSet(this._comparer);
-        for (let element of this._second) set.add(element);
+  *[Symbol.iterator]() {
+    let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+    for (let element of this._second) set.add(element);
 
-        for (let element of this._first)
-            if (set.has(element) === false) {
-                set.add(element);
-                yield element;
-            }
-    }
+    for (let element of this._first)
+      if (set.has(element) === false) {
+        set.add(element);
+        yield element;
+      }
+  }
 }
 
 class DistinctIterator extends Manipula {
-    constructor(source, comparer) {
-        super();
-        this._source = source;
-        this._comparer = comparer;
-    }
+  constructor(source, comparer) {
+    super();
+    this._source = source;
+    this._comparer = comparer;
+  }
 
-    *[Symbol.iterator]() {
-        let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+  *[Symbol.iterator]() {
+    let set = !this._comparer ? new Set() : new HashSet(this._comparer);
 
-        for (let element of this._source)
-            if (set.has(element) === false) {
-                set.add(element);
-                yield element;
-            }
-    }
+    for (let element of this._source)
+      if (set.has(element) === false) {
+        set.add(element);
+        yield element;
+      }
+  }
 }
