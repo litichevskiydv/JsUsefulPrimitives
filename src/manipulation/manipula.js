@@ -32,6 +32,10 @@ const Manipula = class Manipula {
     throw new Error("No matching element was found");
   }
 
+  firstOrDefault(predicate) {
+    return this._tryGetFirst(predicate).element;
+  }
+
   toArray() {
     return Array.from(this);
   }

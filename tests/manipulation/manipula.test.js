@@ -243,3 +243,25 @@ test("Should throw error on getting first element if no elements matches the pat
   // When, Then
   expect.toThrowWithMessage(() => manipula.first(x => x % 7 === 0), "No matching element was found");
 });
+
+test("Should return null on getting first or default element if collection is empty", () => {
+  // Given
+  const manipula = Manipula.from([]);
+
+  // When
+  let actualElement = manipula.firstOrDefault();
+
+  // Then
+  expect(actualElement).toBeNull();
+});
+
+test("Should return null on getting first or default element if no elements matches the pattern", () => {
+  // Given
+  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+
+  // When
+  let actualElement = manipula.first(x => x % 7 === 0);
+
+  // Then
+  expect(actualElement).toBeNull();
+});
