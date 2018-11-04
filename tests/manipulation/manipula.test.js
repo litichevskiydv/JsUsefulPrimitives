@@ -32,6 +32,33 @@ test("Should convert manipula to array", () => {
   expect(actualArray).toIncludeSameMembers(expectedArray);
 });
 
+test("Should convert manipula to set of primitive type", () => {
+  // Given
+  const sourceArray = [1, 2, 3, 4, 5];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualSet = manipula.toSet();
+
+  // Then
+  expect(sourceArray).toSatisfyAll(x => actualSet.has(x));
+});
+
+test("Should convert manipula to set of complex type", () => {
+  // Given
+  const firstKey = new Key(1, 1);
+  const secondKey = new Key(2, 2);
+  const sourceArray = [firstKey, secondKey];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualSet = manipula.toSet(new KeysComparer());
+
+  // Then
+  expect(sourceArray).toSatisfyAll(x => actualSet.has(x));
+  expect(actualSet.has(new Key(firstKey.hi, firstKey.lo))).toBeTrue();
+});
+
 test("Should produce new collection", () => {
   // Given
   const manipula = Manipula.from([1, 2, 3, 4, 5]);

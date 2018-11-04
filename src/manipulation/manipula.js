@@ -65,10 +65,6 @@ const Manipula = class Manipula {
     return searchResult.element;
   }
 
-  toArray() {
-    return Array.from(this);
-  }
-
   select(selector) {
     return new SelectIterator(this, selector);
   }
@@ -91,6 +87,17 @@ const Manipula = class Manipula {
 
   distinct(comparer) {
     return new DistinctIterator(this, comparer);
+  }
+
+  toArray() {
+    return Array.from(this);
+  }
+
+  toSet(comparer) {
+    let set = !comparer ? new Set() : new HashSet(comparer);
+    for (let element of this) set.add(element);
+
+    return set;
   }
 };
 module.exports = Manipula;
