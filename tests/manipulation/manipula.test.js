@@ -220,7 +220,7 @@ test("Should throw error on getting first element if collection is empty", () =>
   const manipula = Manipula.from([]);
 
   // When, Then
-  expect.toThrowWithMessage(() => manipula.first(), "No matching element was found");
+  expect(() => manipula.first()).toThrowWithMessage(Error, "No matching element was found");
 });
 
 test("Should get first element that matches the pattern", () => {
@@ -241,7 +241,7 @@ test("Should throw error on getting first element if no elements matches the pat
   const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
 
   // When, Then
-  expect.toThrowWithMessage(() => manipula.first(x => x % 7 === 0), "No matching element was found");
+  expect(() => manipula.first(x => x % 7 === 0)).toThrowWithMessage(Error, "No matching element was found");
 });
 
 test("Should return null on getting first or default element if collection is empty", () => {
@@ -260,8 +260,66 @@ test("Should return null on getting first or default element if no elements matc
   const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
 
   // When
-  let actualElement = manipula.first(x => x % 7 === 0);
+  let actualElement = manipula.firstOrDefault(x => x % 7 === 0);
 
   // Then
   expect(actualElement).toBeNull();
+});
+
+test("Should get single element", () => {
+  // Given
+  const sourceArray = [1];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualFirstElement = manipula.single();
+
+  // Then
+  const expectedFirstElement = sourceArray[0];
+  expect(actualFirstElement).toBe(expectedFirstElement);
+});
+
+test("Should throw error on getting single element if collection is empty", () => {
+  // Given
+  const manipula = Manipula.from([]);
+
+  // When, Then
+  expect(() => manipula.single()).toThrowWithMessage(Error, "No matching element was found");
+});
+
+test("Should throw error on getting single element if collection contains more than one element", () => {
+  // Given
+  const manipula = Manipula.from([1, 2]);
+
+  // When, Then
+  expect(() => manipula.single()).toThrowWithMessage(Error, "More than one element was found");
+});
+
+test("Should get single element that matches the pattern", () => {
+  // Given
+  const sourceArray = [1, 2, 3, 4, 5, 6];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualFirstElement = manipula.single(x => x % 4 === 0);
+
+  // Then
+  const expectedFirstElement = sourceArray[3];
+  expect(actualFirstElement).toBe(expectedFirstElement);
+});
+
+test("Should throw error on getting single element if no elements match the pattern", () => {
+  // Given
+  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+
+  // When, Then
+  expect(() => manipula.single(x => x % 7 === 0)).toThrowWithMessage(Error, "No matching element was found");
+});
+
+test("Should throw error on getting single element if more than one element match the pattern", () => {
+  // Given
+  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+
+  // When, Then
+  expect(() => manipula.single(x => x % 2 === 0)).toThrowWithMessage(Error, "More than one element was found");
 });

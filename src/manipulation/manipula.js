@@ -22,7 +22,7 @@ const Manipula = class Manipula {
           element: element
         };
 
-    return { found: true, element: null };
+    return { found: false, element: null };
   }
 
   first(predicate) {
@@ -34,6 +34,28 @@ const Manipula = class Manipula {
 
   firstOrDefault(predicate) {
     return this._tryGetFirst(predicate).element;
+  }
+
+  _tryGetSingle(predicate) {
+    let iterator = this[Symbol.iterator]();
+    for (let currentState = iterator.next(); currentState.done === false; currentState = iterator.next()) {
+      const result = currentState.value;
+      if (!predicate || predicate(result)) {
+        for (currentState = iterator.next(); currentState.done === false; currentState = iterator.next())
+          if (!predicate || predicate(currentState.value)) return { foundMoreThanOnce: true };
+        return { foundOnce: true, element: result };
+      }
+    }
+
+    return { foundOnce: false, element: null };
+  }
+
+  single(predicate) {
+    let searchResult = this._tryGetSingle(predicate);
+
+    if (searchResult.foundMoreThanOnce === true) throw new Error("More than one element was found");
+    if (searchResult.foundOnce === true) return searchResult.element;
+    throw new Error("No matching element was found");
   }
 
   toArray() {
