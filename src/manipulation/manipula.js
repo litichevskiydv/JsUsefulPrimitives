@@ -58,6 +58,13 @@ const Manipula = class Manipula {
     throw new Error("No matching element was found");
   }
 
+  singleOrDefault(predicate) {
+    let searchResult = this._tryGetSingle(predicate);
+
+    if (searchResult.foundMoreThanOnce === true) throw new Error("More than one element was found");
+    return searchResult.element;
+  }
+
   toArray() {
     return Array.from(this);
   }

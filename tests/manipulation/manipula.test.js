@@ -323,3 +323,19 @@ test("Should throw error on getting single element if more than one element matc
   // When, Then
   expect(() => manipula.single(x => x % 2 === 0)).toThrowWithMessage(Error, "More than one element was found");
 });
+
+test("Should return null on getting single or default element if collection is empty", () => {
+  // Given
+  const manipula = Manipula.from([]);
+
+  // When, Then
+  expect(manipula.singleOrDefault()).toBeNull();
+});
+
+test("Should return null on getting single or default if no elements match the pattern", () => {
+  // Given
+  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+
+  // When, Then
+  expect(manipula.singleOrDefault(x => x % 7 === 0)).toBeNull();
+});
