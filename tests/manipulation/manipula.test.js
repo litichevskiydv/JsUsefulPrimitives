@@ -397,3 +397,44 @@ test("Should return null on getting single or default if no elements match the p
   // When, Then
   expect(manipula.singleOrDefault(x => x % 7 === 0)).toBeNull();
 });
+
+describe("Should test any", () => {
+  const testCases = [
+    {
+      toString: () => "Any without predicate should return false on empty collection",
+      source: Manipula.from([]),
+      expected: false
+    },
+    {
+      toString: () => "Any with predicate should return false on empty collection",
+      source: Manipula.from([]),
+      predicate: x => x % 2 === 0,
+      expected: false
+    },
+    {
+      toString: () => "Any without predicate should return true on not empty collection",
+      source: Manipula.from([1, 2]),
+      expected: true
+    },
+    {
+      toString: () => "Any with predicate should detect compatible element",
+      source: Manipula.from([1, 2, 3]),
+      predicate: x => x % 2 === 0,
+      expected: true
+    },
+    {
+      toString: () => "Any with predicate should not detect compatible element",
+      source: Manipula.from([1, 2, 3]),
+      predicate: x => x % 5 === 0,
+      expected: false
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    let actual = testCase.source.any(testCase.predicate);
+
+    // Thenq
+    expect(actual).toBe(testCase.expected);
+  });
+});

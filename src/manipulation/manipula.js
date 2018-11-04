@@ -66,6 +66,11 @@ const Manipula = class Manipula {
     return searchResult.element;
   }
 
+  any(predicate) {
+    for (let element of this) if (!predicate || predicate(element)) return true;
+    return false;
+  }
+
   select(selector) {
     return new SelectIterator(this, selector);
   }
