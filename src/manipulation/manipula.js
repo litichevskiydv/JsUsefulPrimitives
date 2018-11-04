@@ -1,4 +1,5 @@
 const HashSet = require("../collections/hashSet");
+const HashMap = require("../collections/hashMap");
 const lengthPropertyName = "length";
 
 const Manipula = class Manipula {
@@ -98,6 +99,13 @@ const Manipula = class Manipula {
     for (let element of this) set.add(element);
 
     return set;
+  }
+
+  toMap(options) {
+    let map = !options.comparer ? new Map() : new HashMap(options.comparer);
+    for (let element of this) map.set(options.keySelector(element), !options.elementSelector ? element : options.elementSelector(element));
+
+    return map;
   }
 };
 module.exports = Manipula;

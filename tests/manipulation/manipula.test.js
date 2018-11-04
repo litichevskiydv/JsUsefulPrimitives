@@ -59,6 +59,37 @@ test("Should convert manipula to set of complex type", () => {
   expect(actualSet.has(new Key(firstKey.hi, firstKey.lo))).toBeTrue();
 });
 
+test("Should convert manipula to map of primitive type", () => {
+  // Given
+  const sourceArray = [1, 2, 3, 4, 5];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualMap = manipula.toMap({
+    keySelector: x => x,
+    elementSelector: x => x * x
+  });
+
+  // Then
+  expect(sourceArray).toSatisfyAll(x => actualMap.get(x) === x * x);
+});
+
+test("Should convert manipula to map of complex type", () => {
+  // Given
+  const sourceArray = [1, 2];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualMap = manipula.toMap({
+    keySelector: x => new Key(x, x),
+    elementSelector: x => x + 1,
+    comparer: new KeysComparer()
+  });
+
+  // Then
+  expect(sourceArray).toSatisfyAll(x => actualMap.get(new Key(x, x)) === x + 1);
+});
+
 test("Should produce new collection", () => {
   // Given
   const manipula = Manipula.from([1, 2, 3, 4, 5]);
