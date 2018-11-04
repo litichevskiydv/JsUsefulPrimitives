@@ -191,7 +191,7 @@ test("Should calculate elements count", () => {
   expect(actualCount).toBe(sourceArray.length);
 });
 
-test("Shouls calculate the number of elements satisfying the predicate", () => {
+test("Should calculate the number of elements satisfying the predicate", () => {
   // Given
   const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
 
@@ -200,4 +200,46 @@ test("Shouls calculate the number of elements satisfying the predicate", () => {
 
   // Then
   expect(actualCount).toBe(3);
+});
+
+test("Should get first element", () => {
+  // Given
+  const sourceArray = [1, 2, 3, 4, 5, 6];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualFirstElement = manipula.first();
+
+  // Then
+  const expectedFirstElement = sourceArray[0];
+  expect(actualFirstElement).toBe(expectedFirstElement);
+});
+
+test("Should throw error on getting first element if collection is empty", () => {
+  // Given
+  const manipula = Manipula.from([]);
+
+  // When, Then
+  expect.toThrowWithMessage(() => manipula.first(), "No matching element was found");
+});
+
+test("Should get first element that matches the pattern", () => {
+  // Given
+  const sourceArray = [1, 2, 3, 4, 5, 6];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualFirstElement = manipula.first(x => x % 3 === 0);
+
+  // Then
+  const expectedFirstElement = sourceArray[2];
+  expect(actualFirstElement).toBe(expectedFirstElement);
+});
+
+test("Should throw error on getting first element if no elements matches the pattern", () => {
+  // Given
+  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+
+  // When, Then
+  expect.toThrowWithMessage(() => manipula.first(x => x % 7 === 0), "No matching element was found");
 });

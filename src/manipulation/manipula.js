@@ -14,6 +14,24 @@ const Manipula = class Manipula {
     return count;
   }
 
+  _tryGetFirst(predicate) {
+    for (let element of this)
+      if (!predicate || predicate(element))
+        return {
+          found: true,
+          element: element
+        };
+
+    return { found: true, element: null };
+  }
+
+  first(predicate) {
+    let searchResult = this._tryGetFirst(predicate);
+    if (searchResult.found === true) return searchResult.element;
+
+    throw new Error("No matching element was found");
+  }
+
   toArray() {
     return Array.from(this);
   }
