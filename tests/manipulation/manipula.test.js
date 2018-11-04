@@ -438,3 +438,34 @@ describe("Should test any", () => {
     expect(actual).toBe(testCase.expected);
   });
 });
+
+describe("Should test all", () => {
+  const testCases = [
+    {
+      toString: () => "Should return true on empty collection",
+      source: Manipula.from([]),
+      predicate: x => x % 2 === 0,
+      expected: true
+    },
+    {
+      toString: () => "Should approve collection",
+      source: Manipula.from([2, 4, 6]),
+      predicate: x => x % 2 === 0,
+      expected: true
+    },
+    {
+      toString: () => "Should not approve collection",
+      source: Manipula.from([1, 2, 3]),
+      predicate: x => x % 2 === 0,
+      expected: false
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    let actual = testCase.source.all(testCase.predicate);
+
+    // Thenq
+    expect(actual).toBe(testCase.expected);
+  });
+});
