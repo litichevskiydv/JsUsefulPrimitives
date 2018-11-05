@@ -29,6 +29,7 @@ test("Should convert manipula to array", () => {
   const actualArray = manipula.toArray();
 
   // Then
+  expect(manipula.length).toBe(expectedArray.length);
   expect(actualArray).toIncludeSameMembers(expectedArray);
 });
 
@@ -108,10 +109,12 @@ describe("Should test select", () => {
 
   test.each(testCases)("%s", testCase => {
     // When
-    const actual = testCase.source.select(testCase.selector).toArray();
+    const actual = testCase.source.select(testCase.selector);
+    const actualArray = actual.toArray();
 
     // Then
-    expect(actual).toIncludeSameMembers(testCase.expected);
+    expect(actual.length).toBe(testCase.expected.length);
+    expect(actualArray).toIncludeSameMembers(testCase.expected);
   });
 });
 

@@ -141,6 +141,11 @@ class SelectIterator extends Manipula {
     super();
     this._iterable = iterable;
     this._selector = selector;
+
+    if (lengthPropertyName in iterable)
+      Object.defineProperty(this, lengthPropertyName, {
+        get: () => this._iterable[lengthPropertyName]
+      });
   }
 
   *[Symbol.iterator]() {
