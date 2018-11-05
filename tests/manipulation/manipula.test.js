@@ -115,28 +115,29 @@ describe("Should test select", () => {
   });
 });
 
-test("Should filter collection", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+describe("Should test where", () => {
+  const testCases = [
+    {
+      toString: () => "Filter collection",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 2 === 0,
+      expected: [2, 4, 6]
+    },
+    {
+      toString: () => "Filter collection depends on element number",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: (x, i) => i % 2 === 0,
+      expected: [1, 3, 5]
+    }
+  ];
 
-  // When
-  const actualArray = manipula.where(x => x % 2 === 0).toArray();
+  test.each(testCases)("%s", testCase => {
+    // When
+    let actual = testCase.source.where(testCase.predicate).toArray();
 
-  // Then
-  const expectedArray = [2, 4, 6];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
-});
-
-test("Should filter collection depends on element number", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
-
-  // When
-  const actualArray = manipula.where((x, i) => i % 2 === 0).toArray();
-
-  // Then
-  const expectedArray = [1, 3, 5];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
+    // Then
+    expect(actual).toIncludeSameMembers(testCase.expected);
+  });
 });
 
 test("Should concat collections", () => {
