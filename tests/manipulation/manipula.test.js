@@ -90,28 +90,29 @@ test("Should convert manipula to map of complex type", () => {
   expect(sourceArray).toSatisfyAll(x => actualMap.get(new Key(x, x)) === x + 1);
 });
 
-test("Should produce new collection", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5]);
+describe("Should test select", () => {
+  const testCases = [
+    {
+      toString: () => "Produce new collection",
+      source: Manipula.from([1, 2, 3, 4, 5]),
+      selector: x => x + 1,
+      expected: [2, 3, 4, 5, 6]
+    },
+    {
+      toString: () => "Produce new collection depends on element number",
+      source: Manipula.from([1, 2, 3, 4, 5]),
+      selector: (x, i) => x * i,
+      expected: [0, 2, 6, 12, 20]
+    }
+  ];
 
-  // When
-  const actualArray = manipula.select(x => x + 1).toArray();
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.select(testCase.selector).toArray();
 
-  // Then
-  const expectedArray = [2, 3, 4, 5, 6];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
-});
-
-test("Should produce new collection depends on element number", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5]);
-
-  // When
-  const actualArray = manipula.select((x, i) => x * i).toArray();
-
-  // Then
-  const expectedArray = [0, 2, 6, 12, 20];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
+    // Then
+    expect(actual).toIncludeSameMembers(testCase.expected);
+  });
 });
 
 test("Should filter collection", () => {
