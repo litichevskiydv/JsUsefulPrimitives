@@ -11,5 +11,11 @@
     "**/yarn-error.log": true,
     "**/yarn.lock": true
   },
-  "flow.pathToFlow": "..\\node_modules\\.bin\\flow.cmd"
+  "flow.pathToFlow": "..\\node_modules\\.bin\\flow.cmd",
+  "protoc": {
+        "path": ".\\node_modules\\grpc-tools\\bin\\protoc.exe",
+        "options": [
+            "--js_out=import_style=commonjs"
+        ]
+    }
 }
