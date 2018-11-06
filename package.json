@@ -6,6 +6,7 @@
     "build:protos": "npx mkdirp ./src/grpc/generated && node ./src/grpc/infrastructure/bin/protoc-gen-grpc.js --js_out=import_style=commonjs,binary:./src/grpc/generated --grpc_out=./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
     "build:types": "npx mkdirp ./src/grpc/generated && node ./src/grpc/infrastructure/bin/protoc-gen-ts.js --ts_out=service=true:./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
     "build:swagger": "npx mkdirp ./src/grpc/generated && node ./src/grpc/infrastructure/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
+    "build:watch": "npx nodemon --ext *.proto --watch ./src/grpc/protos --exec npm run build",
     "build": "npm run build:protos && npm run build:types && npm run build:swagger",
     "test": "jest"
   },
@@ -23,6 +24,7 @@
     "grpc-tools": "^1.6.6",
     "jest": "^23.6.0",
     "jest-extended": "^0.11.0",
+    "nodemon": "^1.18.6",
     "ts-protoc-gen": "^0.7.7"
   },
   "jest": {
