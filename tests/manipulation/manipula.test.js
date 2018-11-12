@@ -279,13 +279,13 @@ describe("Should test first", () => {
       expectedErrorMessage: "No matching element was found"
     },
     {
-      toString: () => "First without predicate should return first matched element if it exists",
+      toString: () => "First with predicate should return first matched element if it exists",
       source: Manipula.from([1, 2, 3, 4, 5, 6]),
       predicate: x => x % 3 === 0,
       expected: 3
     },
     {
-      toString: () => "First without predicate should throw error if no matching element was found",
+      toString: () => "First with predicate should throw error if no matching element was found",
       source: Manipula.from([1, 2, 3, 4, 5, 6]),
       predicate: x => x % 7 === 0,
       expectedErrorMessage: "No matching element was found"
@@ -299,15 +299,36 @@ describe("Should test first", () => {
   });
 });
 
-test("Should return null on getting first or default element if no elements matches the pattern", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
+describe("Should test firstOrDefault", () => {
+  const testCases = [
+    {
+      toString: () => "FirstOrDefault without predicate should return first element of not empty manipula",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      expected: 1
+    },
+    {
+      toString: () => "FirstOrDefault without predicate should return null if manipula is empty",
+      source: Manipula.from([]),
+      expected: null
+    },
+    {
+      toString: () => "FirstOrDefault with predicate should return first matched element if it exists",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 3 === 0,
+      expected: 3
+    },
+    {
+      toString: () => "FirstOrDefault with predicate should return null if no matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 7 === 0,
+      expected: null
+    }
+  ];
 
-  // When
-  let actualElement = manipula.firstOrDefault(x => x % 7 === 0);
-
-  // Then
-  expect(actualElement).toBeNull();
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    expect(testCase.source.firstOrDefault(testCase.predicate)).toBe(testCase.expected);
+  });
 });
 
 test("Should get single element", () => {
