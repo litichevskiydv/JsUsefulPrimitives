@@ -266,57 +266,37 @@ describe("Should test count", () => {
   });
 });
 
-test("Should get first element", () => {
-  // Given
-  const sourceArray = [1, 2, 3, 4, 5, 6];
-  const manipula = Manipula.from(sourceArray);
+describe("Should test first", () => {
+  const testCases = [
+    {
+      toString: () => "First without predicate should return first element of not empty manipula",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      expected: 1
+    },
+    {
+      toString: () => "First without predicate should throw error if manipula is empty",
+      source: Manipula.from([]),
+      expectedErrorMessage: "No matching element was found"
+    },
+    {
+      toString: () => "First without predicate should return first matched element if it exists",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 3 === 0,
+      expected: 3
+    },
+    {
+      toString: () => "First without predicate should throw error if no matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 7 === 0,
+      expectedErrorMessage: "No matching element was found"
+    }
+  ];
 
-  // When
-  const actualFirstElement = manipula.first();
-
-  // Then
-  const expectedFirstElement = sourceArray[0];
-  expect(actualFirstElement).toBe(expectedFirstElement);
-});
-
-test("Should throw error on getting first element if collection is empty", () => {
-  // Given
-  const manipula = Manipula.from([]);
-
-  // When, Then
-  expect(() => manipula.first()).toThrowWithMessage(Error, "No matching element was found");
-});
-
-test("Should get first element that matches the pattern", () => {
-  // Given
-  const sourceArray = [1, 2, 3, 4, 5, 6];
-  const manipula = Manipula.from(sourceArray);
-
-  // When
-  const actualFirstElement = manipula.first(x => x % 3 === 0);
-
-  // Then
-  const expectedFirstElement = sourceArray[2];
-  expect(actualFirstElement).toBe(expectedFirstElement);
-});
-
-test("Should throw error on getting first element if no elements matches the pattern", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
-
-  // When, Then
-  expect(() => manipula.first(x => x % 7 === 0)).toThrowWithMessage(Error, "No matching element was found");
-});
-
-test("Should return null on getting first or default element if collection is empty", () => {
-  // Given
-  const manipula = Manipula.from([]);
-
-  // When
-  let actualElement = manipula.firstOrDefault();
-
-  // Then
-  expect(actualElement).toBeNull();
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(testCase.source.first(testCase.predicate)).toBe(testCase.expected);
+    else expect(() => testCase.source.first(testCase.predicate)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
 });
 
 test("Should return null on getting first or default element if no elements matches the pattern", () => {
