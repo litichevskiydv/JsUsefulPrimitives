@@ -242,27 +242,28 @@ test("Should distinct collection of complex type", () => {
   expect(actualArray).toIncludeSameMembers(expectedArray);
 });
 
-test("Should calculate elements count", () => {
-  // Given
-  const sourceArray = [1, 2, 3, 4, 5, 6];
-  const manipula = Manipula.from(sourceArray);
+describe("Should test count", () => {
+  const testCases = [
+    {
+      toString: () => "Count without predicate should return collection length",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      expected: 6
+    },
+    {
+      toString: () => "Count with predicate should return count of the satisfying elements",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 2 === 0,
+      expected: 3
+    }
+  ];
 
-  // When
-  const actualCount = manipula.count();
+  test.each(testCases)("%s", testCase => {
+    // When
+    let actual = testCase.source.count(testCase.predicate);
 
-  // Then
-  expect(actualCount).toBe(sourceArray.length);
-});
-
-test("Should calculate the number of elements satisfying the predicate", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
-
-  // When
-  const actualCount = manipula.count(x => x % 2 === 0);
-
-  // Then
-  expect(actualCount).toBe(3);
+    // Thenq
+    expect(actual).toBe(testCase.expected);
+  });
 });
 
 test("Should get first element", () => {
