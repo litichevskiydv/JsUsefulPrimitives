@@ -331,62 +331,48 @@ describe("Should test firstOrDefault", () => {
   });
 });
 
-test("Should get single element", () => {
-  // Given
-  const sourceArray = [1];
-  const manipula = Manipula.from(sourceArray);
+describe("Should test single", () => {
+  const testCases = [
+    {
+      toString: () => "Single without predicate should return single element of not empty manipula",
+      source: Manipula.from([1]),
+      expected: 1
+    },
+    {
+      toString: () => "Single without predicate should throw error if manipula is empty",
+      source: Manipula.from([]),
+      expectedErrorMessage: "No matching element was found"
+    },
+    {
+      toString: () => "Single without predicate should throw error if manipula contains more than one element",
+      source: Manipula.from([1, 2]),
+      expectedErrorMessage: "More than one element was found"
+    },
+    {
+      toString: () => "Single with predicate should return single matched element if one element matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 4 === 0,
+      expected: 4
+    },
+    {
+      toString: () => "Single with predicate should throw error if no matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 7 === 0,
+      expectedErrorMessage: "No matching element was found"
+    },
+    {
+      toString: () => "Single with predicate should throw error if more than one element matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 2 === 0,
+      expectedErrorMessage: "More than one element was found"
+    }
+  ];
 
-  // When
-  const actualFirstElement = manipula.single();
-
-  // Then
-  const expectedFirstElement = sourceArray[0];
-  expect(actualFirstElement).toBe(expectedFirstElement);
-});
-
-test("Should throw error on getting single element if collection is empty", () => {
-  // Given
-  const manipula = Manipula.from([]);
-
-  // When, Then
-  expect(() => manipula.single()).toThrowWithMessage(Error, "No matching element was found");
-});
-
-test("Should throw error on getting single element if collection contains more than one element", () => {
-  // Given
-  const manipula = Manipula.from([1, 2]);
-
-  // When, Then
-  expect(() => manipula.single()).toThrowWithMessage(Error, "More than one element was found");
-});
-
-test("Should get single element that matches the pattern", () => {
-  // Given
-  const sourceArray = [1, 2, 3, 4, 5, 6];
-  const manipula = Manipula.from(sourceArray);
-
-  // When
-  const actualFirstElement = manipula.single(x => x % 4 === 0);
-
-  // Then
-  const expectedFirstElement = sourceArray[3];
-  expect(actualFirstElement).toBe(expectedFirstElement);
-});
-
-test("Should throw error on getting single element if no elements match the pattern", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
-
-  // When, Then
-  expect(() => manipula.single(x => x % 7 === 0)).toThrowWithMessage(Error, "No matching element was found");
-});
-
-test("Should throw error on getting single element if more than one element match the pattern", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
-
-  // When, Then
-  expect(() => manipula.single(x => x % 2 === 0)).toThrowWithMessage(Error, "More than one element was found");
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(testCase.source.single(testCase.predicate)).toBe(testCase.expected);
+    else expect(() => testCase.source.single(testCase.predicate)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
 });
 
 test("Should return null on getting single or default element if collection is empty", () => {
