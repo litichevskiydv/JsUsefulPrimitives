@@ -375,20 +375,48 @@ describe("Should test single", () => {
   });
 });
 
-test("Should return null on getting single or default element if collection is empty", () => {
-  // Given
-  const manipula = Manipula.from([]);
+describe("Should test singleOrDefault", () => {
+  const testCases = [
+    {
+      toString: () => "SingleOrDefault without predicate should return single element of not empty manipula",
+      source: Manipula.from([1]),
+      expected: 1
+    },
+    {
+      toString: () => "SingleOrDefault without predicate should return null if manipula is empty",
+      source: Manipula.from([]),
+      expected: null
+    },
+    {
+      toString: () => "SingleOrDefault without predicate should throw error if manipula contains more than one element",
+      source: Manipula.from([1, 2]),
+      expectedErrorMessage: "More than one element was found"
+    },
+    {
+      toString: () => "SingleOrDefault with predicate should return single matched element if one element matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 4 === 0,
+      expected: 4
+    },
+    {
+      toString: () => "SingleOrDefault with predicate should return null if no matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 7 === 0,
+      expected: null
+    },
+    {
+      toString: () => "SingleOrDefault with predicate should throw error if more than one element matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 2 === 0,
+      expectedErrorMessage: "More than one element was found"
+    }
+  ];
 
-  // When, Then
-  expect(manipula.singleOrDefault()).toBeNull();
-});
-
-test("Should return null on getting single or default if no elements match the pattern", () => {
-  // Given
-  const manipula = Manipula.from([1, 2, 3, 4, 5, 6]);
-
-  // When, Then
-  expect(manipula.singleOrDefault(x => x % 7 === 0)).toBeNull();
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected !== undefined) expect(testCase.source.singleOrDefault(testCase.predicate)).toBe(testCase.expected);
+    else expect(() => testCase.source.singleOrDefault(testCase.predicate)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
 });
 
 describe("Should test any", () => {
