@@ -1,14 +1,17 @@
 const HashSet = require("../collections/hashSet");
 const HashMap = require("../collections/hashMap");
-const lengthPropertyName = "length";
 
 const Manipula = class Manipula {
+  static get _lengthPropertyName() {
+    return "length";
+  }
+
   static from(iterable) {
     return new FromIterator(iterable);
   }
 
   count(predicate) {
-    if (!predicate && lengthPropertyName in this) return this[lengthPropertyName];
+    if (!predicate && Manipula._lengthPropertyName in this) return this[Manipula._lengthPropertyName];
 
     let count = 0;
     for (let element of this) if (!predicate || predicate(element)) count++;
@@ -76,10 +79,6 @@ const Manipula = class Manipula {
     return true;
   }
 
-  select(selector) {
-    return new SelectIterator(this, selector);
-  }
-
   where(predicate) {
     return new WhereIterator(this, predicate);
   }
@@ -125,32 +124,14 @@ class FromIterator extends Manipula {
     super();
     this._iterable = iterable;
 
-    if (lengthPropertyName in iterable)
-      Object.defineProperty(this, lengthPropertyName, {
-        get: () => this._iterable[lengthPropertyName]
+    if (Manipula._lengthPropertyName in iterable)
+      Object.defineProperty(this, Manipula._lengthPropertyName, {
+        get: () => this._iterable[Manipula._lengthPropertyName]
       });
   }
 
   *[Symbol.iterator]() {
     for (let element of this._iterable) yield element;
-  }
-}
-
-class SelectIterator extends Manipula {
-  constructor(iterable, selector) {
-    super();
-    this._iterable = iterable;
-    this._selector = selector;
-
-    if (lengthPropertyName in iterable)
-      Object.defineProperty(this, lengthPropertyName, {
-        get: () => this._iterable[lengthPropertyName]
-      });
-  }
-
-  *[Symbol.iterator]() {
-    let i = 0;
-    for (let element of this._iterable) yield this._selector(element, i++);
   }
 }
 

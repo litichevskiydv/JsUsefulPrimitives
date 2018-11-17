@@ -1,4 +1,4 @@
-const Manipula = require("../../src/manipulation/manipula");
+const Manipula = require("../../src/manipulation/index");
 
 class Key {
   constructor(hi, lo) {
