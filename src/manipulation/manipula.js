@@ -79,10 +79,6 @@ const Manipula = class Manipula {
     return true;
   }
 
-  distinct(comparer) {
-    return new DistinctIterator(this, comparer);
-  }
-
   toArray() {
     return Array.from(this);
   }
@@ -116,23 +112,5 @@ class FromIterator extends Manipula {
 
   *[Symbol.iterator]() {
     for (let element of this._iterable) yield element;
-  }
-}
-
-class DistinctIterator extends Manipula {
-  constructor(source, comparer) {
-    super();
-    this._source = source;
-    this._comparer = comparer;
-  }
-
-  *[Symbol.iterator]() {
-    let set = !this._comparer ? new Set() : new HashSet(this._comparer);
-
-    for (let element of this._source)
-      if (set.has(element) === false) {
-        set.add(element);
-        yield element;
-      }
   }
 }
