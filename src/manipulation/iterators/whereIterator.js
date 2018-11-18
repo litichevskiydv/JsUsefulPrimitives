@@ -1,4 +1,4 @@
-let Manipula = require("./manipula");
+let Manipula = require("../manipula");
 
 class WhereIterator extends Manipula {
   constructor(iterable, predicate) {

@@ -1,4 +1,4 @@
-let Manipula = require("./manipula");
+let Manipula = require("../manipula");
 
 class SelectIterator extends Manipula {
   constructor(iterable, selector) {

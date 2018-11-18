@@ -1,5 +1,5 @@
-const HashSet = require("../collections/hashSet");
-let Manipula = require("./manipula");
+const HashSet = require("../../collections/hashSet");
+let Manipula = require("../manipula");
 
 class UnionIterator extends Manipula {
   constructor(first, second, comparer) {

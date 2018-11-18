@@ -1,5 +1,5 @@
-const HashSet = require("../collections/hashSet");
-let Manipula = require("./manipula");
+const HashSet = require("../../collections/hashSet");
+let Manipula = require("../manipula");
 
 class DistinctIterator extends Manipula {
   constructor(source, comparer) {
