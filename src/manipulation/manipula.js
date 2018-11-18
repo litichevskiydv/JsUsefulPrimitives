@@ -79,10 +79,6 @@ const Manipula = class Manipula {
     return true;
   }
 
-  where(predicate) {
-    return new WhereIterator(this, predicate);
-  }
-
   concat(second) {
     return new ConcatIterator(this, second);
   }
@@ -132,19 +128,6 @@ class FromIterator extends Manipula {
 
   *[Symbol.iterator]() {
     for (let element of this._iterable) yield element;
-  }
-}
-
-class WhereIterator extends Manipula {
-  constructor(iterable, predicate) {
-    super();
-    this._iterable = iterable;
-    this._predicate = predicate;
-  }
-
-  *[Symbol.iterator]() {
-    let i = 0;
-    for (let element of this._iterable) if (this._predicate(element, i++)) yield element;
   }
 }
 
