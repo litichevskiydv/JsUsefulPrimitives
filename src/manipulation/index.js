@@ -1,3 +1,4 @@
+require("./fromIterator");
 require("./selectIterator");
 require("./whereIterator");
 require("./concatIterator");

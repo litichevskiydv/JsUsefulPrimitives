@@ -1,13 +1,9 @@
 const HashSet = require("../collections/hashSet");
 const HashMap = require("../collections/hashMap");
 
-const Manipula = class Manipula {
+module.exports = class Manipula {
   static get _lengthPropertyName() {
     return "length";
-  }
-
-  static from(iterable) {
-    return new FromIterator(iterable);
   }
 
   count(predicate) {
@@ -97,20 +93,3 @@ const Manipula = class Manipula {
     return map;
   }
 };
-module.exports = Manipula;
-
-class FromIterator extends Manipula {
-  constructor(iterable) {
-    super();
-    this._iterable = iterable;
-
-    if (Manipula._lengthPropertyName in iterable)
-      Object.defineProperty(this, Manipula._lengthPropertyName, {
-        get: () => this._iterable[Manipula._lengthPropertyName]
-      });
-  }
-
-  *[Symbol.iterator]() {
-    for (let element of this._iterable) yield element;
-  }
-}
