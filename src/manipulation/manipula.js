@@ -79,10 +79,6 @@ const Manipula = class Manipula {
     return true;
   }
 
-  concat(second) {
-    return new ConcatIterator(this, second);
-  }
-
   union(second, comparer) {
     return new UnionIterator(this, second, comparer);
   }
@@ -128,19 +124,6 @@ class FromIterator extends Manipula {
 
   *[Symbol.iterator]() {
     for (let element of this._iterable) yield element;
-  }
-}
-
-class ConcatIterator extends Manipula {
-  constructor(first, second) {
-    super();
-    this._first = first;
-    this._second = second;
-  }
-
-  *[Symbol.iterator]() {
-    yield* this._first;
-    yield* this._second;
   }
 }
 
