@@ -490,3 +490,43 @@ describe("Should test all", () => {
     expect(actual).toBe(testCase.expected);
   });
 });
+
+describe("Should test groupBy", () => {
+  const testCases = [
+    {
+      toString: () => "Should group by simple key without results transformation",
+      source: Manipula.from([{ key: 1, value: 2 }, { key: 1, value: 3 }, { key: 2, value: 4 }]),
+      options: { keySelector: x => x.key },
+      expected: [[{ key: 1, value: 2 }, { key: 1, value: 3 }], [{ key: 2, value: 4 }]]
+    },
+    {
+      toString: () => "Should group by simple key and transform results",
+      source: Manipula.from([{ key: 1, value: 2 }, { key: 1, value: 3 }, { key: 2, value: 4 }]),
+      options: { keySelector: x => x.key, elementSelector: x => x.value },
+      expected: [[2, 3], [4]]
+    },
+    {
+      toString: () => "Should group by complex key without results transformation",
+      source: Manipula.from([{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }, { key: new Key(2, 2), value: 4 }]),
+      options: { keySelector: x => x.key, comparer: new KeysComparer() },
+      expected: [[{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }], [{ key: new Key(2, 2), value: 4 }]]
+    },
+    {
+      toString: () => "Should group by complex key and transform results",
+      source: Manipula.from([{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }, { key: new Key(2, 2), value: 4 }]),
+      options: { keySelector: x => x.key, comparer: new KeysComparer(), elementSelector: x => x.value },
+      expected: [[2, 3], [4]]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    let actual = testCase.source
+      .groupBy(testCase.options)
+      .select(x => x.toArray())
+      .toArray();
+
+    // Thenq
+    expect(actual).toEqual(testCase.expected);
+  });
+});

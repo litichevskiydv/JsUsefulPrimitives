@@ -8,7 +8,8 @@
     "build:swagger": "mkdirp ./src/grpc/generated && node ./src/grpc/infrastructure/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
     "build:watch": "nodemon --ext *.proto --watch ./src/grpc/protos --exec npm run build",
     "build": "npm run build:protos && npm run build:types && npm run build:swagger",
-    "test": "jest"
+    "test:watch": "jest --verbose --watch",
+    "test": "jest --verbose"
   },
   "repository": {
     "type": "git",
@@ -35,5 +36,5 @@
   "jest": {
     "testEnvironment": "node",
     "setupTestFrameworkScriptFile": "jest-extended"
-  }  
+  }
 }
