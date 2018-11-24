@@ -118,6 +118,32 @@ describe("Should test select", () => {
   });
 });
 
+describe("Should test selectMany", () => {
+  const testCases = [
+    {
+      toString: () => "Produce new collection",
+      source: Manipula.from([Manipula.from([1, 2]), Manipula.from([3, 4]), Manipula.from([5])]),
+      selector: x => x.select(value => value + 1),
+      expected: [2, 3, 4, 5, 6]
+    },
+    {
+      toString: () => "Produce new collection depends on element number",
+      source: Manipula.from([Manipula.from([1, 2]), Manipula.from([3, 4]), Manipula.from([5])]),
+      selector: (x, i) => x.select(value => value * i),
+      expected: [0, 0, 3, 4, 10]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.selectMany(testCase.selector).toArray();
+
+    // Then
+    expect(actual.length).toBe(testCase.expected.length);
+    expect(actual).toIncludeSameMembers(testCase.expected);
+  });
+});
+
 describe("Should test where", () => {
   const testCases = [
     {
