@@ -581,3 +581,35 @@ describe("Should test append", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test intersect", () => {
+  const testCases = [
+    {
+      toString: () => "Intersect collections without common elements",
+      first: Manipula.from([1, 2, 3]),
+      second: Manipula.from([4, 5, 6]),
+      expected: []
+    },
+    {
+      toString: () => "Intersect collections of primitive types with common elements",
+      first: Manipula.from([1, 2, 2, 3, 4]),
+      second: Manipula.from([5, 2, 3, 2, 8]),
+      expected: [2, 3]
+    },
+    {
+      toString: () => "Intersect collections of complex types with common elements",
+      first: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(2, 2), new Key(3, 3), new Key(4, 4)]),
+      second: Manipula.from([new Key(5, 5), new Key(2, 2), new Key(3, 3), new Key(2, 2), new Key(8, 8)]),
+      comparer: new KeysComparer(),
+      expected: [new Key(2, 2), new Key(3, 3)]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.first.intersect(testCase.second, testCase.comparer).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});
