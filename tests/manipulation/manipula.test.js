@@ -556,3 +556,28 @@ describe("Should test groupBy", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test append", () => {
+  const testCases = [
+    {
+      toString: () => "Append element to empty source",
+      source: Manipula.from([]),
+      element: 1,
+      expected: [1]
+    },
+    {
+      toString: () => "Append element to not empty source",
+      source: Manipula.from([1, 2, 3]),
+      element: 4,
+      expected: [1, 2, 3, 4]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.append(testCase.element).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});

@@ -7,5 +7,6 @@ require("./iterators/unionIterator");
 require("./iterators/exceptIterator");
 require("./iterators/distinctIterator");
 require("./iterators/groupByIterator");
+require("./iterators/appendIterator");
 
 module.exports = require("./manipula");
