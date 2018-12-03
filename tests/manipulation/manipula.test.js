@@ -212,32 +212,36 @@ test("Should union collections of complex type", () => {
   expect(actualArray).toIncludeSameMembers(expectedArray);
 });
 
-test("Should subtracts sets of primitive type", () => {
-  // Given
-  const manipula = Manipula.from([2.0, 2.0, 2.1, 2.2, 2.3, 2.3, 2.4, 2.5]);
+describe("Should test except", () => {
+  const testCases = [
+    {
+      toString: () => "Subtracting same collections",
+      first: Manipula.from([1, 2, 3]),
+      second: Manipula.from([1, 2, 3]),
+      expected: []
+    },
+    {
+      toString: () => "Subtracting collections of primitive types with different elements",
+      first: Manipula.from([1, 2, 2, 3, 4]),
+      second: Manipula.from([5, 2, 3, 2, 8]),
+      expected: [1, 4]
+    },
+    {
+      toString: () => "Subtracting collections of complex types with different elements",
+      first: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(2, 2), new Key(3, 3), new Key(4, 4)]),
+      second: Manipula.from([new Key(5, 5), new Key(2, 2), new Key(3, 3), new Key(2, 2), new Key(8, 8)]),
+      comparer: new KeysComparer(),
+      expected: [new Key(1, 1), new Key(4, 4)]
+    }
+  ];
 
-  // When
-  const actualArray = manipula.except([2.2]).toArray();
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.first.except(testCase.second, testCase.comparer).toArray();
 
-  // Then
-  const expectedArray = [2.0, 2.1, 2.3, 2.4, 2.5];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
-});
-
-test("Should subtracts sets of complex type", () => {
-  // Given
-  let firstKey = new Key(1, 1);
-  let secondKey = new Key(2, 2);
-  let thirdKey = new Key(2, 2);
-  let fourthKey = new Key(1, 1);
-  const manipula = Manipula.from([firstKey, secondKey, thirdKey]);
-
-  // When
-  const actualArray = manipula.except([fourthKey], new KeysComparer()).toArray();
-
-  // Then
-  const expectedArray = [secondKey];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
 });
 
 test("Should distinct collection of primitive type", () => {
