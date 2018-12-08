@@ -184,32 +184,30 @@ test("Should concat collections", () => {
   expect(actualArray).toIncludeSameMembers(expectedArray);
 });
 
-test("Should union collections of primitive type", () => {
-  // Given
-  const manipula = Manipula.from([5, 3, 9, 7, 5, 9, 3, 7]);
+describe("Should test union", () => {
+  const testCases = [
+    {
+      toString: () => "Unioning collections of primitive type",
+      first: Manipula.from([5, 3, 9, 7, 5, 9, 3, 7]),
+      second: Manipula.from([8, 3, 6, 4, 4, 9, 1, 0]),
+      expected: [5, 3, 9, 7, 8, 6, 4, 1, 0]
+    },
+    {
+      toString: () => "Unioning collections of primitive type",
+      first: Manipula.from([new Key(1, 1), new Key(2, 2)]),
+      second: Manipula.from([new Key(2, 2), new Key(1, 1)]),
+      comparer: new KeysComparer(),
+      expected: [new Key(1, 1), new Key(2, 2)]
+    }
+  ];
 
-  // When
-  const actualArray = manipula.union([8, 3, 6, 4, 4, 9, 1, 0]).toArray();
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.first.union(testCase.second, testCase.comparer).toArray();
 
-  // Then
-  const expectedArray = [5, 3, 9, 7, 8, 6, 4, 1, 0];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
-});
-
-test("Should union collections of complex type", () => {
-  // Given
-  let firstKey = new Key(1, 1);
-  let secondKey = new Key(2, 2);
-  let thirdKey = new Key(2, 2);
-  let fourthKey = new Key(1, 1);
-  const manipula = Manipula.from([firstKey, secondKey]);
-
-  // When
-  const actualArray = manipula.union([thirdKey, fourthKey], new KeysComparer()).toArray();
-
-  // Then
-  const expectedArray = [firstKey, secondKey];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
 });
 
 describe("Should test except", () => {
