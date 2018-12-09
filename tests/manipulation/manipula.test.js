@@ -242,32 +242,28 @@ describe("Should test except", () => {
   });
 });
 
-test("Should distinct collection of primitive type", () => {
-  // Given
-  const manipula = Manipula.from([2.0, 2.0, 2.1, 2.2, 2.3, 2.3, 2.4, 2.5]);
+describe("Should test distinct", () => {
+  const testCases = [
+    {
+      toString: () => "Distincting collections of primitive type",
+      source: Manipula.from([2.0, 2.0, 2.1, 2.2, 2.3, 2.3, 2.4, 2.5]),
+      expected: [2.0, 2.1, 2.2, 2.3, 2.4, 2.5]
+    },
+    {
+      toString: () => "Distincting collections of primitive type",
+      source: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(2, 2), new Key(1, 1)]),
+      comparer: new KeysComparer(),
+      expected: [new Key(1, 1), new Key(2, 2)]
+    }
+  ];
 
-  // When
-  const actualArray = manipula.distinct().toArray();
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.distinct(testCase.comparer).toArray();
 
-  // Then
-  const expectedArray = [2.0, 2.1, 2.2, 2.3, 2.4, 2.5];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
-});
-
-test("Should distinct collection of complex type", () => {
-  // Given
-  let firstKey = new Key(1, 1);
-  let secondKey = new Key(2, 2);
-  let thirdKey = new Key(2, 2);
-  let fourthKey = new Key(1, 1);
-  const manipula = Manipula.from([firstKey, secondKey, thirdKey, fourthKey]);
-
-  // When
-  const actualArray = manipula.distinct(new KeysComparer()).toArray();
-
-  // Then
-  const expectedArray = [firstKey, secondKey];
-  expect(actualArray).toIncludeSameMembers(expectedArray);
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
 });
 
 describe("Should test count", () => {
