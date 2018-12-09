@@ -611,3 +611,34 @@ describe("Should test intersect", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test skip", () => {
+  const testCases = [
+    {
+      toString: () => "Skip less than elements count",
+      source: Manipula.from([1, 2, 3]),
+      count: 2,
+      expected: [3]
+    },
+    {
+      toString: () => "Skip more than elements count",
+      source: Manipula.from([1, 2, 3]),
+      count: 4,
+      expected: []
+    },
+    {
+      toString: () => "Skip negative count",
+      source: Manipula.from([1, 2, 3]),
+      count: -1,
+      expected: [1, 2, 3]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.skip(testCase.count).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});
