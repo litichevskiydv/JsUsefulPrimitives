@@ -86,9 +86,10 @@ module.exports = class Manipula {
     return set;
   }
 
-  toMap(options) {
-    let map = !options.comparer ? new Map() : new HashMap(options.comparer);
-    for (let element of this) map.set(options.keySelector(element), !options.elementSelector ? element : options.elementSelector(element));
+  toMap(keySelector, options) {
+    const opt = options || {};
+    let map = !opt.comparer ? new Map() : new HashMap(opt.comparer);
+    for (let element of this) map.set(keySelector(element), !opt.elementSelector ? element : opt.elementSelector(element));
 
     return map;
   }

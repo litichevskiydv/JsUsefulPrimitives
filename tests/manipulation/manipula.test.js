@@ -66,10 +66,7 @@ test("Should convert manipula to map of primitive type", () => {
   const manipula = Manipula.from(sourceArray);
 
   // When
-  const actualMap = manipula.toMap({
-    keySelector: x => x,
-    elementSelector: x => x * x
-  });
+  const actualMap = manipula.toMap(x => x, { elementSelector: x => x * x });
 
   // Then
   expect(sourceArray).toSatisfyAll(x => actualMap.get(x) === x * x);
@@ -81,8 +78,7 @@ test("Should convert manipula to map of complex type", () => {
   const manipula = Manipula.from(sourceArray);
 
   // When
-  const actualMap = manipula.toMap({
-    keySelector: x => new Key(x, x),
+  const actualMap = manipula.toMap(x => new Key(x, x), {
     elementSelector: x => x + 1,
     comparer: new KeysComparer()
   });
@@ -520,25 +516,28 @@ describe("Should test groupBy", () => {
     {
       toString: () => "Should group by simple key without results transformation",
       source: Manipula.from([{ key: 1, value: 2 }, { key: 1, value: 3 }, { key: 2, value: 4 }]),
-      options: { keySelector: x => x.key },
+      keySelector: x => x.key,
       expected: [[{ key: 1, value: 2 }, { key: 1, value: 3 }], [{ key: 2, value: 4 }]]
     },
     {
       toString: () => "Should group by simple key and transform results",
       source: Manipula.from([{ key: 1, value: 2 }, { key: 1, value: 3 }, { key: 2, value: 4 }]),
-      options: { keySelector: x => x.key, elementSelector: x => x.value },
+      keySelector: x => x.key,
+      options: { elementSelector: x => x.value },
       expected: [[2, 3], [4]]
     },
     {
       toString: () => "Should group by complex key without results transformation",
       source: Manipula.from([{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }, { key: new Key(2, 2), value: 4 }]),
-      options: { keySelector: x => x.key, comparer: new KeysComparer() },
+      keySelector: x => x.key,
+      options: { comparer: new KeysComparer() },
       expected: [[{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }], [{ key: new Key(2, 2), value: 4 }]]
     },
     {
       toString: () => "Should group by complex key and transform results",
       source: Manipula.from([{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }, { key: new Key(2, 2), value: 4 }]),
-      options: { keySelector: x => x.key, comparer: new KeysComparer(), elementSelector: x => x.value },
+      keySelector: x => x.key,
+      options: { comparer: new KeysComparer(), elementSelector: x => x.value },
       expected: [[2, 3], [4]]
     }
   ];
@@ -546,7 +545,7 @@ describe("Should test groupBy", () => {
   test.each(testCases)("%s", testCase => {
     // When
     let actual = testCase.source
-      .groupBy(testCase.options)
+      .groupBy(testCase.keySelector, testCase.options)
       .select(x => x.toArray())
       .toArray();
 

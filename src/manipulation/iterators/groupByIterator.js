@@ -36,6 +36,7 @@ class GroupByIterator extends Manipula {
   }
 }
 
-Manipula.prototype.groupBy = function(options) {
-  return new GroupByIterator(this, options.keySelector, options.elementSelector, options.comparer);
+Manipula.prototype.groupBy = function(keySelector, options) {
+  const opt = options || {};
+  return new GroupByIterator(this, keySelector, opt.elementSelector, opt.comparer);
 };
