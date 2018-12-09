@@ -672,3 +672,34 @@ describe("Should test take", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test skipWhile", () => {
+  const testCases = [
+    {
+      toString: () => "Skip all elements",
+      source: Manipula.from([1, 2, 3]),
+      predicate: x => x < 4,
+      expected: []
+    },
+    {
+      toString: () => "Skip nothing",
+      source: Manipula.from([1, 2, 3]),
+      predicate: x => x > 4,
+      expected: [1, 2, 3]
+    },
+    {
+      toString: () => "Skip two elements",
+      source: Manipula.from([1, 2, 3]),
+      predicate: (x, i) => x + i <= 3,
+      expected: [3]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.skipWhile(testCase.predicate).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});
