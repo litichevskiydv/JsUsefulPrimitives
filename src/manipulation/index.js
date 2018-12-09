@@ -12,5 +12,6 @@ require("./iterators/appendIterator");
 require("./iterators/skipIterator");
 require("./iterators/takeIterator");
 require("./iterators/skipWhileIterator");
+require("./iterators/takeWhileIterator");
 
 module.exports = require("./manipula");
