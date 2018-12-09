@@ -75,6 +75,11 @@ module.exports = class Manipula {
     return true;
   }
 
+  contains(value, comparer) {
+    for (const element of this) if (element === value || (comparer && comparer.equals(element, value))) return true;
+    return false;
+  }
+
   toArray() {
     return Array.from(this);
   }

@@ -511,6 +511,45 @@ describe("Should test all", () => {
   });
 });
 
+describe("Should test contains", () => {
+  const testCases = [
+    {
+      toString: () => "Should not find value of primitive type",
+      source: Manipula.from([1, 2, 3]),
+      value: 4,
+      expected: false
+    },
+    {
+      toString: () => "Should not find value of complex type",
+      source: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(3, 3)]),
+      value: new Key(4, 4),
+      comparer: new KeysComparer(),
+      expected: false
+    },
+    {
+      toString: () => "Should find value of primitive type",
+      source: Manipula.from([1, 2, 3]),
+      value: 2,
+      expected: true
+    },
+    {
+      toString: () => "Should not find value of complex type",
+      source: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(3, 3)]),
+      value: new Key(2, 2),
+      comparer: new KeysComparer(),
+      expected: true
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    let actual = testCase.source.contains(testCase.value, testCase.comparer);
+
+    // Thenq
+    expect(actual).toBe(testCase.expected);
+  });
+});
+
 describe("Should test groupBy", () => {
   const testCases = [
     {
