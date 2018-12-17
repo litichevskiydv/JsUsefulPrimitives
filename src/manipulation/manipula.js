@@ -10,12 +10,12 @@ module.exports = class Manipula {
     if (!predicate && Manipula._lengthPropertyName in this) return this[Manipula._lengthPropertyName];
 
     let count = 0;
-    for (let element of this) if (!predicate || predicate(element)) count++;
+    for (const element of this) if (!predicate || predicate(element)) count++;
     return count;
   }
 
   _tryGetFirst(predicate) {
-    for (let element of this)
+    for (const element of this)
       if (!predicate || predicate(element))
         return {
           found: true,
@@ -26,7 +26,7 @@ module.exports = class Manipula {
   }
 
   first(predicate) {
-    let searchResult = this._tryGetFirst(predicate);
+    const searchResult = this._tryGetFirst(predicate);
     if (searchResult.found === true) return searchResult.element;
 
     throw new Error("No matching element was found");
@@ -51,7 +51,7 @@ module.exports = class Manipula {
   }
 
   single(predicate) {
-    let searchResult = this._tryGetSingle(predicate);
+    const searchResult = this._tryGetSingle(predicate);
 
     if (searchResult.foundMoreThanOnce === true) throw new Error("More than one element was found");
     if (searchResult.foundOnce === true) return searchResult.element;
@@ -59,19 +59,19 @@ module.exports = class Manipula {
   }
 
   singleOrDefault(predicate) {
-    let searchResult = this._tryGetSingle(predicate);
+    const searchResult = this._tryGetSingle(predicate);
 
     if (searchResult.foundMoreThanOnce === true) throw new Error("More than one element was found");
     return searchResult.element;
   }
 
   any(predicate) {
-    for (let element of this) if (!predicate || predicate(element)) return true;
+    for (const element of this) if (!predicate || predicate(element)) return true;
     return false;
   }
 
   all(predicate) {
-    for (let element of this) if (!predicate(element)) return false;
+    for (const element of this) if (!predicate(element)) return false;
     return true;
   }
 
@@ -94,8 +94,24 @@ module.exports = class Manipula {
   toMap(keySelector, options) {
     const opt = options || {};
     let map = !opt.comparer ? new Map() : new HashMap(opt.comparer);
-    for (let element of this) map.set(keySelector(element), !opt.elementSelector ? element : opt.elementSelector(element));
+    for (const element of this) map.set(keySelector(element), !opt.elementSelector ? element : opt.elementSelector(element));
 
     return map;
+  }
+
+  _tryGetElementByIndex(index) {
+    if (index < 0) return { found: false, element: null };
+
+    let i = 0;
+    for (const element of this) if (i++ === index) return { found: true, element: element };
+
+    return { found: false, element: null };
+  }
+
+  elementAt(index) {
+    const searchResult = this._tryGetElementByIndex(index);
+    if (searchResult.found === false) throw new Error(`Index ${index} lies out of range`);
+
+    return searchResult.element;
   }
 };

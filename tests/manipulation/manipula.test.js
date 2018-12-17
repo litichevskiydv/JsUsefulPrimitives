@@ -773,3 +773,32 @@ describe("Should test takeWhile", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test elementAt", () => {
+  const testCases = [
+    {
+      toString: () => "ElementAt should locate element by index",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      index: 1,
+      expected: 2
+    },
+    {
+      toString: () => "ElementAt should throw error if index is greater or equal to source size",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      index: 15,
+      expectedErrorMessage: "Index 15 lies out of range"
+    },
+    {
+      toString: () => "ElementAt should throw error if index is less than zero",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      index: -1,
+      expectedErrorMessage: "Index -1 lies out of range"
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(testCase.source.elementAt(testCase.index)).toBe(testCase.expected);
+    else expect(() => testCase.source.elementAt(testCase.index)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
+});
