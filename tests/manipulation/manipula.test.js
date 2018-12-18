@@ -802,3 +802,31 @@ describe("Should test elementAt", () => {
     else expect(() => testCase.source.elementAt(testCase.index)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
   });
 });
+
+describe("Should test elementAtOrDefault", () => {
+  const testCases = [
+    {
+      toString: () => "ElementAtOrDefault should locate element by index",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      index: 1,
+      expected: 2
+    },
+    {
+      toString: () => "ElementAtOrDefault should return null if index is greater or equal to source size",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      index: 15,
+      expected: null
+    },
+    {
+      toString: () => "ElementAtOrDefault should return null if index is less than zero",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      index: -1,
+      expected: null
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    expect(testCase.source.elementAtOrDefault(testCase.index)).toBe(testCase.expected);
+  });
+});

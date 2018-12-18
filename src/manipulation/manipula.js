@@ -114,4 +114,8 @@ module.exports = class Manipula {
 
     return searchResult.element;
   }
+
+  elementAtOrDefault(index) {
+    return this._tryGetElementByIndex(index).element;
+  }
 };
