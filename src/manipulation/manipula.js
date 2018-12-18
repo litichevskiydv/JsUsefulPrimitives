@@ -118,4 +118,16 @@ module.exports = class Manipula {
   elementAtOrDefault(index) {
     return this._tryGetElementByIndex(index).element;
   }
+
+  _aggregate(iterator, accumulatorInitialValue, aggregateFunction) {
+    let accumulator = accumulatorInitialValue;
+    for (let currentState = iterator.next(), i = 0; currentState.done === false; currentState = iterator.next(), i++)
+      accumulator = aggregateFunction(accumulator, currentState.value, i);
+
+    return accumulator;
+  }
+
+  aggregate(accumulatorInitialValue, aggregateFunction) {
+    return this._aggregate(this[Symbol.iterator](), accumulatorInitialValue, aggregateFunction);
+  }
 };

@@ -830,3 +830,27 @@ describe("Should test elementAtOrDefault", () => {
     expect(testCase.source.elementAtOrDefault(testCase.index)).toBe(testCase.expected);
   });
 });
+
+describe("Should test aggregate", () => {
+  const testCases = [
+    {
+      toString: () => "Should aggregate collection",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      accumulatorInitialValue: 1,
+      aggregateFunction: (accumulator, current) => accumulator + current,
+      expected: 22
+    },
+    {
+      toString: () => "Should aggregate collection based on item number",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      accumulatorInitialValue: 1,
+      aggregateFunction: (accumulator, current, index) => accumulator + current * index,
+      expected: 71
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    expect(testCase.source.aggregate(testCase.accumulatorInitialValue, testCase.aggregateFunction)).toBe(testCase.expected);
+  });
+});
