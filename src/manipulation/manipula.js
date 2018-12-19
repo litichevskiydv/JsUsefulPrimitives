@@ -154,4 +154,19 @@ module.exports = class Manipula {
   sum(selector) {
     return this._aggregate(this[Symbol.iterator](), 0, (accumulator, current) => accumulator + (selector ? selector(current) : current));
   }
+
+  average(selector) {
+    let iterator = this[Symbol.iterator]();
+    const begin = iterator.next();
+    if (begin.done === true) throw new Error("Source contains no elements");
+
+    let count = 1;
+    let sum = selector ? selector(begin.value) : begin.value;
+    for (let currentState = iterator.next(); currentState.done === false; currentState = iterator.next()) {
+      sum += selector ? selector(currentState.value) : currentState.value;
+      count++;
+    }
+
+    return sum / count;
+  }
 };
