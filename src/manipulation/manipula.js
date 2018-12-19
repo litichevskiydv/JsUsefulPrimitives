@@ -150,4 +150,8 @@ module.exports = class Manipula {
       Math.max(accumulator, selector ? selector(current) : current)
     );
   }
+
+  sum(selector) {
+    return this._aggregate(this[Symbol.iterator](), 0, (accumulator, current) => accumulator + (selector ? selector(current) : current));
+  }
 };
