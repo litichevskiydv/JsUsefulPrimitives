@@ -130,4 +130,14 @@ module.exports = class Manipula {
   aggregate(accumulatorInitialValue, aggregateFunction) {
     return this._aggregate(this[Symbol.iterator](), accumulatorInitialValue, aggregateFunction);
   }
+
+  min(selector) {
+    let iterator = this[Symbol.iterator]();
+    const begin = iterator.next();
+    if (begin.done === true) throw new Error("Source contains no elements");
+
+    return this._aggregate(iterator, selector ? selector(begin.value) : begin.value, (accumulator, current) =>
+      Math.min(accumulator, selector ? selector(current) : current)
+    );
+  }
 };

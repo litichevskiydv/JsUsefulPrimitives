@@ -854,3 +854,30 @@ describe("Should test aggregate", () => {
     expect(testCase.source.aggregate(testCase.accumulatorInitialValue, testCase.aggregateFunction)).toBe(testCase.expected);
   });
 });
+
+describe("Should test min", () => {
+  const testCases = [
+    {
+      toString: () => "Should throw exception if source is empty",
+      source: Manipula.from([]),
+      expectedErrorMessage: "Source contains no elements"
+    },
+    {
+      toString: () => "Should compute minimum",
+      source: Manipula.from([1, 2, -3, 4, -5, -6.3]),
+      expected: -6.3
+    },
+    {
+      toString: () => "Should compute minimum using values selector",
+      source: Manipula.from([1, 2, -3, 4, -5, -6.3]),
+      selector: x => x * x,
+      expected: 1
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(testCase.source.min(testCase.selector)).toBe(testCase.expected);
+    else expect(() => testCase.source.min(testCase.selector)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
+});
