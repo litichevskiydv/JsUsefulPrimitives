@@ -961,3 +961,23 @@ describe("Should test average", () => {
     else expect(() => testCase.source.average(testCase.selector)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
   });
 });
+
+describe("Should test reverse", () => {
+  const testCases = [
+    {
+      toString: () => "Should return empty array if source was empty",
+      source: Manipula.from([]),
+      expected: []
+    },
+    {
+      toString: () => "Should reverse source",
+      source: Manipula.from([1, 2, 3, 4, 5]),
+      expected: [5, 4, 3, 2, 1]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    expect(testCase.source.reverse().toArray()).toEqual(testCase.expected);
+  });
+});
