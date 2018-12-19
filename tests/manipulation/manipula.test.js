@@ -881,3 +881,30 @@ describe("Should test min", () => {
     else expect(() => testCase.source.min(testCase.selector)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
   });
 });
+
+describe("Should test max", () => {
+  const testCases = [
+    {
+      toString: () => "Should throw exception if source is empty",
+      source: Manipula.from([]),
+      expectedErrorMessage: "Source contains no elements"
+    },
+    {
+      toString: () => "Should compute maximum",
+      source: Manipula.from([1, 2, -3, 4, -5, -6.3]),
+      expected: 4
+    },
+    {
+      toString: () => "Should compute minimum using values selector",
+      source: Manipula.from([1, 2, -3, 4, -5, -6.3]),
+      selector: x => x * x,
+      expected: 39.69
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(testCase.source.max(testCase.selector)).toBe(testCase.expected);
+    else expect(() => testCase.source.max(testCase.selector)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
+});
