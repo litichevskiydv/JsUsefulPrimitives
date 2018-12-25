@@ -981,3 +981,32 @@ describe("Should test reverse", () => {
     expect(testCase.source.reverse().toArray()).toEqual(testCase.expected);
   });
 });
+
+describe("Should test repeat", () => {
+  const testCases = [
+    {
+      toString: () => "Should throw exception if count is negative",
+      element: 1,
+      count: -1,
+      expectedErrorMessage: "Count mustn't be negative"
+    },
+    {
+      toString: () => "Should produce empty collection",
+      element: 1,
+      count: 0,
+      expected: []
+    },
+    {
+      toString: () => "Should repeat twice",
+      element: 1,
+      count: 2,
+      expected: [1, 1]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(Manipula.repeat(testCase.element, testCase.count).toArray()).toEqual(testCase.expected);
+    else expect(() => Manipula.repeat(testCase.element, testCase.count)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
+});
