@@ -1010,3 +1010,32 @@ describe("Should test repeat", () => {
     else expect(() => Manipula.repeat(testCase.element, testCase.count)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
   });
 });
+
+describe("Should test range", () => {
+  const testCases = [
+    {
+      toString: () => "Should throw exception if count is negative",
+      start: 1,
+      count: -1,
+      expectedErrorMessage: "Count mustn't be negative"
+    },
+    {
+      toString: () => "Should produce empty collection",
+      start: 1,
+      count: 0,
+      expected: []
+    },
+    {
+      toString: () => "Should produce three elements",
+      start: 1,
+      count: 3,
+      expected: [1, 2, 3]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(Manipula.range(testCase.start, testCase.count).toArray()).toEqual(testCase.expected);
+    else expect(() => Manipula.range(testCase.start, testCase.count)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
+});
