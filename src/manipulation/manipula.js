@@ -55,6 +55,10 @@ module.exports = class Manipula {
     throw new Error("No matching element was found");
   }
 
+  lastOrDefault(predicate) {
+    return this._tryGetLast(predicate).element;
+  }
+
   _tryGetSingle(predicate) {
     let iterator = this[Symbol.iterator]();
     for (let currentState = iterator.next(); currentState.done === false; currentState = iterator.next()) {

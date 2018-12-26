@@ -384,6 +384,38 @@ describe("Should test last", () => {
   });
 });
 
+describe("Should test lastOrDefault", () => {
+  const testCases = [
+    {
+      toString: () => "LastOrDefault without predicate should return first element of not empty manipula",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      expected: 6
+    },
+    {
+      toString: () => "LastOrDefault without predicate should return null if manipula is empty",
+      source: Manipula.from([]),
+      expected: null
+    },
+    {
+      toString: () => "LastOrDefault with predicate should return first matched element if it exists",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 3 === 0,
+      expected: 6
+    },
+    {
+      toString: () => "LastOrDefault with predicate should return null if no matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 7 === 0,
+      expected: null
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    expect(testCase.source.lastOrDefault(testCase.predicate)).toBe(testCase.expected);
+  });
+});
+
 describe("Should test single", () => {
   const testCases = [
     {
