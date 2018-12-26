@@ -36,6 +36,25 @@ module.exports = class Manipula {
     return this._tryGetFirst(predicate).element;
   }
 
+  _tryGetLast(predicate) {
+    let result = { found: false, element: null };
+
+    for (const element of this)
+      if (!predicate || predicate(element)) {
+        result.found = true;
+        result.element = element;
+      }
+
+    return result;
+  }
+
+  last(predicate) {
+    const searchResult = this._tryGetLast(predicate);
+    if (searchResult.found === true) return searchResult.element;
+
+    throw new Error("No matching element was found");
+  }
+
   _tryGetSingle(predicate) {
     let iterator = this[Symbol.iterator]();
     for (let currentState = iterator.next(); currentState.done === false; currentState = iterator.next()) {

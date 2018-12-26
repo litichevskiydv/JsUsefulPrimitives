@@ -351,6 +351,39 @@ describe("Should test firstOrDefault", () => {
   });
 });
 
+describe("Should test last", () => {
+  const testCases = [
+    {
+      toString: () => "Last without predicate should return last element of not empty manipula",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      expected: 6
+    },
+    {
+      toString: () => "Last without predicate should throw error if manipula is empty",
+      source: Manipula.from([]),
+      expectedErrorMessage: "No matching element was found"
+    },
+    {
+      toString: () => "Last with predicate should return last matched element if it exists",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 3 === 0,
+      expected: 6
+    },
+    {
+      toString: () => "Last with predicate should throw error if no matching element was found",
+      source: Manipula.from([1, 2, 3, 4, 5, 6]),
+      predicate: x => x % 7 === 0,
+      expectedErrorMessage: "No matching element was found"
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When, Then
+    if (testCase.expected) expect(testCase.source.last(testCase.predicate)).toBe(testCase.expected);
+    else expect(() => testCase.source.last(testCase.predicate)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
+  });
+});
+
 describe("Should test single", () => {
   const testCases = [
     {
