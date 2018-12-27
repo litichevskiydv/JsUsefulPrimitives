@@ -1172,3 +1172,77 @@ describe("Should test takeLase", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test ordering", () => {
+  const testCases = [
+    {
+      toString: () => "Should sort numbers in ascending order",
+      source: Manipula.from([5, 3, 2, 1, 4]),
+      sorter: source => source.orderBy(x => x),
+      expected: [1, 2, 3, 4, 5]
+    },
+    {
+      toString: () => "Should sort numbers in descending order",
+      source: Manipula.from([5, 3, 2, 1, 4]),
+      sorter: source => source.orderByDescending(x => x),
+      expected: [5, 4, 3, 2, 1]
+    },
+    {
+      toString: () => "Should sort strings in ascending order",
+      source: Manipula.from(["March", "Jan", "Feb", "Dec"]),
+      sorter: source => source.orderBy(x => x),
+      expected: ["Dec", "Feb", "Jan", "March"]
+    },
+    {
+      toString: () => "Should sort strings in descending order",
+      source: Manipula.from(["March", "Jan", "Feb", "Dec"]),
+      sorter: source => source.orderByDescending(x => x),
+      expected: ["March", "Jan", "Feb", "Dec"]
+    },
+    {
+      toString: () => "Should sort booleans in ascending order",
+      source: Manipula.from([true, false, true, false]),
+      sorter: source => source.orderBy(x => x),
+      expected: [false, false, true, true]
+    },
+    {
+      toString: () => "Should sort booleans in descending order",
+      source: Manipula.from([true, false, true, false]),
+      sorter: source => source.orderByDescending(x => x),
+      expected: [true, true, false, false]
+    },
+    {
+      toString: () => "Should sort complex object in ascending order",
+      source: Manipula.from([new Key(1, 2), new Key(2, 7), new Key(2, 5), new Key(1, 3)]),
+      sorter: source => source.orderBy(x => x.hi).thenBy(x => x.lo),
+      expected: [new Key(1, 2), new Key(1, 3), new Key(2, 5), new Key(2, 7)]
+    },
+    {
+      toString: () => "Should sort complex object in descending order",
+      source: Manipula.from([new Key(1, 2), new Key(2, 7), new Key(2, 5), new Key(1, 3)]),
+      sorter: source => source.orderByDescending(x => x.hi).thenByDescending(x => x.lo),
+      expected: [new Key(2, 7), new Key(2, 5), new Key(1, 3), new Key(1, 2)]
+    },
+    {
+      toString: () => "Should sort complex object in ascending order with custom comparer",
+      source: Manipula.from([new Key(1, 2), new Key(2, 7), new Key(2, 5), new Key(1, 3)]),
+      sorter: source =>
+        source.orderBy(
+          x => x,
+          (a, b) => {
+            if (a.hi !== b.hi) return a.hi - b.hi;
+            return a.lo - b.lo;
+          }
+        ),
+      expected: [new Key(1, 2), new Key(1, 3), new Key(2, 5), new Key(2, 7)]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.sorter(testCase.source).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});

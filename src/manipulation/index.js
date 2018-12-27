@@ -18,5 +18,6 @@ require("./iterators/repeatIterator");
 require("./iterators/rangeIterator");
 require("./iterators/skipLastIterator");
 require("./iterators/takeLastIterator");
+require("./iterators/orderByIterator");
 
 module.exports = require("./manipula");
