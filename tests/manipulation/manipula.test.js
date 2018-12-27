@@ -1104,3 +1104,40 @@ describe("Should test range", () => {
     else expect(() => Manipula.range(testCase.start, testCase.count)).toThrowWithMessage(Error, testCase.expectedErrorMessage);
   });
 });
+
+describe("Should test skipLast", () => {
+  const testCases = [
+    {
+      toString: () => "Skip less than elements count",
+      source: Manipula.from([1, 2, 3]),
+      count: 2,
+      expected: [1]
+    },
+    {
+      toString: () => "Skip more than elements count",
+      source: Manipula.from([1, 2, 3]),
+      count: 4,
+      expected: []
+    },
+    {
+      toString: () => "Skip zero count",
+      source: Manipula.from([1, 2, 3]),
+      count: 0,
+      expected: [1, 2, 3]
+    },
+    {
+      toString: () => "Skip negative count",
+      source: Manipula.from([1, 2, 3]),
+      count: -1,
+      expected: [1, 2, 3]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.skipLast(testCase.count).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});
