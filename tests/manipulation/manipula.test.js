@@ -1141,3 +1141,34 @@ describe("Should test skipLast", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test takeLase", () => {
+  const testCases = [
+    {
+      toString: () => "Take less than elements count",
+      source: Manipula.from([1, 2, 3]),
+      count: 2,
+      expected: [2, 3]
+    },
+    {
+      toString: () => "Take more than elements count",
+      source: Manipula.from([1, 2, 3]),
+      count: 4,
+      expected: [1, 2, 3]
+    },
+    {
+      toString: () => "Take negative count",
+      source: Manipula.from([1, 2, 3]),
+      count: -1,
+      expected: []
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.takeLast(testCase.count).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});
