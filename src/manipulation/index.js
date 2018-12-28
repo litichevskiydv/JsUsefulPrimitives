@@ -9,6 +9,7 @@ require("./iterators/intersectIterator");
 require("./iterators/distinctIterator");
 require("./iterators/groupByIterator");
 require("./iterators/appendIterator");
+require("./iterators/prependIterator");
 require("./iterators/skipIterator");
 require("./iterators/takeIterator");
 require("./iterators/skipWhileIterator");

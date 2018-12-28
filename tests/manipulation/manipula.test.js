@@ -683,6 +683,31 @@ describe("Should test append", () => {
   });
 });
 
+describe("Should test prepend", () => {
+  const testCases = [
+    {
+      toString: () => "Prepend element to empty source",
+      source: Manipula.from([]),
+      element: 1,
+      expected: [1]
+    },
+    {
+      toString: () => "Prepend element to not empty source",
+      source: Manipula.from([1, 2, 3]),
+      element: 4,
+      expected: [4, 1, 2, 3]
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.source.prepend(testCase.element).toArray();
+
+    // Then
+    expect(actual).toEqual(testCase.expected);
+  });
+});
+
 describe("Should test intersect", () => {
   const testCases = [
     {
