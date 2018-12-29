@@ -192,4 +192,21 @@ module.exports = class Manipula {
 
     return sum / count;
   }
+
+  sequenceEqual(second, comparer) {
+    if (this === second) return true;
+    if (!second) return false;
+
+    let firstIterator = this[Symbol.iterator]();
+    let secondIterator = second[Symbol.iterator]();
+    for (
+      var firstState = firstIterator.next(), secondState = secondIterator.next();
+      firstState.done === false && secondState.done === false;
+      firstState = firstIterator.next(), secondState = secondIterator.next()
+    )
+      if (firstState.value !== secondState.value && (!comparer || comparer.equals(firstState.value, secondState.value) === false))
+        return false;
+
+    return firstState.done && secondState.done;
+  }
 };

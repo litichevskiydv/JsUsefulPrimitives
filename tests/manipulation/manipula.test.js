@@ -1271,3 +1271,53 @@ describe("Should test ordering", () => {
     expect(actual).toEqual(testCase.expected);
   });
 });
+
+describe("Should test sequenceEqual", () => {
+  const testCases = [
+    {
+      toString: () => "Sequence must not be equal to null",
+      first: Manipula.from([1, 2, 3]),
+      second: null,
+      expected: false
+    },
+    {
+      toString: () => "Must determine that first sequence is larger",
+      first: Manipula.from([1, 2, 3]),
+      second: Manipula.from([1, 2]),
+      expected: false
+    },
+    {
+      toString: () => "Must determine that second sequence is larger",
+      first: Manipula.from([1, 2]),
+      second: Manipula.from([1, 2, 3]),
+      expected: false
+    },
+    {
+      toString: () => "Must determine that sequences are different",
+      first: Manipula.from([1, "first", 3]),
+      second: Manipula.from([1, "second", 3]),
+      expected: false
+    },
+    {
+      toString: () => "Must determine that sequences are equal",
+      first: Manipula.from([1, "test", 3]),
+      second: Manipula.from([1, "test", 3]),
+      expected: true
+    },
+    {
+      toString: () => "Must determine that sequences are equal using external comparer",
+      first: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(3, 3)]),
+      second: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(3, 3)]),
+      comparer: new KeysComparer(),
+      expected: true
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {
+    // When
+    const actual = testCase.first.sequenceEqual(testCase.second, testCase.comparer);
+
+    // Then
+    expect(actual).toBe(testCase.expected);
+  });
+});
