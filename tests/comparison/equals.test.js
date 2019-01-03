@@ -318,6 +318,13 @@ describe("Should test equals", () => {
       second: { id: 0, value: "test" },
       options: { membersToIgnore: new Set(["Object.id"]) },
       expected: true
+    },
+    {
+      toString: () => "Must use external comperer for classes",
+      first: new Key(2, 1),
+      second: new Key(1, 2),
+      options: { customComparers: new Map([[Key.prototype, (a, b) => a.hi + a.lo === b.hi + b.lo]]) },
+      expected: true
     }
   ];
 

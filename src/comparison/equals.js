@@ -26,16 +26,19 @@ function equalsForVariousObjects(first, second, options) {
   if (firstEquals) return first.equals(second);
   if (secondEquals) return second.equals(first);
 
-  const firstConstructor = first.constructor;
-  const secondConstructor = second.constructor;
-  if (!options.ignoreObjectTypes && firstConstructor !== secondConstructor) return false;
+  const firstPrototype = Object.getPrototypeOf(first);
+  const arePrototypesEqual = firstPrototype === Object.getPrototypeOf(second);
+  if (!options.ignoreObjectTypes && arePrototypesEqual === false) return false;
+
+  const customComparer = options.customComparers.get(firstPrototype);
+  if (arePrototypesEqual && customComparer) return customComparer(first, second);
 
   const firstKeys = Object.keys(first).sort();
   const secondKeys = Object.keys(second).sort();
   if (firstKeys.length !== secondKeys.length) return false;
   for (let i = 0; i < firstKeys.length; i++) if (firstKeys[i] !== secondKeys[i]) return false;
   for (const key of firstKeys) {
-    if (firstConstructor === secondConstructor && options.membersToIgnore.has(`${firstConstructor.name}.${key}`)) continue;
+    if (arePrototypesEqual && options.membersToIgnore.has(`${firstPrototype.constructor.name}.${key}`)) continue;
 
     if (equals(first[key], second[key], options) === false) return false;
   }
@@ -44,7 +47,9 @@ function equalsForVariousObjects(first, second, options) {
 }
 
 function equals(first, second, options) {
-  const opts = options || { membersToIgnore: new Set() };
+  const opts = options || {};
+  if (!opts.membersToIgnore) opts.membersToIgnore = new Set();
+  if (!opts.customComparers) opts.customComparers = new Map();
 
   if (first === second) return true;
 
