@@ -34,13 +34,17 @@ function equalsForVariousObjects(first, second, options) {
   const secondKeys = Object.keys(second).sort();
   if (firstKeys.length !== secondKeys.length) return false;
   for (let i = 0; i < firstKeys.length; i++) if (firstKeys[i] !== secondKeys[i]) return false;
-  for (const key of firstKeys) if (equals(first[key], second[key], options) === false) return false;
+  for (const key of firstKeys) {
+    if (firstConstructor === secondConstructor && options.membersToIgnore.has(`${firstConstructor.name}.${key}`)) continue;
+
+    if (equals(first[key], second[key], options) === false) return false;
+  }
 
   return true;
 }
 
 function equals(first, second, options) {
-  const opts = options || {};
+  const opts = options || { membersToIgnore: new Set() };
 
   if (first === second) return true;
 

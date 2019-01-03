@@ -304,6 +304,20 @@ describe("Should test equals", () => {
       first: new Key(1, 1),
       second: new OtherKey(1, 1),
       expected: false
+    },
+    {
+      toString: () => "Must exclude class member from comparison",
+      first: new Key(1, 1),
+      second: new Key(1, 2),
+      options: { membersToIgnore: new Set(["Key.lo"]) },
+      expected: true
+    },
+    {
+      toString: () => "Must exclude anonymous types member from comparison",
+      first: { id: 1, value: "test" },
+      second: { id: 0, value: "test" },
+      options: { membersToIgnore: new Set(["Object.id"]) },
+      expected: true
     }
   ];
 
