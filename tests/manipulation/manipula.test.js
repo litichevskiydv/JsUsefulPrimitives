@@ -221,11 +221,17 @@ describe("Should test except", () => {
       expected: [1, 4]
     },
     {
-      toString: () => "Subtracting collections of complex types with different elements",
+      toString: () => "Subtracting collections of complex types with different elements using external comparer",
       first: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(2, 2), new Key(3, 3), new Key(4, 4)]),
       second: Manipula.from([new Key(5, 5), new Key(2, 2), new Key(3, 3), new Key(2, 2), new Key(8, 8)]),
       comparer: new KeysComparer(),
       expected: [new Key(1, 1), new Key(4, 4)]
+    },
+    {
+      toString: () => "Subtracting collections of complex types with different elements using default comparer",
+      first: Manipula.from([{ hi: 1, lo: 1 }, { hi: 2, lo: 2 }, { hi: 2, lo: 2 }, { hi: 3, lo: 3 }, { hi: 4, lo: 4 }]),
+      second: Manipula.from([{ hi: 5, lo: 5 }, { hi: 2, lo: 2 }, { hi: 3, lo: 3 }, { hi: 2, lo: 2 }, { hi: 8, lo: 8 }]),
+      expected: [{ hi: 1, lo: 1 }, { hi: 4, lo: 4 }]
     }
   ];
 

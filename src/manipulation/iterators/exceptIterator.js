@@ -1,19 +1,20 @@
+const Manipula = require("../manipula");
 const HashSet = require("../../collections/hashSet");
-let Manipula = require("../manipula");
+const DefaultComparer = require("../../comparison/defaultEqualityComparer");
 
 class ExceptIterator extends Manipula {
   constructor(first, second, comparer) {
     super();
     this._first = first;
     this._second = second;
-    this._comparer = comparer;
+    this._comparer = comparer || DefaultComparer;
   }
 
   *[Symbol.iterator]() {
-    let set = !this._comparer ? new Set() : new HashSet(this._comparer);
-    for (let element of this._second) set.add(element);
+    const set = new HashSet(this._comparer);
+    for (const element of this._second) set.add(element);
 
-    for (let element of this._first)
+    for (const element of this._first)
       if (set.has(element) === false) {
         set.add(element);
         yield element;
