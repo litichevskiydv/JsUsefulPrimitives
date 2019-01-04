@@ -193,6 +193,13 @@ module.exports.commonCases = [
     expected: false
   },
   {
+    toString: () => "Must determine the equality of objects with inner collection ignoring its order",
+    first: { a: { id: 123, name: "test" }, b: ["ab", "ac", "ad"] },
+    second: { a: { id: 123, name: "test" }, b: ["ad", "ac", "ab"] },
+    options: { ignoreCollectionOrder: true },
+    expected: true
+  },
+  {
     toString: () => "Must determine the equality of arrays of complex type",
     first: [new Key(1, 1), new Key(2, 2), new Key(3, 3)],
     second: [new Key(1, 1), new Key(2, 2), new Key(3, 3)],

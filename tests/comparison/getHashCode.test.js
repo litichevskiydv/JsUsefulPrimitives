@@ -90,17 +90,17 @@ describe("Should test getHashCode", () => {
     {
       toString: () => "Must calculate hashcode for object without getHashCode method",
       operand: { a: 1, b: 2 },
-      expected: -191014771
+      expected: -1628806289
     },
     {
       toString: () => "Must calculate hashcode for Key",
       operand: new Key(1, 1),
-      expected: 1199425
+      expected: 71015395
     },
     {
       toString: () => "Must calculate hashcode for OtherKey",
       operand: new OtherKey(1, 1),
-      expected: 1820041547
+      expected: 487865513
     },
     {
       toString: () => "Must calculate hashcode for Key ignoring type",

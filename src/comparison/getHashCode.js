@@ -8,15 +8,13 @@ function getHashCodeForIterables(operand, options) {
 function equalsForVariousObjects(operand, options) {
   if (operand["getHashCode"]) return operand.getHashCode();
 
-  let hashCode = options.ignoreObjectTypes ? 0 : getHashCode(operand.constructor.name, options);
-
-  return (
-    (hashCode * 31) ^
-    getHashCodeForIterables(
-      Object.entries(operand).sort((a, b) => a[0] - b[0]),
-      Object.assign({}, options, { ignoreCollectionOrder: false })
-    )
-  );
+  return Object.entries(operand)
+    .sort((a, b) => a[0] - b[0])
+    .map(x => (getHashCode(x[0], options) * 31) ^ getHashCode(x[1], options))
+    .reduce(
+      (accumulator, current) => (accumulator * 31) ^ current,
+      options.ignoreObjectTypes ? 0 : getHashCode(operand.constructor.name, options)
+    );
 }
 
 function getHashCode(operand, options) {
