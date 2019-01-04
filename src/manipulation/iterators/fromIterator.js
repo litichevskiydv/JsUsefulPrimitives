@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class FromIterator extends Manipula {
   constructor(iterable) {
@@ -12,7 +12,7 @@ class FromIterator extends Manipula {
   }
 
   *[Symbol.iterator]() {
-    for (let element of this._iterable) yield element;
+    for (const element of this._iterable) yield element;
   }
 }
 
