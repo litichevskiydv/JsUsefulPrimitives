@@ -1,8 +1,9 @@
 require("./fromIterator");
 require("./selectIterator");
 
+const Manipula = require("../manipula");
 const HashMap = require("../../collections/hashMap");
-let Manipula = require("../manipula");
+const DefaultComparer = require("../../comparison/defaultEqualityComparer");
 
 class GroupByIterator extends Manipula {
   constructor(source, keySelector, elementSelector, comparer) {
@@ -10,11 +11,11 @@ class GroupByIterator extends Manipula {
     this._source = source;
     this._keySelector = keySelector;
     this._elementSelector = elementSelector;
-    this._comparer = comparer;
+    this._comparer = comparer || DefaultComparer;
   }
 
   *[Symbol.iterator]() {
-    let map = !this._comparer ? new Map() : new HashMap(this._comparer);
+    const map = new HashMap(this._comparer);
     for (const element of this._source) {
       const elementKey = this._keySelector(element);
       let bucket = map.get(elementKey);

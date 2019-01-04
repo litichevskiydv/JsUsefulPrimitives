@@ -631,17 +631,26 @@ describe("Should test groupBy", () => {
       expected: [[2, 3], [4]]
     },
     {
-      toString: () => "Should group by complex key without results transformation",
+      toString: () => "Should group by complex key using external comparer without results transformation",
       source: Manipula.from([{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }, { key: new Key(2, 2), value: 4 }]),
       keySelector: x => x.key,
       options: { comparer: new KeysComparer() },
       expected: [[{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }], [{ key: new Key(2, 2), value: 4 }]]
     },
     {
-      toString: () => "Should group by complex key and transform results",
+      toString: () => "Should group by complex key using external comparer and transform results",
       source: Manipula.from([{ key: new Key(1, 1), value: 2 }, { key: new Key(1, 1), value: 3 }, { key: new Key(2, 2), value: 4 }]),
       keySelector: x => x.key,
       options: { comparer: new KeysComparer(), elementSelector: x => x.value },
+      expected: [[2, 3], [4]]
+    },
+    {
+      toString: () => "Should group by complex key using default comparer and transform results",
+      source: Manipula.from([{ hi: 1, lo: 1, value: 2 }, { hi: 1, lo: 1, value: 3 }, { hi: 2, lo: 2, value: 4 }]),
+      keySelector: x => {
+        return { hi: x.hi, lo: x.lo };
+      },
+      options: { elementSelector: x => x.value },
       expected: [[2, 3], [4]]
     }
   ];
