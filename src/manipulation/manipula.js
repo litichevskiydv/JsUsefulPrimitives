@@ -156,7 +156,7 @@ module.exports = class Manipula {
   }
 
   min(selector) {
-    let iterator = this[Symbol.iterator]();
+    const iterator = this[Symbol.iterator]();
     const begin = iterator.next();
     if (begin.done === true) throw new Error("Source contains no elements");
 
@@ -166,7 +166,7 @@ module.exports = class Manipula {
   }
 
   max(selector) {
-    let iterator = this[Symbol.iterator]();
+    const iterator = this[Symbol.iterator]();
     const begin = iterator.next();
     if (begin.done === true) throw new Error("Source contains no elements");
 
@@ -180,7 +180,7 @@ module.exports = class Manipula {
   }
 
   average(selector) {
-    let iterator = this[Symbol.iterator]();
+    const iterator = this[Symbol.iterator]();
     const begin = iterator.next();
     if (begin.done === true) throw new Error("Source contains no elements");
 
@@ -198,8 +198,8 @@ module.exports = class Manipula {
     if (this === second) return true;
     if (!second) return false;
 
-    let firstIterator = this[Symbol.iterator]();
-    let secondIterator = second[Symbol.iterator]();
+    const firstIterator = this[Symbol.iterator]();
+    const secondIterator = second[Symbol.iterator]();
     for (
       var firstState = firstIterator.next(), secondState = secondIterator.next();
       firstState.done === false && secondState.done === false;
