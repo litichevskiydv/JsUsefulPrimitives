@@ -1,5 +1,6 @@
 const HashSet = require("../collections/hashSet");
 const HashMap = require("../collections/hashMap");
+const DefaultComparer = require("../comparison/defaultEqualityComparer");
 
 module.exports = class Manipula {
   static get _lengthPropertyName() {
@@ -37,7 +38,7 @@ module.exports = class Manipula {
   }
 
   _tryGetLast(predicate) {
-    let result = { found: false, element: null };
+    const result = { found: false, element: null };
 
     for (const element of this)
       if (!predicate || predicate(element)) {
@@ -60,7 +61,7 @@ module.exports = class Manipula {
   }
 
   _tryGetSingle(predicate) {
-    let iterator = this[Symbol.iterator]();
+    const iterator = this[Symbol.iterator]();
     for (let currentState = iterator.next(); currentState.done === false; currentState = iterator.next()) {
       const result = currentState.value;
       if (!predicate || predicate(result)) {
@@ -108,8 +109,8 @@ module.exports = class Manipula {
   }
 
   toSet(comparer) {
-    let set = !comparer ? new Set() : new HashSet(comparer);
-    for (let element of this) set.add(element);
+    const set = new HashSet(comparer || DefaultComparer);
+    for (const element of this) set.add(element);
 
     return set;
   }

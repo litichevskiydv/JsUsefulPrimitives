@@ -45,7 +45,7 @@ test("Should convert manipula to set of primitive type", () => {
   expect(sourceArray).toSatisfyAll(x => actualSet.has(x));
 });
 
-test("Should convert manipula to set of complex type", () => {
+test("Should convert manipula to set of complex type using external comparer", () => {
   // Given
   const firstKey = new Key(1, 1);
   const secondKey = new Key(2, 2);
@@ -58,6 +58,21 @@ test("Should convert manipula to set of complex type", () => {
   // Then
   expect(sourceArray).toSatisfyAll(x => actualSet.has(x));
   expect(actualSet.has(new Key(firstKey.hi, firstKey.lo))).toBeTrue();
+});
+
+test("Should convert manipula to set of complex type using default comparer", () => {
+  // Given
+  const firstKey = { hi: 1, lo: 1 };
+  const secondKey = { hi: 2, lo: 2 };
+  const sourceArray = [firstKey, secondKey];
+  const manipula = Manipula.from(sourceArray);
+
+  // When
+  const actualSet = manipula.toSet();
+
+  // Then
+  expect(sourceArray).toSatisfyAll(x => actualSet.has(x));
+  expect(actualSet.has({ hi: firstKey.hi, lo: firstKey.lo })).toBeTrue();
 });
 
 test("Should convert manipula to map of primitive type", () => {
