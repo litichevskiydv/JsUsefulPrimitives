@@ -1,16 +1,17 @@
+const Manipula = require("../manipula");
 const HashSet = require("../../collections/hashSet");
-let Manipula = require("../manipula");
+const DefaultComparer = require("../../comparison/defaultEqualityComparer");
 
 class UnionIterator extends Manipula {
   constructor(first, second, comparer) {
     super();
     this._first = first;
     this._second = second;
-    this._comparer = comparer;
+    this._comparer = comparer || DefaultComparer;
   }
 
   *_iterate(set, source) {
-    for (let element of source)
+    for (const element of source)
       if (set.has(element) === false) {
         set.add(element);
         yield element;
@@ -18,7 +19,7 @@ class UnionIterator extends Manipula {
   }
 
   *[Symbol.iterator]() {
-    let set = !this._comparer ? new Set() : new HashSet(this._comparer);
+    const set = new HashSet(this._comparer);
     yield* this._iterate(set, this._first);
     yield* this._iterate(set, this._second);
   }

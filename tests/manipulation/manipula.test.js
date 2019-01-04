@@ -189,10 +189,16 @@ describe("Should test union", () => {
       expected: [5, 3, 9, 7, 8, 6, 4, 1, 0]
     },
     {
-      toString: () => "Unioning collections of primitive type",
+      toString: () => "Unioning collections of complex type using external comparer",
       first: Manipula.from([new Key(1, 1), new Key(2, 2)]),
       second: Manipula.from([new Key(2, 2), new Key(1, 1)]),
       comparer: new KeysComparer(),
+      expected: [new Key(1, 1), new Key(2, 2)]
+    },
+    {
+      toString: () => "Unioning collections of complex type using default comparer",
+      first: Manipula.from([new Key(1, 1), new Key(2, 2)]),
+      second: Manipula.from([new Key(2, 2), new Key(1, 1)]),
       expected: [new Key(1, 1), new Key(2, 2)]
     }
   ];
