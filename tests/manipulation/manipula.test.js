@@ -246,10 +246,16 @@ describe("Should test distinct", () => {
       expected: [2.0, 2.1, 2.2, 2.3, 2.4, 2.5]
     },
     {
-      toString: () => "Distincting collections of primitive type",
+      toString: () => "Distincting collections of complex type using external comparer",
       source: Manipula.from([new Key(1, 1), new Key(2, 2), new Key(2, 2), new Key(1, 1)]),
       comparer: new KeysComparer(),
       expected: [new Key(1, 1), new Key(2, 2)]
+    },
+    {
+      toString: () => "Distincting collections of complex type using default comparer",
+      source: Manipula.from([{ hi: 1, lo: 1 }, { hi: 2, lo: 2 }, { hi: 2, lo: 2 }, { hi: 1, lo: 1 }]),
+      comparer: new KeysComparer(),
+      expected: [{ hi: 1, lo: 1 }, { hi: 2, lo: 2 }]
     }
   ];
 
