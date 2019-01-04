@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class TakeWhileIterator extends Manipula {
   constructor(source, predicate) {
@@ -8,7 +8,7 @@ class TakeWhileIterator extends Manipula {
   }
 
   *[Symbol.iterator]() {
-    let iterator = this._source[Symbol.iterator]();
+    const iterator = this._source[Symbol.iterator]();
     for (
       let currentState = iterator.next(), i = 0;
       currentState.done === false && this._predicate(currentState.value, i);

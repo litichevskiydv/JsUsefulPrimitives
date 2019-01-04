@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class OrderByIterator extends Manipula {
   constructor(source, keySelector, sortByDescending, compareFunction) {

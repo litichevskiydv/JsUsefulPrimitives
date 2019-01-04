@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class RangeIterator extends Manipula {
   constructor(start, count) {

@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class PrependIterator extends Manipula {
   constructor(source, element) {

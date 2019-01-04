@@ -1,15 +1,15 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class WhereIterator extends Manipula {
-  constructor(iterable, predicate) {
+  constructor(source, predicate) {
     super();
-    this._iterable = iterable;
+    this._source = source;
     this._predicate = predicate;
   }
 
   *[Symbol.iterator]() {
     let i = 0;
-    for (let element of this._iterable) if (this._predicate(element, i++)) yield element;
+    for (const element of this._source) if (this._predicate(element, i++)) yield element;
   }
 }
 

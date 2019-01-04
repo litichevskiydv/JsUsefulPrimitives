@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class RepeatIterator extends Manipula {
   constructor(element, count) {

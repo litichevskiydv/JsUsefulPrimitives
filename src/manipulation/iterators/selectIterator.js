@@ -1,20 +1,20 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class SelectIterator extends Manipula {
-  constructor(iterable, selector) {
+  constructor(source, selector) {
     super();
-    this._iterable = iterable;
+    this._source = source;
     this._selector = selector;
 
-    if (Manipula._lengthPropertyName in iterable)
+    if (Manipula._lengthPropertyName in source)
       Object.defineProperty(this, Manipula._lengthPropertyName, {
-        get: () => this._iterable[Manipula._lengthPropertyName]
+        get: () => this._source[Manipula._lengthPropertyName]
       });
   }
 
   *[Symbol.iterator]() {
     let i = 0;
-    for (let element of this._iterable) yield this._selector(element, i++);
+    for (const element of this._source) yield this._selector(element, i++);
   }
 }
 

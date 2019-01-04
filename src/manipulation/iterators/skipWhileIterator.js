@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class SkipWhileIterator extends Manipula {
   constructor(source, predicate) {
@@ -8,7 +8,7 @@ class SkipWhileIterator extends Manipula {
   }
 
   *[Symbol.iterator]() {
-    let iterator = this._source[Symbol.iterator]();
+    const iterator = this._source[Symbol.iterator]();
     for (
       var currentState = iterator.next(), i = 0;
       currentState.done === false && this._predicate(currentState.value, i);

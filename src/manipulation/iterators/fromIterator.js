@@ -1,18 +1,18 @@
 const Manipula = require("../manipula");
 
 class FromIterator extends Manipula {
-  constructor(iterable) {
+  constructor(source) {
     super();
-    this._iterable = iterable;
+    this._source = source;
 
-    if (Manipula._lengthPropertyName in iterable)
+    if (Manipula._lengthPropertyName in source)
       Object.defineProperty(this, Manipula._lengthPropertyName, {
-        get: () => this._iterable[Manipula._lengthPropertyName]
+        get: () => this._source[Manipula._lengthPropertyName]
       });
   }
 
   *[Symbol.iterator]() {
-    for (const element of this._iterable) yield element;
+    for (const element of this._source) yield element;
   }
 }
 

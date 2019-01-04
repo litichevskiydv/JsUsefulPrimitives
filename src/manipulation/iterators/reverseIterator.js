@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class ReverseIterator extends Manipula {
   constructor(source) {

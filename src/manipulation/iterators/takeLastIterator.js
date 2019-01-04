@@ -1,4 +1,4 @@
-let Manipula = require("../manipula");
+const Manipula = require("../manipula");
 
 class TakeLastIterator extends Manipula {
   constructor(source, count) {
@@ -10,8 +10,8 @@ class TakeLastIterator extends Manipula {
   *[Symbol.iterator]() {
     if (this._count <= 0) return;
 
-    let queue = [];
-    let iterator = this._source[Symbol.iterator]();
+    const queue = [];
+    const iterator = this._source[Symbol.iterator]();
     for (let currentState = iterator.next(); currentState.done === false; currentState = iterator.next())
       if (queue.length === this._count)
         for (; currentState.done === false; currentState = iterator.next()) {
