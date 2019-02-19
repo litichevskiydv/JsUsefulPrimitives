@@ -5,7 +5,7 @@
   "scripts": {
     "build:protos": "mkdirp ./src/grpc/generated && pbjs -r greeter -t static-module -w commonjs --no-verify -o ./src/grpc/generated/greeter_pb.js ./src/grpc/protos/greeter.proto",
     "build:types": "mkdirp ./src/grpc/generated && pbts -o ./src/grpc/generated/greeter_pb.d.ts ./src/grpc/generated/greeter_pb.js",
-    "build:swagger": "mkdirp ./src/grpc/generated && node ./src/grpc/infrastructure/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
+    "build:swagger": "mkdirp ./src/grpc/generated && node ./src/grpc/complier/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
     "build:watch": "nodemon --ext *.proto --watch ./src/grpc/protos --exec npm run build",
     "build": "npm run build:protos && npm run build:types && npm run build:swagger",
     "test:watch": "jest --verbose --watch",
