@@ -6,8 +6,9 @@ node_js:
   - "node"
 branches:
   only:
-  - master
-  - /^release\/.*$/
-  - develop
+    - master
+    - /^release\/.*$/
+    - develop
 script:
- - npm test
+  - npm run build
+  - npm test
