@@ -55,12 +55,11 @@ module.exports = class GrpcServerBuilder {
 
   /**
    * Binds server to endpoint.
-   * @param {string} address Binded address.
-   * @param {number} port Binded port.
+   * @param {string} grpcBind Bind for gRPC server in format "address:port".
    * @param {ServerCredentials} [credentials = ServerCredentials.createInsecure()] Server credentials
    */
-  bind(address, port, credentials = ServerCredentials.createInsecure()) {
-    this._server.bind(`${address}:${port}`, credentials);
+  bind(grpcBind, credentials = ServerCredentials.createInsecure()) {
+    this._server.bind(grpcBind, credentials);
     return this;
   }
 

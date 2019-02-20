@@ -4,8 +4,7 @@ const protoLoader = require("@grpc/proto-loader");
 const GrpcServerBuilder = require("../../src/grpc/grpcServerBuilder");
 const { HelloRequest, HelloResponse } = require("../../src/grpc/generated/greeter_pb").v1;
 
-const address = "0.0.0.0";
-const port = 3000;
+const grpcBind = "0.0.0.0:3000";
 const packageObject = grpc.loadPackageDefinition(
   protoLoader.loadSync(path.join(__dirname, "../../src/grpc/protos/greeter.proto"), {
     includeDirs: [path.join(__dirname, "../../src/grpc/complier/include/"), path.join(__dirname, "../../node_modules/grpc-tools/bin/")]
@@ -24,12 +23,12 @@ const createServer = configurator => {
         callback(null, new HelloResponse({ message: `Hello, ${request.name}!` }));
       }
     })
-    .bind(address, port)
+    .bind(grpcBind)
     .build();
 };
 
 const getMessage = async name => {
-  const client = new packageObject.v1.Greeter(`${address}:${port}`, grpc.credentials.createInsecure());
+  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure());
   return await new Promise((resolve, reject) => {
     client.sayHello(new HelloRequest({ name: name }), (error, response) => {
       if (error) reject(error);
