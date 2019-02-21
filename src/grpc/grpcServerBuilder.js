@@ -1,9 +1,12 @@
 const { Server, ServerCredentials } = require("grpc");
 
 module.exports = class GrpcServerBuilder {
-  constructor() {
+  /**
+   * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
+   */
+  constructor(options) {
     this._interceptors = [];
-    this._server = new Server();
+    this._server = new Server(options);
   }
 
   /**
