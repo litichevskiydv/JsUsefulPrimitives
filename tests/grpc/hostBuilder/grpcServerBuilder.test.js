@@ -52,7 +52,7 @@ test("Must build simple server", async () => {
   expect(actualMessage).toBe("Hello, Tom!");
 });
 
-test("Must build server with interceptors", async () => {
+test("Must build server with stateless interceptors", async () => {
   // Given
   const server = createServer(x =>
     x
@@ -75,5 +75,26 @@ test("Must build server with interceptors", async () => {
   // Then
   expect(messageForTom).toBe("Hello again, Tom!");
   expect(messageForJane).toBe("Hello dear, Jane!");
+  expect(messageForAlex).toBe("Hello, Alex!");
+});
+
+class InterceptorForTom {
+  async invoke(call, methodDefinition, callback, next) {
+    if (call.request.name === "Tom") callback(null, { message: "Hello again, Tom!" });
+    else await next(call, callback);
+  }
+}
+
+test("Must build server with stateful interceptor", async () => {
+  // Given
+  const server = createServer(x => x.useInterceptor(InterceptorForTom));
+
+  // When
+  const messageForTom = await getMessage("Tom");
+  const messageForAlex = await getMessage("Alex");
+  server.forceShutdown();
+
+  // Then
+  expect(messageForTom).toBe("Hello again, Tom!");
   expect(messageForAlex).toBe("Hello, Alex!");
 });
