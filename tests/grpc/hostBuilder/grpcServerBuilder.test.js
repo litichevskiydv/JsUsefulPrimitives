@@ -1,13 +1,16 @@
 const path = require("path");
 const grpc = require("grpc");
 const protoLoader = require("@grpc/proto-loader");
-const GrpcServerBuilder = require("../../src/grpc/grpcServerBuilder");
-const { HelloRequest, HelloResponse } = require("../../src/grpc/generated/greeter_pb").v1;
+const GrpcServerBuilder = require("../../../src/grpc/hostBuilder/grpcServerBuilder");
+const { HelloRequest, HelloResponse } = require("../../../src/grpc/generated/greeter_pb").v1;
 
 const grpcBind = "0.0.0.0:3000";
 const packageObject = grpc.loadPackageDefinition(
-  protoLoader.loadSync(path.join(__dirname, "../../src/grpc/protos/greeter.proto"), {
-    includeDirs: [path.join(__dirname, "../../src/grpc/complier/include/"), path.join(__dirname, "../../node_modules/grpc-tools/bin/")]
+  protoLoader.loadSync(path.join(__dirname, "../../../src/grpc/protos/greeter.proto"), {
+    includeDirs: [
+      path.join(__dirname, "../../../src/grpc/complier/include/"),
+      path.join(__dirname, "../../../node_modules/grpc-tools/bin/")
+    ]
   })
 );
 
