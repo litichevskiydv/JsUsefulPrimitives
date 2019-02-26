@@ -1,10 +1,13 @@
 const log = (level, message, payload) =>
   console.log(
-    JSON.stringify({
-      level,
-      message,
-      payload
-    })
+    JSON.stringify(
+      {
+        level,
+        message,
+        payload
+      },
+      (key, value) => (value instanceof Error ? { message: value.message, stack: value.stack } : value)
+    )
   );
 
 const defaultLogger = {};

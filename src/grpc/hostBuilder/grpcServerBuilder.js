@@ -1,5 +1,6 @@
 const { Server, ServerCredentials } = require("grpc");
 const { createLogger } = require("./logging/defaultLoggersFactory");
+const ExceptionsHandlingInterceptor = require("./exceptionsHandling/interceptor");
 
 module.exports = class GrpcServerBuilder {
   /**
@@ -12,13 +13,15 @@ module.exports = class GrpcServerBuilder {
 
     this._serverContext = { createLogger };
     this._server = new Server(options);
+
+    this.addInterceptor(ExceptionsHandlingInterceptor);
   }
 
   /**
    * Changes default loggers factory/
    * @param {loggersFactory} createLogger Factory method for loggers creation.
    */
-  useLoggerFactory(createLogger) {
+  useLoggersFactory(createLogger) {
     this._serverContext.createLogger = createLogger;
   }
 
