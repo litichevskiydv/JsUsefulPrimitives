@@ -1,4 +1,5 @@
 const { Server, ServerCredentials } = require("grpc");
+const { createLogger } = require("./logging/defaultLoggersFactory");
 
 module.exports = class GrpcServerBuilder {
   /**
@@ -9,8 +10,16 @@ module.exports = class GrpcServerBuilder {
     this._interceptorsDefinitions = [];
     this._servicesDefinitions = [];
 
-    this._serverContext = {};
+    this._serverContext = { createLogger };
     this._server = new Server(options);
+  }
+
+  /**
+   * Changes default loggers factory/
+   * @param {loggersFactory} createLogger Factory method for loggers creation.
+   */
+  useLoggerFactory(createLogger) {
+    this._serverContext.createLogger = createLogger;
   }
 
   /**
@@ -115,4 +124,19 @@ module.exports = class GrpcServerBuilder {
  * @callback interceptorConstructor
  * @param {*} serverContext Context of the gRPC server.
  * @returns {Interceptor}
+ */
+
+/**
+ * @typedef {Object} Logger
+ * @property {function(string, any):void} fatal Method for logging events with level fatal.
+ * @property {function(string, any):void} error Method for logging events with level error.
+ * @property {function(string, any):void} warn Method for logging events with level warn.
+ * @property {function(string, any):void} info Method for logging events with level info.
+ * @property {function(string, any):void} debug Method for logging events with level debug.
+ */
+
+/**
+ * @callback loggersFactory
+ * @param {*} [options] Logger cration options.
+ * @returns {Logger}
  */
