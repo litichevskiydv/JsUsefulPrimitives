@@ -56,11 +56,11 @@ test("Must build server with stateless interceptors", async () => {
   // Given
   const server = createServer(x =>
     x
-      .useInterceptor(async (call, methodDefinition, callback, next) => {
+      .addInterceptor(async (call, methodDefinition, callback, next) => {
         if (call.request.name === "Tom") callback(null, { message: "Hello again, Tom!" });
         else await next(call, callback);
       })
-      .useInterceptor(async (call, methodDefinition, callback, next) => {
+      .addInterceptor(async (call, methodDefinition, callback, next) => {
         if (call.request.name === "Jane") callback(null, { message: "Hello dear, Jane!" });
         else await next(call, callback);
       })
@@ -87,7 +87,7 @@ class InterceptorForTom {
 
 test("Must build server with stateful interceptor", async () => {
   // Given
-  const server = createServer(x => x.useInterceptor(InterceptorForTom));
+  const server = createServer(x => x.addInterceptor(InterceptorForTom));
 
   // When
   const messageForTom = await getMessage("Tom");

@@ -17,9 +17,9 @@ module.exports = class GrpcServerBuilder {
    * Adds new interceptor to pipeline.
    * @param {interceptorFunction | interceptorConstructor} interceptor New interceptor.
    */
-  useInterceptor(interceptor) {
+  addInterceptor(interceptor) {
     if (interceptor.prototype && typeof interceptor.prototype.invoke === "function")
-      return this.useInterceptor(
+      return this.addInterceptor(
         async (call, methodDefinition, callback, next) =>
           await new interceptor(this._serverContext).invoke(call, methodDefinition, callback, next)
       );
