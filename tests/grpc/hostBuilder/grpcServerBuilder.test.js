@@ -98,3 +98,23 @@ test("Must build server with stateful interceptor", async () => {
   expect(messageForTom).toBe("Hello again, Tom!");
   expect(messageForAlex).toBe("Hello, Alex!");
 });
+
+test("Must catch and log error", async () => {
+  // Given
+  const mockLogger = { error: jest.fn() };
+  const mockLoggersFactory = () => mockLogger;
+
+  const server = createServer(x =>
+    x
+      .addInterceptor(() => {
+        throw new Error("Something went wrong");
+      })
+      .useLoggersFactory(mockLoggersFactory)
+  );
+
+  // When, Then
+  await expect(getMessage("Tom")).rejects.toEqual(new Error("13 INTERNAL: Something went wrong"));
+  expect(mockLogger.error.mock.calls.length).toBe(1);
+
+  server.forceShutdown();
+});

@@ -23,6 +23,7 @@ module.exports = class GrpcServerBuilder {
    */
   useLoggersFactory(createLogger) {
     this._serverContext.createLogger = createLogger;
+    return this;
   }
 
   /**
