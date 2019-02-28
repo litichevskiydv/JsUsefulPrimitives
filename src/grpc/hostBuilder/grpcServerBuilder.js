@@ -69,8 +69,9 @@ module.exports = class GrpcServerBuilder {
   _getMethodImplementation(serviceIndex, serviceImplementation, methodName, methodDefinition) {
     let methodImplementation = serviceImplementation[methodName];
     if (methodImplementation === undefined) methodImplementation = serviceImplementation[methodDefinition.originalName];
-    methodImplementation = methodImplementation.bind(serviceImplementation);
+    if (methodImplementation === undefined) throw new Error(`Method ${methodDefinition.path} is not implemented`);
 
+    methodImplementation = methodImplementation.bind(serviceImplementation);
     for (let i = this._interceptorsDefinitions.length - 1; i > -1; i--) {
       const interceptorDefinition = this._interceptorsDefinitions[i];
       if (interceptorDefinition.index > serviceIndex) continue;

@@ -118,3 +118,11 @@ test("Must catch and log error", async () => {
 
   server.forceShutdown();
 });
+
+test("Must throw error if server method was not implemented", () => {
+  // Given
+  const builder = new GrpcServerBuilder().addService(packageObject.v1.Greeter.service, {}).bind(grpcBind);
+
+  // When, Then
+  expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
+});
