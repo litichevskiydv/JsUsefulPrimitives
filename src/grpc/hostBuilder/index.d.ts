@@ -12,7 +12,7 @@ import {
   Server
 } from "grpc";
 
-export class GrpcServerBuilder {
+declare class GrpcServerBuilder {
   /**
    * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
    */
@@ -65,14 +65,16 @@ export class GrpcServerBuilder {
   build(): Server;
 }
 
+export = GrpcServerBuilder;
+
 type ServerContext = { createLogger: (options?: object) => Logging.ILogger };
 
 type ServiceCall = ServerUnaryCall<any> | ServerReadableStream<any> | ServerWriteableStream<any> | ServerDuplexStream<any, any>;
 type sendUnaryData = (error: ServiceError | null, value: any | null, trailer?: Metadata, flags?: number) => void;
 
 type handleServiceCall = handleUnaryCall | handleClientStreamingCall | handleServerStreamingCall | handleBidiStreamingCall;
-type handleUnaryCall = (call: ServerUnaryCall<any>, callback: sendUnaryData<any>) => Promise<void>;
-type handleClientStreamingCall = (call: ServerReadableStream<any>, callback: sendUnaryData<any>) => Promise<void>;
+type handleUnaryCall = (call: ServerUnaryCall<any>, callback: sendUnaryData) => Promise<void>;
+type handleClientStreamingCall = (call: ServerReadableStream<any>, callback: sendUnaryData) => Promise<void>;
 type handleServerStreamingCall = (call: ServerWriteableStream<any>) => Promise<void>;
 type handleBidiStreamingCall = (call: ServerDuplexStream<any, any>) => Promise<void>;
 
@@ -81,7 +83,7 @@ interface IInterceptor {
 }
 
 declare namespace Logging {
-  export interface ILogger {
+  interface ILogger {
     fatal(message: string, payload?: object): void;
     error(message: string, payload?: object): void;
     warn(message: string, payload?: object): void;
