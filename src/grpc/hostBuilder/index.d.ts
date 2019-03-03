@@ -29,10 +29,16 @@ declare class GrpcServerBuilder {
    * @param interceptor New interceptor.
    */
   addInterceptor(
+    /**
+     * @param call Server call.
+     * @param methodDefinition Metadata for method implementation.
+     * @param callback gRPC server callback.
+     * @param next Next layers executor.
+     */
     interceptor: (
       call: ServiceCall,
       methodDefinition: MethodDefinition<any, any>,
-      callback: sendUnaryData,
+      callback: sendUnaryData | null,
       next: handleServiceCall
     ) => Promise<void>
   ): GrpcServerBuilder;
@@ -79,7 +85,19 @@ type handleServerStreamingCall = (call: ServerWriteableStream<any>) => Promise<v
 type handleBidiStreamingCall = (call: ServerDuplexStream<any, any>) => Promise<void>;
 
 interface IInterceptor {
-  invoke(call: ServiceCall, methodDefinition: MethodDefinition<any, any>, callback: sendUnaryData, next: handleServiceCall): Promise<void>;
+  /**
+   * Interceptor implementation.
+   * @param call Server call.
+   * @param methodDefinition Metadata for method implementation.
+   * @param callback gRPC server callback.
+   * @param next Next layers executor.
+   */
+  invoke(
+    call: ServiceCall,
+    methodDefinition: MethodDefinition<any, any>,
+    callback: sendUnaryData | null,
+    next: handleServiceCall
+  ): Promise<void>;
 }
 
 declare namespace Logging {
