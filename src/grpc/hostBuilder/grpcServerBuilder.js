@@ -2,7 +2,7 @@ const { Server, ServerCredentials } = require("grpc");
 const { createLogger } = require("./logging/defaultLoggersFactory");
 const ExceptionsHandlingInterceptor = require("./exceptionsHandling/interceptor");
 
-module.exports = class GrpcServerBuilder {
+module.exports.GrpcServerBuilder = class GrpcServerBuilder {
   /**
    * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
    */
