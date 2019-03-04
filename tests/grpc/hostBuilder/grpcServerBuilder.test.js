@@ -1,5 +1,6 @@
 const path = require("path");
 const grpc = require("grpc");
+const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
 const GrpcServerBuilder = require("../../../src/grpc/hostBuilder/index");
 const { HelloRequest, HelloResponse } = require("../../../src/grpc/generated/greeter_pb").v1;
@@ -99,7 +100,7 @@ test("Must build server with stateful interceptor", async () => {
   expect(messageForAlex).toBe("Hello, Alex!");
 });
 
-test("Must catch and log error", async () => {
+test("Must catch and log common error", async () => {
   // Given
   const mockLogger = { error: jest.fn() };
   const mockLoggersFactory = () => mockLogger;
@@ -114,7 +115,27 @@ test("Must catch and log error", async () => {
 
   // When, Then
   await expect(getMessage("Tom")).rejects.toEqual(new Error("13 INTERNAL: Something went wrong"));
-  expect(mockLogger.error.mock.calls.length).toBe(1);
+  expect(mockLogger.error).toBeCalledTimes(1);
+
+  server.forceShutdown();
+});
+
+test("Must catch and not log GRPCError", async () => {
+  // Given
+  const mockLogger = { error: jest.fn() };
+  const mockLoggersFactory = () => mockLogger;
+
+  const server = createServer(x =>
+    x
+      .addInterceptor(() => {
+        throw new GRPCError("Wrong payload", grpc.status.INVALID_ARGUMENT, null);
+      })
+      .useLoggersFactory(mockLoggersFactory)
+  );
+
+  // When, Then
+  await expect(getMessage("Tom")).rejects.toEqual(new Error("3 INVALID_ARGUMENT: Wrong payload"));
+  expect(mockLogger.error).toBeCalledTimes(0);
 
   server.forceShutdown();
 });
