@@ -10,17 +10,18 @@ module.exports = class Interceptor {
     try {
       await next(call, callback);
     } catch (error) {
-      if (error instanceof GRPCError || error.constructor.toString() === GRPCError.toString()) callback(error);
-      else {
+      if (error instanceof GRPCError === false && error.constructor.toString() !== GRPCError.toString()) {
         this._logger.error("Unhandled exception has occurred in method {methodName}", { error, methodName: methodDefinition.path });
 
-        const stackTrace = error.stack.replace(/\r?\n|\r/g, " ");
-        callback(
-          /^[ -~]*$/.test(stackTrace)
-            ? new GRPCError(error, grpc.status.INTERNAL, { stackTrace })
-            : new GRPCError(error, grpc.status.INTERNAL)
-        );
-      }
+        if (callback) {
+          const stackTrace = error.stack.replace(/\r?\n|\r/g, " ");
+          callback(
+            /^[ -~]*$/.test(stackTrace)
+              ? new GRPCError(error, grpc.status.INTERNAL, { stackTrace })
+              : new GRPCError(error, grpc.status.INTERNAL)
+          );
+        }
+      } else if (callback) callback(error);
     }
   }
 };
