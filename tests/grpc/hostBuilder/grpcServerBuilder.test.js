@@ -140,6 +140,26 @@ test("Must catch and not log GRPCError", async () => {
   server.forceShutdown();
 });
 
+test("Must handle error with non ASCII message", async () => {
+  // Given
+  const mockLogger = { error: jest.fn() };
+  const mockLoggersFactory = () => mockLogger;
+
+  const server = createServer(x =>
+    x
+      .addInterceptor(() => {
+        throw new Error("Что-то пошло не так");
+      })
+      .useLoggersFactory(mockLoggersFactory)
+  );
+
+  // When, Then
+  await expect(getMessage("Tom")).rejects.toEqual(new Error("13 INTERNAL: Что-то пошло не так"));
+  expect(mockLogger.error).toBeCalledTimes(1);
+
+  server.forceShutdown();
+});
+
 test("Must throw error if server method was not implemented", () => {
   // Given
   const builder = new GrpcServerBuilder().addService(packageObject.v1.Greeter.service, {});
