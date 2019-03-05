@@ -22,9 +22,9 @@ const packageObject = grpc.loadPackageDefinition(
 const createServer = configurator => {
   return configurator(new GrpcServerBuilder())
     .addService(packageObject.v1.Greeter.service, {
-      sayHello: (call, callback) => {
+      sayHello: call => {
         const request = new HelloRequest(call.request);
-        callback(null, new HelloResponse({ message: `Hello, ${request.name}!` }));
+        return new HelloResponse({ message: `Hello, ${request.name}!` });
       }
     })
     .bind(grpcBind)

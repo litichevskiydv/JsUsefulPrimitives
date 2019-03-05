@@ -5,12 +5,12 @@ import {
   ServerReadableStream,
   ServerWriteableStream,
   ServerDuplexStream,
-  UntypedServiceImplementation,
   ServiceError,
   Metadata,
   ServerCredentials,
   Server
 } from "grpc";
+import { type } from "os";
 
 declare class GrpcServerBuilder {
   /**
@@ -38,8 +38,8 @@ declare class GrpcServerBuilder {
     interceptor: (
       call: ServiceCall,
       methodDefinition: MethodDefinition<any, any>,
-      callback: sendUnaryData | null,
-      next: handleServiceCall
+      callback: sendUnaryData<any> | null,
+      next: handleServiceCall<any, any>
     ) => Promise<void>
   ): GrpcServerBuilder;
   /**
@@ -76,13 +76,34 @@ export = GrpcServerBuilder;
 type ServerContext = { createLogger: (options?: object) => Logging.ILogger };
 
 type ServiceCall = ServerUnaryCall<any> | ServerReadableStream<any> | ServerWriteableStream<any> | ServerDuplexStream<any, any>;
-type sendUnaryData = (error: ServiceError | null, value: any | null, trailer?: Metadata, flags?: number) => void;
+type sendUnaryData<ResponseType> = (error: ServiceError | null, value: ResponseType | null, trailer?: Metadata, flags?: number) => void;
 
-type handleServiceCall = handleUnaryCall | handleClientStreamingCall | handleServerStreamingCall | handleBidiStreamingCall;
-type handleUnaryCall = (call: ServerUnaryCall<any>, callback: sendUnaryData) => Promise<void>;
-type handleClientStreamingCall = (call: ServerReadableStream<any>, callback: sendUnaryData) => Promise<void>;
-type handleServerStreamingCall = (call: ServerWriteableStream<any>) => Promise<void>;
-type handleBidiStreamingCall = (call: ServerDuplexStream<any, any>) => Promise<void>;
+type handleServiceCall<RequestType, ResponseType> =
+  | handleUnaryCall<RequestType, ResponseType>
+  | handleClientStreamingCall<RequestType, ResponseType>
+  | handleServerStreamingCall<RequestType, ResponseType>
+  | handleBidiStreamingCall<RequestType, ResponseType>;
+type handleUnaryCall<RequestType, ResponseType> = (
+  call: ServerUnaryCall<RequestType>,
+  callback: sendUnaryData<ResponseType>
+) => Promise<void>;
+type handleClientStreamingCall<RequestType, ResponseType> = (
+  call: ServerReadableStream<RequestType>,
+  callback: sendUnaryData<ResponseType>
+) => Promise<void>;
+type handleServerStreamingCall<RequestType, ResponseType> = (call: ServerWriteableStream<RequestType>) => Promise<void>;
+type handleBidiStreamingCall<RequestType, ResponseType> = (call: ServerDuplexStream<RequestType, ResponseType>) => Promise<void>;
+
+type UntypedServiceImplementation = { [name: string]: serviceMethodImplementation<any, any> };
+type serviceMethodImplementation<RequestType, ResponseType> =
+  | serviceUnaryMethodImplementation<RequestType, ResponseType>
+  | serviceClientStreamingMethodImplementation<RequestType, ResponseType>
+  | handleServerStreamingCall<RequestType, ResponseType>
+  | handleBidiStreamingCall<RequestType, ResponseType>;
+type serviceUnaryMethodImplementation<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>;
+type serviceClientStreamingMethodImplementation<RequestType, ResponseType> = (
+  call: ServerReadableStream<RequestType>
+) => Promise<ResponseType>;
 
 interface IInterceptor {
   /**
@@ -95,8 +116,8 @@ interface IInterceptor {
   invoke(
     call: ServiceCall,
     methodDefinition: MethodDefinition<any, any>,
-    callback: sendUnaryData | null,
-    next: handleServiceCall
+    callback: sendUnaryData<any> | null,
+    next: handleServiceCall<any, any>
   ): Promise<void>;
 }
 

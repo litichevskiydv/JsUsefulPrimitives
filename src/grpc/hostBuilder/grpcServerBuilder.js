@@ -70,17 +70,23 @@ module.exports = class GrpcServerBuilder {
     let methodImplementation = serviceImplementation[methodName];
     if (methodImplementation === undefined) methodImplementation = serviceImplementation[methodDefinition.originalName];
     if (methodImplementation === undefined) throw new Error(`Method ${methodDefinition.path} is not implemented`);
-
     methodImplementation = methodImplementation.bind(serviceImplementation);
+
+    const methodType = GrpcServerBuilder._getMethodType(methodDefinition);
+    let serviceCallHandler =
+      methodType === "unary" || methodType === "client_stream"
+        ? async (call, callback) => callback(null, await methodImplementation(call))
+        : methodImplementation;
+
     for (let i = this._interceptorsDefinitions.length - 1; i > -1; i--) {
       const interceptorDefinition = this._interceptorsDefinitions[i];
       if (interceptorDefinition.index > serviceIndex) continue;
 
-      const next = methodImplementation;
-      methodImplementation = async (call, callback) => await interceptorDefinition.interceptor(call, methodDefinition, callback, next);
+      const next = serviceCallHandler;
+      serviceCallHandler = async (call, callback) => await interceptorDefinition.interceptor(call, methodDefinition, callback, next);
     }
 
-    return methodImplementation;
+    return serviceCallHandler;
   }
 
   _addServices() {
