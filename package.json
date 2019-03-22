@@ -5,9 +5,9 @@
   "scripts": {
     "build:server:protos": "mkdirp ./src/grpc/generated/server && pbjs -r greeter -t static-module -w commonjs --no-verify -o ./src/grpc/generated/server/greeter_pb.js ./src/grpc/protos/greeter.proto",
     "build:server:types": "mkdirp ./src/grpc/generated/server && pbts -o ./src/grpc/generated/server/greeter_pb.d.ts ./src/grpc/generated/server/greeter_pb.js",
-    "build:server:swagger": "mkdirp ./src/grpc/generated/server && node ./src/grpc/complier/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated/server -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
+    "build:server:swagger": "mkdirp ./src/grpc/generated/server && node ./src/grpc/complier/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated/server -I ./src/grpc/protos/ greeter.proto",
     "build:server": "npm run build:server:protos && npm run build:server:types && npm run build:server:swagger",
-    "build:client:protos": "mkdirp ./src/grpc/generated/client && node ./src/grpc/complier/bin/protoc-gen-grpc.js --js_out=import_style=commonjs,binary:./src/grpc/generated/client --grpc_out=./src/grpc/generated/client -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
+    "build:client:protos": "mkdirp ./src/grpc/generated/client && node ./src/grpc/complier/bin/protoc-gen-grpc.js --js_out=import_style=commonjs,binary:./src/grpc/generated/client --grpc_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto google/api/annotations.proto google/api/http.proto",
     "build:client:types": "mkdirp ./src/grpc/generated/client && node ./src/grpc/complier/bin/protoc-gen-ts.js --ts_out=./src/grpc/generated/client -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
     "build:client": "npm run build:client:protos && npm run build:client:types",
     "build": "npm run build:server && npm run build:client",
