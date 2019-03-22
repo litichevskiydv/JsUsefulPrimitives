@@ -1,6 +1,7 @@
 syntax = "proto3";
 package v1;
 
+import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 
 // The greeting service definition.
@@ -17,6 +18,7 @@ service Greeter {
 // The request message containing the user's name.
 message HelloRequest {
   string name = 1;
+  google.protobuf.Timestamp moment = 2;
 }
 
 // The response message containing the greetings
