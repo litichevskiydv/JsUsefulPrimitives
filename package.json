@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "description": "Primitives for comfort coding with Node.js",
   "scripts": {
-    "build:protos": "mkdirp ./src/grpc/generated && pbjs -r greeter -t static-module -w commonjs --no-verify -o ./src/grpc/generated/greeter_pb.js ./src/grpc/protos/greeter.proto",
-    "build:types": "mkdirp ./src/grpc/generated && pbts -o ./src/grpc/generated/greeter_pb.d.ts ./src/grpc/generated/greeter_pb.js",
-    "build:swagger": "mkdirp ./src/grpc/generated && node ./src/grpc/complier/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
+    "build:server:protos": "mkdirp ./src/grpc/generated/server && pbjs -r greeter -t static-module -w commonjs --no-verify -o ./src/grpc/generated/server/greeter_pb.js ./src/grpc/protos/greeter.proto",
+    "build:server:types": "mkdirp ./src/grpc/generated/server && pbts -o ./src/grpc/generated/server/greeter_pb.d.ts ./src/grpc/generated/server/greeter_pb.js",
+    "build:server:swagger": "mkdirp ./src/grpc/generated/server && node ./src/grpc/complier/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated/server -I ./src/grpc/protos/ ./src/grpc/protos/greeter.proto",
+    "build:server": "npm run build:server:protos && npm run build:server:types && npm run build:server:swagger",
     "build:watch": "nodemon --ext *.proto --watch ./src/grpc/protos --exec npm run build",
-    "build": "npm run build:protos && npm run build:types && npm run build:swagger",
+    "build": "npm run build:server",
     "test:watch": "jest --verbose --watch",
     "test": "jest --verbose"
   },
