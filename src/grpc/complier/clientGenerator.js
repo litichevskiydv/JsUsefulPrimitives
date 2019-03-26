@@ -2,6 +2,25 @@ const bl = require("bl");
 const path = require("path");
 const { CodeGeneratorRequest, CodeGeneratorResponse } = require("google-protobuf/google/protobuf/compiler/plugin_pb");
 
+/**
+ * Adds new file to code generation response
+ * @param {CodeGeneratorResponse} response Code generation response
+ * @param {string} originalFileName Name of the original file
+ * @param {string} fileExtension Extension of the new file
+ * @param {string} content New file content
+ */
+const addFileToResponse = (response, originalFileName, fileExtension, content) => {
+  const file = new CodeGeneratorResponse.File();
+  file.setName(
+    path.join(
+      path.dirname(originalFileName),
+      `${path.basename(originalFileName, path.extname(originalFileName))}_pb_client.${fileExtension}`
+    )
+  );
+  file.setContent(content);
+  response.addFile(file);
+};
+
 (async () => {
   const request = CodeGeneratorRequest.deserializeBinary(
     new Uint8Array(
@@ -22,16 +41,9 @@ const { CodeGeneratorRequest, CodeGeneratorResponse } = require("google-protobuf
     const fileName = fileDescriptor.getName();
     if (filesToGenerate.has(fileName) === false || fileDescriptor.getServiceList().length === 0) return;
 
-    const clientFile = new CodeGeneratorResponse.File();
-    clientFile.setName(path.join(path.dirname(fileName), `${path.basename(fileName, path.extname(fileName))}_pb_client.js`));
-    clientFile.setContent("test");
-    response.addFile(clientFile);
-
-    const clientTypesFile = new CodeGeneratorResponse.File();
-    clientTypesFile.setName(path.join(path.dirname(fileName), `${path.basename(fileName, path.extname(fileName))}_pb_client.d.ts`));
-    clientTypesFile.setContent("test");
-    response.addFile(clientTypesFile);
+    addFileToResponse(response, fileName, "js", "test");
+    addFileToResponse(response, fileName, "d.ts", "test");
   });
 
-  process.stdout.write(new Buffer(response.serializeBinary()));
+  process.stdout.write(Buffer.from(response.serializeBinary()));
 })();
