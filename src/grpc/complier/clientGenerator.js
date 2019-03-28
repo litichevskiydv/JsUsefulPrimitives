@@ -39,8 +39,8 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
       } else if (method.hasServerStreaming === true) {
       } else
         builder
-          .appendLineIdented(`${camelCase(method.getName())}(message) {`, 1)
-          .appendLineIdented(`return this._client.${camelCase(method.getName())}().sendMessage(message);`, 2)
+          .appendLineIdented(`async ${camelCase(method.getName())}(message) {`, 1)
+          .appendLineIdented(`return await this._client.${camelCase(method.getName())}().sendMessage(message);`, 2)
           .appendLineIdented("}", 1);
     });
 
