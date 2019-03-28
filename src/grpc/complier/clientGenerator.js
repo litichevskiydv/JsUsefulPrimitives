@@ -16,10 +16,7 @@ const importPathToRequirePath = (importPath, suffix) =>
 const generateJs = (messagesCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder
-    .appendLine('const grpc = require("grpc");')
-    .appendLine('const grpcPromise = require("grpc-promise");')
-    .appendLine();
+  builder.appendLine('const grpcPromise = require("grpc-promise");').appendLine();
 
   const requirePath = importPathToRequirePath(fileDescriptor.getName(), "grpc_pb");
   const clientsList = fileDescriptor.getServiceList().map(x => `${x.getName()}Client: ${x.getName()}ClientRaw`);
