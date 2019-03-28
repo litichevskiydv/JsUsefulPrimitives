@@ -34,8 +34,14 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
       .appendLineIdented("}", 1);
 
     service.getMethodList().forEach(method => {
-      if (method.getClientStreaming() === true && method.getServerStreaming() === true) {
-      } else if (method.getClientStreaming() === true)
+      if (method.getClientStreaming() === true && method.getServerStreaming() === true)
+        builder
+          .appendLineIdented(`async *${camelCase(method.getName())}(messages) {`, 1)
+          .appendLineIdented(`const channel = this._client.${camelCase(method.getName())}();`, 2)
+          .appendLineIdented("for (const message of messages) yield await channel.sendMessage(message);", 2)
+          .appendLineIdented("channel.end();", 2)
+          .appendLineIdented("}", 1);
+      else if (method.getClientStreaming() === true)
         builder
           .appendLineIdented(`async ${camelCase(method.getName())}(messages) {`, 1)
           .appendLineIdented(`const channel = this._client.${camelCase(method.getName())}();`, 2)
