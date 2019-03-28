@@ -42,8 +42,12 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
           .appendLineIdented("for (const message of messages) channel.sendMessage(message);", 2)
           .appendLineIdented("return await channel.end();", 2)
           .appendLineIdented("}", 1);
-      else if (method.getServerStreaming() === true) {
-      } else
+      else if (method.getServerStreaming() === true)
+        builder
+          .appendLineIdented(`async ${camelCase(method.getName())}(message) {`, 1)
+          .appendLineIdented(`return await this._client.${camelCase(method.getName())}().sendMessage(message);`, 2)
+          .appendLineIdented("}", 1);
+      else
         builder
           .appendLineIdented(`async ${camelCase(method.getName())}(message) {`, 1)
           .appendLineIdented(`return await this._client.${camelCase(method.getName())}().sendMessage(message);`, 2)
