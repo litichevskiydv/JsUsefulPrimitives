@@ -5,7 +5,6 @@
 const path = require("path");
 const { execFile } = require("child_process");
 const find = require("find");
-const slash = require("slash");
 const findNodeModules = require("find-node-modules");
 
 const exeExt = process.platform === "win32" ? ".exe" : "";
