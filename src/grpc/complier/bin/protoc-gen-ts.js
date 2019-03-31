@@ -3,25 +3,28 @@
 "use strict";
 
 const path = require("path");
-const { execFile } = require("child_process");
 const find = require("find");
 const slash = require("slash");
-const findNodeModules = require("find-node-modules");
+const pathKey = require("path-key");
+const { execFile } = require("child_process");
+
+const env = { ...process.env };
+const pathKeyName = pathKey({ env });
+env[pathKeyName] = process.mainModule.paths
+  .map(x => path.join(x, "grpc-tools", "bin"))
+  .concat(process.mainModule.paths.map(x => path.join(x, ".bin")))
+  .concat(env[pathKeyName])
+  .join(path.delimiter);
 
 const exeExt = process.platform === "win32" ? ".exe" : "";
 const scriptExt = process.platform === "win32" ? ".cmd" : "";
-const modulesDirectory = findNodeModules({ relative: false })[0];
-
-const protocPath = find.fileSync(new RegExp(`protoc${exeExt}$`), path.join(modulesDirectory, "grpc-tools"))[0];
-const pluginPath = find.fileSync(new RegExp(`protoc-gen-ts${scriptExt}$`), path.join(modulesDirectory, ".bin"))[0];
 
 const includePath = path.resolve(__dirname, "..", "include");
-const includedProtos = find.fileSync(/\.proto$/, includePath).map(x => slash(path.relative(includePath, path.normalize(x))));
-const args = ["--plugin=protoc-gen-ts=" + pluginPath, "-I", includePath].concat(process.argv.slice(2)).concat(includedProtos);
-const child_process = execFile(protocPath, args, function(error, stdout, stderr) {
-  if (error) {
-    throw error;
-  }
+const args = ["-I", includePath]
+  .concat(process.argv.slice(2).map(x => (x.startsWith("--ts_out") ? x.replace("--ts_out", `--ts${scriptExt}_out`) : x)))
+  .concat(find.fileSync(/\.proto$/, includePath).map(x => slash(path.relative(includePath, path.normalize(x)))));
+const child_process = execFile(`protoc${exeExt}`, args, { env }, error => {
+  if (error) throw error;
 });
 
 child_process.stdout.pipe(process.stdout);
