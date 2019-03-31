@@ -10,5 +10,6 @@ branches:
     - /^release\/.*$/
     - develop
 script:
+  - npm link
   - npm run build
   - npm test

@@ -4,7 +4,7 @@ const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
 const GrpcServerBuilder = require("../../../src/grpc/hostBuilder/index");
 const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
-const { GreeterClient } = require("../../../src/grpc/generated/client/greeter_grpc_pb");
+const { GreeterClient } = require("../../../src/grpc/generated/client/greeter_pb_client");
 const { HelloRequest: ClientRequest, HelloResponse: ClientResponse } = require("../../../src/grpc/generated/client/greeter_pb");
 
 const grpcBind = "0.0.0.0:3000";
@@ -36,15 +36,10 @@ const createServer = configurator => {
 const getMessage = async name => {
   const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
 
-  return await new Promise((resolve, reject) => {
-    const request = new ClientRequest();
-    request.setName(name);
+  const request = new ClientRequest();
+  request.setName(name);
 
-    client.sayHello(request, (error, response) => {
-      if (error) reject(error);
-      else resolve(response.getMessage());
-    });
-  });
+  return (await client.sayHello(request)).getMessage();
 };
 
 test("Must build simple server", async () => {
