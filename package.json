@@ -5,11 +5,11 @@
   "scripts": {
     "build:server:protos": "mkdirp ./src/grpc/generated/server && pbjs -r greeter -t static-module -w commonjs --no-verify -o ./src/grpc/generated/server/greeter_pb.js ./src/grpc/protos/greeter.proto",
     "build:server:types": "mkdirp ./src/grpc/generated/server && pbts -o ./src/grpc/generated/server/greeter_pb.d.ts ./src/grpc/generated/server/greeter_pb.js",
-    "build:server:swagger": "mkdirp ./src/grpc/generated/server && node ./src/grpc/complier/bin/protoc-gen-swagger.js --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated/server -I ./src/grpc/protos/ greeter.proto",
+    "build:server:swagger": "mkdirp ./src/grpc/generated/server && grpc-gen-swagger --swagger_opt=json_names_for_fields=true --swagger_out=logtostderr=true:./src/grpc/generated/server -I ./src/grpc/protos/ greeter.proto",
     "build:server": "npm run build:server:protos && npm run build:server:types && npm run build:server:swagger",
-    "build:client:protos": "mkdirp ./src/grpc/generated/client && node ./src/grpc/complier/bin/protoc-gen-grpc.js --js_out=import_style=commonjs,binary:./src/grpc/generated/client --grpc_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
-    "build:client:types": "mkdirp ./src/grpc/generated/client && node ./src/grpc/complier/bin/protoc-gen-ts.js --ts_out=service=true:./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
-    "build:client": "npm run build:client:protos && npm run build:client:types && gen-grpc-client --client_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
+    "build:client:protos": "mkdirp ./src/grpc/generated/client && grpc-gen-js --js_out=import_style=commonjs,binary:./src/grpc/generated/client --grpc_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
+    "build:client:types": "mkdirp ./src/grpc/generated/client && grpc-gen-ts --ts_out=service=true:./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
+    "build:client": "npm run build:client:protos && npm run build:client:types && grpc-gen-client --client_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
     "build": "npm run build:server && npm run build:client",
     "build:watch": "nodemon --ext *.proto --watch ./src/grpc/protos --exec npm run build",
     "test": "jest --verbose",
@@ -27,7 +27,10 @@
   "homepage": "https://github.com/litichevskiydv/JsUsefulPrimitives#readme",
   "bin": {
     "protoc-gen-client": "./src/grpc/complier/bin/protoc-gen-client.js",
-    "gen-grpc-client": "./src/grpc/complier/bin/gen-grpc-client.js"
+    "grpc-gen-swagger": "./src/grpc/complier/bin/grpc-gen-swagger.js",
+    "grpc-gen-js": "./src/grpc/complier/bin/grpc-gen-js.js",
+    "grpc-gen-ts": "./src/grpc/complier/bin/grpc-gen-ts.js",
+    "grpc-gen-client": "./src/grpc/complier/bin/grpc-gen-client.js"
   },
   "dependencies": {
     "@grpc/proto-loader": "0.4.0",
