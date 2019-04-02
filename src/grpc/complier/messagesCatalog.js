@@ -1,7 +1,10 @@
 const { FileDescriptorProto, DescriptorProto } = require("google-protobuf/google/protobuf/descriptor_pb");
 
-module.exports = class FilesCatalog {
+module.exports = class MessagesCatalog {
   constructor() {
+    /**  @type {Array<FileDescriptorProto>} */
+    this.importedFiles = [];
+    /**  @type {{ [fullName: string]: MessageInfo }} */
     this._messagesByFullNames = {};
   }
 
@@ -26,6 +29,7 @@ module.exports = class FilesCatalog {
    * @param {FileDescriptorProto} fileDescriptor Descriptor for proto file
    */
   processFileDescriptor(fileDescriptor) {
+    this.importedFiles.push(fileDescriptor);
     fileDescriptor.getMessageTypeList().forEach(x => this._addMessage(fileDescriptor, fileDescriptor.getPackage(), x));
   }
 
