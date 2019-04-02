@@ -36,6 +36,7 @@
     "@grpc/proto-loader": "0.4.0",
     "bl": "3.0.0",
     "camelcase": "5.2.0",
+    "dot-prop": "4.2.0",
     "find": "0.2.9",
     "google-protobuf": "3.7.1",
     "grpc": "1.18.0",

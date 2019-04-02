@@ -5,7 +5,7 @@ const protoLoader = require("@grpc/proto-loader");
 const GrpcServerBuilder = require("../../../src/grpc/hostBuilder/index");
 const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const { GreeterClient } = require("../../../src/grpc/generated/client/greeter_pb_client");
-const { HelloRequest: ClientRequest, HelloResponse: ClientResponse } = require("../../../src/grpc/generated/client/greeter_pb");
+const { HelloRequest: ClientRequest, HelloResponse: ClientResponse } = require("../../../src/grpc/generated/client/greeter_pb_client").v1;
 
 const grpcBind = "0.0.0.0:3000";
 const packageObject = grpc.loadPackageDefinition(

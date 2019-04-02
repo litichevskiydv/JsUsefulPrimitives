@@ -50,7 +50,20 @@ const getRequirePath = importPath => predefinedPaths.get(slash(importPath)) || i
 const generateJs = (messagesCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder.appendLine('const grpcPromise = require("grpc-promise");').appendLine();
+  builder
+    .appendLine('const { set } = require("dot-prop");')
+    .appendLine('const grpcPromise = require("grpc-promise");')
+    .appendLine();
+
+  builder.appendLine("let root = {};");
+  messagesCatalog.importedFiles.forEach(fileDescriptor => {
+    const fileName = fileDescriptor.getName();
+    const packageName = fileDescriptor.getPackage();
+
+    if (packageName.length > 0) builder.appendLine(`set(root, "${packageName}", require("${getRequirePath(fileName)}"));`);
+    else builder.appendLine(`root = Object.assign(root, require("${getRequirePath(fileName)}"));`);
+  });
+  builder.appendLine("module.exports = root;").appendLine();
 
   const requirePath = importPathToRequirePath(fileDescriptor.getName(), "grpc_pb");
   const clientsList = fileDescriptor.getServiceList().map(x => `${x.getName()}Client: ${x.getName()}ClientRaw`);
