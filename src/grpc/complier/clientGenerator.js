@@ -55,7 +55,7 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
     .appendLine('const grpcPromise = require("grpc-promise");')
     .appendLine();
 
-  builder.appendLine("let root = {};");
+  builder.appendLine("let root = {};").appendLine();
   messagesCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
     const packageName = fileDescriptor.getPackage();
@@ -63,7 +63,7 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
     if (packageName.length > 0) builder.appendLine(`set(root, "${packageName}", require("${getRequirePath(fileName)}"));`);
     else builder.appendLine(`root = Object.assign(root, require("${getRequirePath(fileName)}"));`);
   });
-  builder.appendLine("module.exports = root;").appendLine();
+  builder.appendLine();
 
   const requirePath = importPathToRequirePath(fileDescriptor.getName(), "grpc_pb");
   const clientsList = fileDescriptor.getServiceList().map(x => `${x.getName()}Client: ${x.getName()}ClientRaw`);
@@ -71,7 +71,7 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
 
   fileDescriptor.getServiceList().forEach(service => {
     builder
-      .appendLine(`module.exports.${service.getName()}Client = class ${service.getName()}Client {`)
+      .appendLine(`const ${service.getName()}Client = class ${service.getName()}Client {`)
       .appendLineIdented("constructor(address, credentials) {", 1)
       .appendLineIdented(`this._client = new ${service.getName()}ClientRaw(address, credentials);`, 2)
       .appendLineIdented("grpcPromise.promisifyAll(this._client);", 2)
@@ -105,10 +105,15 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
           .appendLineIdented("}", 1);
     });
 
-    builder.appendLine("};");
+    const packageName = fileDescriptor.getPackage();
+    const path = packageName.length > 0 ? `${packageName}.${service.getName()}Client` : `${service.getName()}Client`;
+    builder
+      .appendLine("};")
+      .appendLine(`set(root, "${path}", ${service.getName()}Client);`)
+      .appendLine();
   });
 
-  return builder.toString();
+  return builder.appendLine("module.exports = root;").toString();
 };
 
 /**
