@@ -43,6 +43,14 @@ const predefinedPaths = new Map([
 const getRequirePath = importPath => predefinedPaths.get(slash(importPath)) || importPathToRequirePath(importPath);
 
 /**
+ *
+ * @param {string} packageName
+ * @param {string} clientName
+ * @returns {string}
+ */
+const getClientFullName = (packageName, clientName) => (packageName.length > 0 ? `${packageName}.${clientName}` : clientName);
+
+/**
  * Generates JavaScript code for client
  * @param {MessagesCatalog} messagesCatalog Messages catalog
  * @param {FileDescriptorProto} fileDescriptor Descriptor for proto file
@@ -70,10 +78,11 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
   builder.appendLine(`const { ${clientsList.join(", ")} } = require("${requirePath}");`).appendLine();
 
   fileDescriptor.getServiceList().forEach(service => {
+    const clientName = `${service.getName()}Client`;
     builder
-      .appendLine(`const ${service.getName()}Client = class ${service.getName()}Client {`)
+      .appendLine(`class ${clientName} {`)
       .appendLineIdented("constructor(address, credentials) {", 1)
-      .appendLineIdented(`this._client = new ${service.getName()}ClientRaw(address, credentials);`, 2)
+      .appendLineIdented(`this._client = new ${clientName}Raw(address, credentials);`, 2)
       .appendLineIdented("grpcPromise.promisifyAll(this._client);", 2)
       .appendLineIdented("}", 1);
 
@@ -105,11 +114,9 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
           .appendLineIdented("}", 1);
     });
 
-    const packageName = fileDescriptor.getPackage();
-    const path = packageName.length > 0 ? `${packageName}.${service.getName()}Client` : `${service.getName()}Client`;
     builder
       .appendLine("};")
-      .appendLine(`set(root, "${path}", ${service.getName()}Client);`)
+      .appendLine(`set(root, "${getClientFullName(fileDescriptor.getPackage(), clientName)}", ${clientName});`)
       .appendLine();
   });
 
