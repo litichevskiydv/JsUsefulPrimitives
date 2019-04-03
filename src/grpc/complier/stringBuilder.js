@@ -1,8 +1,13 @@
 module.exports = class StringBuilder {
+  /**
+   * Creates new StrinBuilder
+   * @param {number} defaultIdent Base ident for each line
+   */
   constructor(defaultIdent) {
-    this._defaultIdent = defaultIdent || 0;
-    this._newLineSeparator = process.platform == "win32" ? "\r\n" : "\n";
     this._parts = [];
+    this._newLineSeparator = process.platform == "win32" ? "\r\n" : "\n";
+
+    this.defaultIdent = defaultIdent || 0;
   }
 
   append(value) {
@@ -15,7 +20,7 @@ module.exports = class StringBuilder {
   }
 
   _generateIdent(ident) {
-    return "  ".repeat(this._defaultIdent + (ident || 0));
+    return "  ".repeat(this.defaultIdent + (ident || 0));
   }
 
   appendIdented(value, ident) {
