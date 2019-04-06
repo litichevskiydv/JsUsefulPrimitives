@@ -7,6 +7,7 @@ const { FileDescriptorProto, ServiceDescriptorProto } = require("google-protobuf
 const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
 const requiresGenerator = require("./subGenerators/requiresGenerator");
+const messagesTypingsGenerator = require("./subGenerators/messagesTypingsGenerator");
 const proxyGenerator = require("./subGenerators/proxyGenerator");
 const proxyTypingsGenerator = require("./subGenerators/proxyTypingsGenerator");
 
@@ -59,23 +60,6 @@ const generateJs = (importsCatalog, fileDescriptor) => {
 
 /**
  * @param {StringBuilder} builder
- * @param {FileDescriptorProto} fileDescriptor
- */
-const generateTypingsForMessages = (builder, fileDescriptor) => {
-  const namespaceName = requiresGenerator.getNamespace(fileDescriptor.getName());
-
-  fileDescriptor.getMessageTypeList().forEach(messageDescriptor => {
-    const messageName = messageDescriptor.getName();
-    builder.appendLineIdented(`export import ${messageName} = ${namespaceName}.${messageName};`);
-  });
-  fileDescriptor.getEnumTypeList().forEach(enumDescriptor => {
-    const enumName = enumDescriptor.getName();
-    builder.appendLineIdented(`export import ${enumName} = ${namespaceName}.${enumName};`);
-  });
-};
-
-/**
- * @param {StringBuilder} builder
  * @param {*} container
  * @returns {StringBuilder}
  */
@@ -109,7 +93,7 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
     const namespaceName = packageName.length > 0 ? `${packageName}.${fileBaseName}` : fileBaseName;
 
     builder.appendLine(`import * as ${requiresGenerator.getNamespace(fileName)} from "${requiresGenerator.getRequirePath(fileName)}";`);
-    set(root, namespaceName, builder => generateTypingsForMessages(builder, fileDescriptor));
+    set(root, namespaceName, builder => messagesTypingsGenerator.generate(builder, fileDescriptor));
   });
   fileDescriptor.getServiceList().forEach(serviceDescriptor => {
     const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
