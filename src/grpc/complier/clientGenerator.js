@@ -2,7 +2,7 @@ const path = require("path");
 const slash = require("slash");
 const { set } = require("dot-prop");
 const camelCase = require("camelcase");
-const { FileDescriptorProto, ServiceDescriptorProto } = require("google-protobuf/google/protobuf/descriptor_pb");
+const { FileDescriptorProto, DescriptorProto, FieldDescriptorProto } = require("google-protobuf/google/protobuf/descriptor_pb");
 
 const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
@@ -10,6 +10,46 @@ const requiresGenerator = require("./subGenerators/requiresGenerator");
 const messagesTypingsGenerator = require("./subGenerators/messagesTypingsGenerator");
 const proxyGenerator = require("./subGenerators/proxyGenerator");
 const proxyTypingsGenerator = require("./subGenerators/proxyTypingsGenerator");
+
+/**
+ * @param {ImportsCatalog} importsCatalog
+ * @param {{fileName: string, descriptor: DescriptorProto, fullName: string}} message
+ * @param {Set<string>} usedImports
+ */
+const scanMesage = (importsCatalog, message, usedImports) => {
+  usedImports.add(message.fileName);
+  const messageDescriptor = message.descriptor;
+
+  for (const field of messageDescriptor.getFieldList().concat(messageDescriptor.getExtensionList())) {
+    const type = field.getType();
+    const typeName = field.getTypeName();
+
+    if (type === FieldDescriptorProto.Type.TYPE_MESSAGE) scanMesage(importsCatalog, importsCatalog.getMessage(typeName), usedImports);
+    else if (type === FieldDescriptorProto.Type.TYPE_ENUM) usedImports.add(importsCatalog.getEnum(typeName).fileName);
+  }
+
+  messageDescriptor.getNestedTypeList().forEach(nestedMessage => {
+    scanMesage(importsCatalog, importsCatalog.getMessage(`${message.fullName}.${nestedMessage.getName()}`), usedImports);
+  });
+};
+
+/**
+ * @param {ImportsCatalog} importsCatalog
+ * @param {FileDescriptorProto} fileDescriptor
+ * @returns {Set<string>}
+ */
+const getUsedImports = (importsCatalog, fileDescriptor) => {
+  const usedImports = new Set();
+
+  fileDescriptor.getServiceList().forEach(service =>
+    service.getMethodList().forEach(method => {
+      scanMesage(importsCatalog, importsCatalog.getMessage(method.getInputType()), usedImports);
+      scanMesage(importsCatalog, importsCatalog.getMessage(method.getOutputType()), usedImports);
+    })
+  );
+
+  return usedImports;
+};
 
 /**
  *
@@ -33,10 +73,13 @@ const generateJs = (importsCatalog, fileDescriptor) => {
     .appendLine();
 
   builder.appendLine("let root = {};").appendLine();
+  const usedImports = getUsedImports(importsCatalog, fileDescriptor);
+
   importsCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
-    const packageName = fileDescriptor.getPackage();
+    if (usedImports.has(fileName) === false) return;
 
+    const packageName = fileDescriptor.getPackage();
     if (packageName.length > 0)
       builder.appendLine(`set(root, "${packageName}", require("${requiresGenerator.getRequirePath(fileName)}"));`);
     else builder.appendLine(`root = Object.assign(root, require("${requiresGenerator.getRequirePath(fileName)}"));`);
@@ -86,8 +129,12 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
   builder.appendLineIdented('import { ServerCredentials } from "grpc";').appendLine();
 
   const root = {};
+  const usedImports = getUsedImports(importsCatalog, fileDescriptor);
+
   importsCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
+    if (usedImports.has(fileName) === false) return;
+
     const packageName = fileDescriptor.getPackage();
     const fileBaseName = path.basename(fileName, path.extname(fileName));
     const namespaceName = packageName.length > 0 ? `${packageName}.${fileBaseName}` : fileBaseName;

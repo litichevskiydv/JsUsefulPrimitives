@@ -35,11 +35,13 @@ module.exports = class ImportsCatalog {
    */
   _addMessage(fileDescriptor, namespace, messageDescriptor) {
     const fullName = `${namespace}.${messageDescriptor.getName()}`;
+    const typeFullName = this._prepareTypeFullName(fullName);
 
-    this._messagesByFullNames[this._prepareTypeFullName(fullName)] = {
+    this._messagesByFullNames[typeFullName] = {
       fileName: fileDescriptor.getName(),
-      name: this._prepareTypeName(fileDescriptor.getPackage(), fullName),
-      descriptor: messageDescriptor
+      descriptor: messageDescriptor,
+      fullName: typeFullName,
+      name: this._prepareTypeName(fileDescriptor.getPackage(), fullName)
     };
 
     this._addEnums(fileDescriptor, fullName, messageDescriptor.getEnumTypeList());
@@ -55,11 +57,13 @@ module.exports = class ImportsCatalog {
   _addEnums(fileDescriptor, namespace, enumsDescriptors) {
     enumsDescriptors.forEach(enumDescriptor => {
       const fullName = `${namespace}.${enumDescriptor.getName()}`;
+      const typeFullName = this._prepareTypeFullName(fullName);
 
-      this._enumsByFullNames[this._prepareTypeFullName(fullName)] = {
+      this._enumsByFullNames[typeFullName] = {
         fileName: fileDescriptor.getName(),
-        name: this._prepareTypeName(fileDescriptor.getPackage(), fullName),
-        descriptor: enumDescriptor
+        descriptor: enumDescriptor,
+        fullName: typeFullName,
+        name: this._prepareTypeName(fileDescriptor.getPackage(), fullName)
       };
     });
   }
@@ -82,18 +86,29 @@ module.exports = class ImportsCatalog {
   getMessage(fullName) {
     return this._messagesByFullNames[fullName];
   }
+
+  /**
+   * Gets enum information by full name
+   * @param {string} fullName
+   * @returns {EnumInfo}
+   */
+  getEnum(fullName) {
+    return this._enumsByFullNames[fullName];
+  }
 };
 
 /**
  * @typedef {Object} MessageInfo
  * @property {string} fileName Name of the file where message was declared
- * @property {string} name Name of the message
  * @property {DescriptorProto} descriptor Message descriptor
+ * @property {string} name Name of the message
+ * @property {string} fullName Full name of the mesage
  */
 
 /**
  * @typedef {Object} EnumInfo
  * @property {string} fileName Name of the file where enum was declared
- * @property {string} name Name of the enum
  * @property {EnumDescriptorProto} descriptor Enum descriptor
+ * @property {string} name Name of the enum
+ * @property {string} fullName Full name of the enum
  */
