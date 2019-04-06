@@ -7,6 +7,7 @@ const { FileDescriptorProto, ServiceDescriptorProto } = require("google-protobuf
 const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
 const standardRequires = require("./standardRequires");
+const proxyGenerator = require("./subGenerators/proxyGenerator");
 
 /**
  * @param {string} importPath
@@ -67,43 +68,8 @@ const generateJs = (importsCatalog, fileDescriptor) => {
 
   fileDescriptor.getServiceList().forEach(service => {
     const clientName = `${service.getName()}Client`;
-    builder
-      .appendLine(`class ${clientName} {`)
-      .appendLineIdented("constructor(address, credentials) {", 1)
-      .appendLineIdented(`this._client = new ${clientName}Raw(address, credentials);`, 2)
-      .appendLineIdented("grpcPromise.promisifyAll(this._client);", 2)
-      .appendLineIdented("}", 1);
-
-    service.getMethodList().forEach(method => {
-      const methodName = camelCase(method.getName());
-      if (method.getClientStreaming() === true && method.getServerStreaming() === true)
-        builder
-          .appendLineIdented(`async *${methodName}(messages) {`, 1)
-          .appendLineIdented(`const channel = this._client.${methodName}();`, 2)
-          .appendLineIdented("for (const message of messages) yield await channel.sendMessage(message);", 2)
-          .appendLineIdented("channel.end();", 2)
-          .appendLineIdented("}", 1);
-      else if (method.getClientStreaming() === true)
-        builder
-          .appendLineIdented(`async ${methodName}(messages) {`, 1)
-          .appendLineIdented(`const channel = this._client.${methodName}();`, 2)
-          .appendLineIdented("for (const message of messages) channel.sendMessage(message);", 2)
-          .appendLineIdented("return await channel.end();", 2)
-          .appendLineIdented("}", 1);
-      else if (method.getServerStreaming() === true)
-        builder
-          .appendLineIdented(`async ${methodName}(message) {`, 1)
-          .appendLineIdented(`return await this._client.${methodName}().sendMessage(message);`, 2)
-          .appendLineIdented("}", 1);
-      else
-        builder
-          .appendLineIdented(`async ${methodName}(message) {`, 1)
-          .appendLineIdented(`return await this._client.${methodName}().sendMessage(message);`, 2)
-          .appendLineIdented("}", 1);
-    });
-
-    builder
-      .appendLine("};")
+    proxyGenerator
+      .generateProxy(builder, service)
       .appendLine(`set(root, "${getClientFullName(fileDescriptor.getPackage(), clientName)}", ${clientName});`)
       .appendLine();
   });
