@@ -1,6 +1,6 @@
 const { FileDescriptorProto, DescriptorProto } = require("google-protobuf/google/protobuf/descriptor_pb");
 
-module.exports = class MessagesCatalog {
+module.exports = class ImportsCatalog {
   constructor() {
     /**  @type {Array<FileDescriptorProto>} */
     this.importedFiles = [];

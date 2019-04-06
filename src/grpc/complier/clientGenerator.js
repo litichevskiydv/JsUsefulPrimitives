@@ -4,7 +4,7 @@ const { set } = require("dot-prop");
 const camelCase = require("camelcase");
 const { FileDescriptorProto, ServiceDescriptorProto } = require("google-protobuf/google/protobuf/descriptor_pb");
 
-const MessagesCatalog = require("./messagesCatalog");
+const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
 
 /**
@@ -53,10 +53,10 @@ const getClientFullName = (packageName, clientName) => (packageName.length > 0 ?
 
 /**
  * Generates JavaScript code for client
- * @param {MessagesCatalog} messagesCatalog Messages catalog
+ * @param {ImportsCatalog} importsCatalog Imports catalog
  * @param {FileDescriptorProto} fileDescriptor Descriptor for proto file
  */
-const generateJs = (messagesCatalog, fileDescriptor) => {
+const generateJs = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
   builder
@@ -65,7 +65,7 @@ const generateJs = (messagesCatalog, fileDescriptor) => {
     .appendLine();
 
   builder.appendLine("let root = {};").appendLine();
-  messagesCatalog.importedFiles.forEach(fileDescriptor => {
+  importsCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
     const packageName = fileDescriptor.getPackage();
 
@@ -144,18 +144,18 @@ const generateTypingsForMessages = (builder, fileDescriptor) => {
 /**
  * @param {StringBuilder} builder
  * @param {ServiceDescriptorProto} serviceDescriptor
- * @param {MessagesCatalog} messagesCatalog
+ * @param {ImportsCatalog} importsCatalog
  */
-const generateTypingsForServices = (builder, serviceDescriptor, messagesCatalog) => {
+const generateTypingsForServices = (builder, serviceDescriptor, importsCatalog) => {
   builder
     .appendLineIdented(`export class ${serviceDescriptor.getName()}Client {`)
     .appendLineIdented("constructor(address: string, credentials: ServerCredentials);", 1);
 
   serviceDescriptor.getMethodList().forEach(method => {
     const methodName = camelCase(method.getName());
-    const inputMessage = messagesCatalog.getMessage(method.getInputType());
+    const inputMessage = importsCatalog.getMessage(method.getInputType());
     const inputTypeName = importPathToNamespaceName(inputMessage.fileName) + inputMessage.name;
-    const outputMessage = messagesCatalog.getMessage(method.getOutputType());
+    const outputMessage = importsCatalog.getMessage(method.getOutputType());
     const outputTypeName = importPathToNamespaceName(outputMessage.fileName) + outputMessage.name;
 
     if (method.getClientStreaming() === true && method.getServerStreaming() === true)
@@ -189,16 +189,16 @@ const generateTypesStructure = (builder, container) => {
 
 /**
  * Generates typings for client
- * @param {MessagesCatalog} messagesCatalog Messages catalog
+ * @param {ImportsCatalog} importsCatalog Imports catalog
  * @param {FileDescriptorProto} fileDescriptor Descriptor for proto file
  */
-const generateTypings = (messagesCatalog, fileDescriptor) => {
+const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
   builder.appendLineIdented('import { ServerCredentials } from "grpc";').appendLine();
 
   const root = {};
-  messagesCatalog.importedFiles.forEach(fileDescriptor => {
+  importsCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
     const packageName = fileDescriptor.getPackage();
     const fileBaseName = path.basename(fileName, path.extname(fileName));
@@ -209,7 +209,7 @@ const generateTypings = (messagesCatalog, fileDescriptor) => {
   });
   fileDescriptor.getServiceList().forEach(serviceDescriptor => {
     const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
-    set(root, clientFullName, builder => generateTypingsForServices(builder, serviceDescriptor, messagesCatalog));
+    set(root, clientFullName, builder => generateTypingsForServices(builder, serviceDescriptor, importsCatalog));
   });
 
   return generateTypesStructure(builder.appendLine(), root).toString();

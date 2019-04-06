@@ -4,7 +4,7 @@ const bl = require("bl");
 const path = require("path");
 const { CodeGeneratorRequest, CodeGeneratorResponse } = require("google-protobuf/google/protobuf/compiler/plugin_pb");
 
-const MessagesCatalog = require("../messagesCatalog");
+const ImportsCatalog = require("../importsCatalog");
 const clientGenerator = require("../clientGenerator");
 
 /**
@@ -41,16 +41,16 @@ const addFileToResponse = (response, originalFileName, fileExtension, content) =
   );
 
   const response = new CodeGeneratorResponse();
-  const messagesCatalog = new MessagesCatalog();
+  const importsCatalog = new ImportsCatalog();
   const filesToGenerate = new Set(request.getFileToGenerateList());
   request.getProtoFileList().forEach(fileDescriptor => {
-    messagesCatalog.processFileDescriptor(fileDescriptor);
+    importsCatalog.processFileDescriptor(fileDescriptor);
 
     const fileName = fileDescriptor.getName();
     if (filesToGenerate.has(fileName) === false || fileDescriptor.getServiceList().length === 0) return;
 
-    addFileToResponse(response, fileName, "js", clientGenerator.generateJs(messagesCatalog, fileDescriptor));
-    addFileToResponse(response, fileName, "d.ts", clientGenerator.generateTypings(messagesCatalog, fileDescriptor));
+    addFileToResponse(response, fileName, "js", clientGenerator.generateJs(importsCatalog, fileDescriptor));
+    addFileToResponse(response, fileName, "d.ts", clientGenerator.generateTypings(importsCatalog, fileDescriptor));
   });
 
   process.stdout.write(Buffer.from(response.serializeBinary()));
