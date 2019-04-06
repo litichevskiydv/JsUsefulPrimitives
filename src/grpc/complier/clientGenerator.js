@@ -6,30 +6,8 @@ const { FileDescriptorProto, ServiceDescriptorProto } = require("google-protobuf
 
 const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
-const standardRequires = require("./standardRequires");
+const requiresGenerator = require("./subGenerators/requiresGenerator");
 const proxyGenerator = require("./subGenerators/proxyGenerator");
-
-/**
- * @param {string} importPath
- */
-const importPathToNamespaceName = importPath =>
-  camelCase(
-    slash(importPath)
-      .replace(path.extname(importPath), "")
-      .split(path.posix.sep)
-      .join("_")
-  );
-
-/**
- * @param {string} importPath
- * @param {string} suffix
- */
-const importPathToRequirePath = (importPath, suffix) => `./${importPath.replace(path.extname(importPath), "")}_${suffix || "pb"}`;
-
-/**
- * @param {string} importPath
- */
-const getRequirePath = importPath => standardRequires.get(slash(importPath)) || importPathToRequirePath(importPath);
 
 /**
  *
@@ -57,12 +35,13 @@ const generateJs = (importsCatalog, fileDescriptor) => {
     const fileName = fileDescriptor.getName();
     const packageName = fileDescriptor.getPackage();
 
-    if (packageName.length > 0) builder.appendLine(`set(root, "${packageName}", require("${getRequirePath(fileName)}"));`);
-    else builder.appendLine(`root = Object.assign(root, require("${getRequirePath(fileName)}"));`);
+    if (packageName.length > 0)
+      builder.appendLine(`set(root, "${packageName}", require("${requiresGenerator.getRequirePath(fileName)}"));`);
+    else builder.appendLine(`root = Object.assign(root, require("${requiresGenerator.getRequirePath(fileName)}"));`);
   });
   builder.appendLine();
 
-  const requirePath = importPathToRequirePath(fileDescriptor.getName(), "grpc_pb");
+  const requirePath = requiresGenerator.getRequirePath(fileDescriptor.getName(), "grpc_pb");
   const clientsList = fileDescriptor.getServiceList().map(x => `${x.getName()}Client: ${x.getName()}ClientRaw`);
   builder.appendLine(`const { ${clientsList.join(", ")} } = require("${requirePath}");`).appendLine();
 
@@ -82,7 +61,7 @@ const generateJs = (importsCatalog, fileDescriptor) => {
  * @param {FileDescriptorProto} fileDescriptor
  */
 const generateTypingsForMessages = (builder, fileDescriptor) => {
-  const namespaceName = importPathToNamespaceName(fileDescriptor.getName());
+  const namespaceName = requiresGenerator.getNamespace(fileDescriptor.getName());
 
   fileDescriptor.getMessageTypeList().forEach(messageDescriptor => {
     const messageName = messageDescriptor.getName();
@@ -107,9 +86,9 @@ const generateTypingsForServices = (builder, serviceDescriptor, importsCatalog) 
   serviceDescriptor.getMethodList().forEach(method => {
     const methodName = camelCase(method.getName());
     const inputMessage = importsCatalog.getMessage(method.getInputType());
-    const inputTypeName = importPathToNamespaceName(inputMessage.fileName) + inputMessage.name;
+    const inputTypeName = requiresGenerator.getNamespace(inputMessage.fileName) + inputMessage.name;
     const outputMessage = importsCatalog.getMessage(method.getOutputType());
-    const outputTypeName = importPathToNamespaceName(outputMessage.fileName) + outputMessage.name;
+    const outputTypeName = requiresGenerator.getNamespace(outputMessage.fileName) + outputMessage.name;
 
     if (method.getClientStreaming() === true && method.getServerStreaming() === true)
       builder.appendLineIdented(`${methodName}(message: Iterable<${inputTypeName}>): AsyncIterableIterator<${outputTypeName}>;`, 1);
@@ -157,7 +136,7 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
     const fileBaseName = path.basename(fileName, path.extname(fileName));
     const namespaceName = packageName.length > 0 ? `${packageName}.${fileBaseName}` : fileBaseName;
 
-    builder.appendLine(`import * as ${importPathToNamespaceName(fileName)} from "${getRequirePath(fileName)}";`);
+    builder.appendLine(`import * as ${requiresGenerator.getNamespace(fileName)} from "${requiresGenerator.getRequirePath(fileName)}";`);
     set(root, namespaceName, builder => generateTypingsForMessages(builder, fileDescriptor));
   });
   fileDescriptor.getServiceList().forEach(serviceDescriptor => {
