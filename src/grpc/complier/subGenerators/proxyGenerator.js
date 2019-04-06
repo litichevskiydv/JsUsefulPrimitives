@@ -9,7 +9,7 @@ const StringBuilder = require("../stringBuilder");
  * @param {ServiceDescriptorProto} serviceDescriptor Service descriptor
  * @returns {StringBuilder}
  */
-const generateProxy = (builder, serviceDescriptor) => {
+const generate = (builder, serviceDescriptor) => {
   const clientName = `${serviceDescriptor.getName()}Client`;
 
   builder
@@ -50,4 +50,4 @@ const generateProxy = (builder, serviceDescriptor) => {
   return builder.appendLineIdented("};");
 };
 
-module.exports = { generateProxy };
+module.exports = { generate };

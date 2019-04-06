@@ -8,6 +8,7 @@ const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
 const requiresGenerator = require("./subGenerators/requiresGenerator");
 const proxyGenerator = require("./subGenerators/proxyGenerator");
+const proxyTypingsGenerator = require("./subGenerators/proxyTypingsGenerator");
 
 /**
  *
@@ -48,7 +49,7 @@ const generateJs = (importsCatalog, fileDescriptor) => {
   fileDescriptor.getServiceList().forEach(service => {
     const clientName = `${service.getName()}Client`;
     proxyGenerator
-      .generateProxy(builder, service)
+      .generate(builder, service)
       .appendLine(`set(root, "${getClientFullName(fileDescriptor.getPackage(), clientName)}", ${clientName});`)
       .appendLine();
   });
@@ -71,35 +72,6 @@ const generateTypingsForMessages = (builder, fileDescriptor) => {
     const enumName = enumDescriptor.getName();
     builder.appendLineIdented(`export import ${enumName} = ${namespaceName}.${enumName};`);
   });
-};
-
-/**
- * @param {StringBuilder} builder
- * @param {ServiceDescriptorProto} serviceDescriptor
- * @param {ImportsCatalog} importsCatalog
- */
-const generateTypingsForServices = (builder, serviceDescriptor, importsCatalog) => {
-  builder
-    .appendLineIdented(`export class ${serviceDescriptor.getName()}Client {`)
-    .appendLineIdented("constructor(address: string, credentials: ServerCredentials);", 1);
-
-  serviceDescriptor.getMethodList().forEach(method => {
-    const methodName = camelCase(method.getName());
-    const inputMessage = importsCatalog.getMessage(method.getInputType());
-    const inputTypeName = requiresGenerator.getNamespace(inputMessage.fileName) + inputMessage.name;
-    const outputMessage = importsCatalog.getMessage(method.getOutputType());
-    const outputTypeName = requiresGenerator.getNamespace(outputMessage.fileName) + outputMessage.name;
-
-    if (method.getClientStreaming() === true && method.getServerStreaming() === true)
-      builder.appendLineIdented(`${methodName}(message: Iterable<${inputTypeName}>): AsyncIterableIterator<${outputTypeName}>;`, 1);
-    else if (method.getClientStreaming() === true)
-      builder.appendLineIdented(`${methodName}(message: Iterable<${inputTypeName}>): Promise<${outputTypeName}>;`, 1);
-    else if (method.getServerStreaming() === true)
-      builder.appendLineIdented(`${methodName}(message: ${inputTypeName}): Promise<Array<${outputTypeName}>>;`, 1);
-    else builder.appendLineIdented(`${methodName}(message: ${inputTypeName}): Promise<${outputTypeName}>;`, 1);
-  });
-
-  builder.appendLineIdented("}");
 };
 
 /**
@@ -141,7 +113,7 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
   });
   fileDescriptor.getServiceList().forEach(serviceDescriptor => {
     const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
-    set(root, clientFullName, builder => generateTypingsForServices(builder, serviceDescriptor, importsCatalog));
+    set(root, clientFullName, builder => proxyTypingsGenerator.generate(builder, serviceDescriptor, importsCatalog));
   });
 
   return generateTypesStructure(builder.appendLine(), root).toString();
