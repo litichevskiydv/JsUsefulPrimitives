@@ -30,18 +30,15 @@ env[pathKeyName] = process.mainModule.paths
   .concat(env[pathKeyName])
   .join(path.delimiter);
 
-const exeExt = process.platform === "win32" ? ".exe" : "";
-const scriptExt = process.platform === "win32" ? ".cmd" : "";
-
 const args = [
-  `--client${scriptExt}_out`,
+  `--client${process.platform === "win32" ? ".cmd" : ""}_out`,
   argv.out,
   "-I",
   path.resolve(__dirname, "..", "include"),
   ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
   argv.protoFile
 ];
-const child_process = execFile(`protoc${exeExt}`, args, { env }, error => {
+const child_process = execFile(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env }, error => {
   if (error) throw error;
 });
 
