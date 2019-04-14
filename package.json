@@ -42,6 +42,7 @@
     "grpc": "1.18.0",
     "grpc-error": "1.0.0",
     "grpc-promise": "1.4.0",
+    "make-dir": "3.0.0",
     "path-key": "3.0.0",
     "slash": "2.0.0",
     "yargs": "13.2.2"
