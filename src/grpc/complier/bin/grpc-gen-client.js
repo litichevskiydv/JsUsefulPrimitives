@@ -6,6 +6,22 @@ const path = require("path");
 const pathKey = require("path-key");
 const { execFile } = require("child_process");
 
+const argv = require("yargs")
+  .usage("$0 [options] <protoFile>", "Produces clients for all services from given proto file")
+  .option("i", {
+    alias: "include",
+    type: "string",
+    array: true,
+    nargs: 1,
+    description: "Include directory"
+  })
+  .option("o", {
+    alias: "out",
+    type: "string",
+    default: process.cwd(),
+    description: "Output directory"
+  }).argv;
+
 const env = { ...process.env };
 const pathKeyName = pathKey({ env });
 env[pathKeyName] = process.mainModule.paths
@@ -17,9 +33,14 @@ env[pathKeyName] = process.mainModule.paths
 const exeExt = process.platform === "win32" ? ".exe" : "";
 const scriptExt = process.platform === "win32" ? ".cmd" : "";
 
-const args = ["-I", path.resolve(__dirname, "..", "include")].concat(
-  process.argv.slice(2).map(x => (x.startsWith("--client_out") ? x.replace("--client_out", `--client${scriptExt}_out`) : x))
-);
+const args = [
+  `--client${scriptExt}_out`,
+  argv.out,
+  "-I",
+  path.resolve(__dirname, "..", "include"),
+  ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
+  argv.protoFile
+];
 const child_process = execFile(`protoc${exeExt}`, args, { env }, error => {
   if (error) throw error;
 });

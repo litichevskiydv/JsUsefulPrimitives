@@ -9,7 +9,7 @@
     "build:server": "npm run build:server:protos && npm run build:server:types && npm run build:server:swagger",
     "build:client:protos": "mkdirp ./src/grpc/generated/client && grpc-gen-js --js_out=import_style=commonjs,binary:./src/grpc/generated/client --grpc_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
     "build:client:types": "mkdirp ./src/grpc/generated/client && grpc-gen-ts --ts_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
-    "build:client": "npm run build:client:protos && npm run build:client:types && grpc-gen-client --client_out=./src/grpc/generated/client -I ./src/grpc/protos/ greeter.proto",
+    "build:client": "npm run build:client:protos && npm run build:client:types && grpc-gen-client --out ./src/grpc/generated/client --include ./src/grpc/protos/ greeter.proto",
     "build": "npm run build:server && npm run build:client",
     "build:watch": "nodemon --ext *.proto --watch ./src/grpc/protos --exec npm run build",
     "test": "jest --verbose",
@@ -43,7 +43,8 @@
     "grpc-error": "1.0.0",
     "grpc-promise": "1.4.0",
     "path-key": "3.0.0",
-    "slash": "2.0.0"
+    "slash": "2.0.0",
+    "yargs": "13.2.2"
   },
   "devDependencies": {
     "grpc-tools": "1.6.6",
