@@ -5,12 +5,26 @@
 const path = require("path");
 const makeDir = require("make-dir");
 const pathKey = require("path-key");
-const { execFile } = require("child_process");
+const { execFileSync, execFile } = require("child_process");
 
 /**
  * @param {CommandLineArguments} argv
  */
 const createOutputDirectory = async argv => await makeDir(argv.out);
+
+/**
+ * @param {CommandLineArguments} argv
+ * @param {*} env
+ */
+const generateJs = (argv, env) => {
+  const args = [
+    `--js_out=import_style=commonjs,binary:${argv.out}`,
+    `--grpc_out=${argv.out}`,
+    ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
+    argv.protoFile
+  ];
+  execFileSync(`grpc-gen-js${process.platform === "win32" ? ".cmd" : ""}`, args, { env });
+};
 
 /**
  * @param {CommandLineArguments} argv
@@ -59,12 +73,13 @@ const generateClient = (argv, env) => {
     .join(path.delimiter);
 
   await createOutputDirectory(argv);
+  generateJs(argv, env);
   generateClient(argv, env);
 })();
 
 /**
  * @typedef {Object} CommandLineArguments
- * @property {string} include
+ * @property {string[]} include
  * @property {string} out
  * @property {string} protoFile
  */
