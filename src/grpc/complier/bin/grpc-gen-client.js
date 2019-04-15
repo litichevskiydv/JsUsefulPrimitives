@@ -5,7 +5,7 @@
 const path = require("path");
 const makeDir = require("make-dir");
 const pathKey = require("path-key");
-const { execFileSync, execFile } = require("child_process");
+const { execFileSync } = require("child_process");
 
 /**
  * @param {CommandLineArguments} argv
@@ -41,19 +41,13 @@ const generateTs = (argv, env) => {
  */
 const generateClient = (argv, env) => {
   const args = [
-    `--client${process.platform === "win32" ? ".cmd" : ""}_out`,
-    argv.out,
+    `--client${process.platform === "win32" ? ".cmd" : ""}_out=${argv.out}`,
     "-I",
     path.resolve(__dirname, "..", "include"),
     ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
     argv.protoFile
   ];
-  const child_process = execFile(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env }, error => {
-    if (error) throw error;
-  });
-
-  child_process.stdout.pipe(process.stdout);
-  child_process.stderr.pipe(process.stderr);
+  execFileSync(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env });
 };
 
 (async () => {
