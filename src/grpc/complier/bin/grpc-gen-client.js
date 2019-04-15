@@ -8,9 +8,30 @@ const pathKey = require("path-key");
 const { execFile } = require("child_process");
 
 /**
- * @param {CommandLineArguments} args
+ * @param {CommandLineArguments} argv
  */
-const createOutputDirectory = async args => await makeDir(args.out);
+const createOutputDirectory = async argv => await makeDir(argv.out);
+
+/**
+ * @param {CommandLineArguments} argv
+ * @param {*} env
+ */
+const generateClient = (argv, env) => {
+  const args = [
+    `--client${process.platform === "win32" ? ".cmd" : ""}_out`,
+    argv.out,
+    "-I",
+    path.resolve(__dirname, "..", "include"),
+    ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
+    argv.protoFile
+  ];
+  const child_process = execFile(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env }, error => {
+    if (error) throw error;
+  });
+
+  child_process.stdout.pipe(process.stdout);
+  child_process.stderr.pipe(process.stderr);
+};
 
 (async () => {
   const argv = require("yargs")
@@ -29,8 +50,6 @@ const createOutputDirectory = async args => await makeDir(args.out);
       description: "Output directory"
     }).argv;
 
-  await createOutputDirectory(argv);
-
   const env = { ...process.env };
   const pathKeyName = pathKey({ env });
   env[pathKeyName] = process.mainModule.paths
@@ -39,20 +58,8 @@ const createOutputDirectory = async args => await makeDir(args.out);
     .concat(env[pathKeyName])
     .join(path.delimiter);
 
-  const args = [
-    `--client${process.platform === "win32" ? ".cmd" : ""}_out`,
-    argv.out,
-    "-I",
-    path.resolve(__dirname, "..", "include"),
-    ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
-    argv.protoFile
-  ];
-  const child_process = execFile(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env }, error => {
-    if (error) throw error;
-  });
-
-  child_process.stdout.pipe(process.stdout);
-  child_process.stderr.pipe(process.stderr);
+  await createOutputDirectory(argv);
+  generateClient(argv, env);
 })();
 
 /**
