@@ -30,6 +30,15 @@ const generateJs = (argv, env) => {
  * @param {CommandLineArguments} argv
  * @param {*} env
  */
+const generateTs = (argv, env) => {
+  const args = [`--ts_out=${argv.out}`, ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []), argv.protoFile];
+  execFileSync(`grpc-gen-ts${process.platform === "win32" ? ".cmd" : ""}`, args, { env });
+};
+
+/**
+ * @param {CommandLineArguments} argv
+ * @param {*} env
+ */
 const generateClient = (argv, env) => {
   const args = [
     `--client${process.platform === "win32" ? ".cmd" : ""}_out`,
@@ -74,6 +83,7 @@ const generateClient = (argv, env) => {
 
   await createOutputDirectory(argv);
   generateJs(argv, env);
+  generateTs(argv, env);
   generateClient(argv, env);
 })();
 
