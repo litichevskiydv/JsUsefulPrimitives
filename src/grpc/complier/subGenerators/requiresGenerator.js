@@ -12,7 +12,7 @@ const getNamespace = importPath =>
   camelCase(
     slash(importPath)
       .replace(path.extname(importPath), "")
-      .split(path.posix.sep)
+      .split(new RegExp(`[-${path.posix.sep}]+`))
       .join("_")
   );
 
