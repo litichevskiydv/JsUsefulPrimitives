@@ -53,7 +53,7 @@ const getFilesList = async (argv, env) => {
 
   const filesListPath = path.join(argv.out, "files-list.json");
   const filesList = await loadFile(filesListPath);
-  delPath(filesListPath);
+  delPath(filesListPath, { force: true });
 
   return filesList;
 };
