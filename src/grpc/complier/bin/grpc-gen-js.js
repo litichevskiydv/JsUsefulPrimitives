@@ -3,8 +3,6 @@
 "use strict";
 
 const path = require("path");
-const find = require("find");
-const slash = require("slash");
 const pathKey = require("path-key");
 const { execFile } = require("child_process");
 
@@ -18,10 +16,7 @@ env[pathKeyName] = process.mainModule.paths
 const exeExt = process.platform === "win32" ? ".exe" : "";
 const scriptExt = process.platform === "win32" ? ".cmd" : "";
 
-const includePath = path.resolve(__dirname, "..", "include");
-const args = ["-I", includePath]
-  .concat(process.argv.slice(2))
-  .concat(find.fileSync(/\.proto$/, includePath).map(x => slash(path.relative(includePath, path.normalize(x)))));
+const args = ["-I", path.resolve(__dirname, "..", "include")].concat(process.argv.slice(2));
 const child_process = execFile(`grpc_tools_node_protoc${scriptExt}`, args, { env }, error => {
   if (error) throw error;
 });
