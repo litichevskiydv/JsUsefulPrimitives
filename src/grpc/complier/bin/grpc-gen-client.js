@@ -15,19 +15,41 @@ const { execFileSync } = require("child_process");
 const createOutputDirectory = async argv => await makeDir(argv.out);
 
 /**
+ * @param {string} name
+ * @returns {string}
+ */
+const prepareScriptName = name => `${name}${process.platform === "win32" ? ".cmd" : ""}`;
+
+/**
+ * @param {string} pluginName
+ * @param {string} outputDirectory
+ * @returns {string}
+ */
+const preparePluginOptions = (pluginName, outputDirectory) => `--${prepareScriptName(pluginName)}_out=${outputDirectory}`;
+
+/**
+ * @param {string[]} includes
+ * @param {boolean} addDefaultIncludes
+ * @returns {string[]}
+ */
+const prepareIncludes = (includes, addDefaultIncludes) =>
+  (includes || [])
+    .concat(addDefaultIncludes ? [path.join(__dirname, "..", "include")] : [])
+    .reduce((acc, cur) => acc.concat("-I", cur), []);
+
+/**
+ * @returns {string}
+ */
+const prepareProtocName = () => `protoc${process.platform === "win32" ? ".exe" : ""}`;
+
+/**
  * @param {CommandLineArguments} argv
  * @param {*} env
  * @returns {Promise<string[]>}
  */
 const getFilesList = async (argv, env) => {
-  const args = [
-    `--files${process.platform === "win32" ? ".cmd" : ""}_out=${argv.out}`,
-    "-I",
-    path.resolve(__dirname, "..", "include"),
-    ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
-    argv.protoFile
-  ];
-  execFileSync(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env });
+  const args = [preparePluginOptions("files", argv.out), ...prepareIncludes(argv.include, true), argv.protoFile];
+  execFileSync(prepareProtocName(), args, { env });
 
   const filesListPath = path.join(argv.out, "files-list.json");
   const filesList = await loadFile(filesListPath);
@@ -45,10 +67,10 @@ const generateJs = (argv, env, filesList) => {
   const args = [
     `--js_out=import_style=commonjs,binary:${argv.out}`,
     `--grpc_out=${argv.out}`,
-    ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
+    ...prepareIncludes(argv.include),
     ...filesList
   ];
-  execFileSync(`grpc-gen-js${process.platform === "win32" ? ".cmd" : ""}`, args, { env });
+  execFileSync(prepareScriptName("grpc-gen-js"), args, { env });
 };
 
 /**
@@ -57,8 +79,8 @@ const generateJs = (argv, env, filesList) => {
  * @param {string[]} filesList
  */
 const generateTs = (argv, env, filesList) => {
-  const args = [`--ts_out=${argv.out}`, ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []), ...filesList];
-  execFileSync(`grpc-gen-ts${process.platform === "win32" ? ".cmd" : ""}`, args, { env });
+  const args = [`--ts_out=${argv.out}`, ...prepareIncludes(argv.include), ...filesList];
+  execFileSync(prepareScriptName("grpc-gen-ts"), args, { env });
 };
 
 /**
@@ -66,14 +88,8 @@ const generateTs = (argv, env, filesList) => {
  * @param {*} env
  */
 const generateClient = (argv, env) => {
-  const args = [
-    `--client${process.platform === "win32" ? ".cmd" : ""}_out=${argv.out}`,
-    "-I",
-    path.resolve(__dirname, "..", "include"),
-    ...(argv.include || []).reduce((acc, cur) => acc.concat("-I", cur), []),
-    argv.protoFile
-  ];
-  execFileSync(`protoc${process.platform === "win32" ? ".exe" : ""}`, args, { env });
+  const args = [preparePluginOptions("client", argv.out), ...prepareIncludes(argv.include, true), argv.protoFile];
+  execFileSync(prepareProtocName(), args, { env });
 };
 
 (async () => {
