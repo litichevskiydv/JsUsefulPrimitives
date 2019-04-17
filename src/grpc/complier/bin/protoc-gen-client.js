@@ -19,7 +19,7 @@ const addFileToResponse = (response, originalFileName, fileExtension, content) =
   file.setName(
     path.join(
       path.dirname(originalFileName),
-      `${path.basename(originalFileName, path.extname(originalFileName))}_pb_client.${fileExtension}`
+      `${path.basename(originalFileName, path.extname(originalFileName))}_client_pb.${fileExtension}`
     )
   );
   file.setContent(content);

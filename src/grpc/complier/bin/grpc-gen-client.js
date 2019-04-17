@@ -64,13 +64,16 @@ const getFilesList = async (argv, env) => {
  * @param {string[]} filesList
  */
 const generateJs = (argv, env, filesList) => {
-  const args = [
-    `--js_out=import_style=commonjs,binary:${argv.out}`,
-    `--grpc_out=${argv.out}`,
-    ...prepareIncludes(argv.include),
-    ...filesList
-  ];
-  execFileSync(prepareScriptName("grpc-gen-js"), args, { env });
+  execFileSync(
+    prepareScriptName("grpc-gen-js"),
+    [`--js_out=import_style=commonjs,binary:${argv.out}`, ...prepareIncludes(argv.include), ...filesList],
+    { env }
+  );
+  execFileSync(
+    prepareScriptName("grpc-gen-js"),
+    [`--js_out=import_style=commonjs,binary:${argv.out}`, `--grpc_out=${argv.out}`, ...prepareIncludes(argv.include), argv.protoFile],
+    { env }
+  );
 };
 
 /**
