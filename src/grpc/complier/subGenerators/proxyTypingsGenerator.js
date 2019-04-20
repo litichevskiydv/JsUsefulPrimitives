@@ -13,7 +13,7 @@ const requiresGenerator = require("./requiresGenerator");
 const generate = (builder, serviceDescriptor, importsCatalog) => {
   builder
     .appendLineIdented(`export class ${serviceDescriptor.getName()}Client {`)
-    .appendLineIdented("constructor(address: string, credentials: ServerCredentials);", 1);
+    .appendLineIdented("constructor(address: string, credentials: ChannelCredentials);", 1);
 
   serviceDescriptor.getMethodList().forEach(method => {
     const methodName = camelCase(method.getName());

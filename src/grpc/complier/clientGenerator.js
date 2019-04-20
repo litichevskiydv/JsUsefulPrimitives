@@ -126,7 +126,7 @@ const generateTypesStructure = (builder, container) => {
 const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder.appendLineIdented('import { ServerCredentials } from "grpc";').appendLine();
+  builder.appendLineIdented('import { ChannelCredentials } from "grpc";').appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
