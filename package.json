@@ -49,14 +49,20 @@
   },
   "devDependencies": {
     "grpc-tools": "1.6.6",
-    "jest": "23.6.0",
-    "jest-extended": "0.11.0",
+    "jest": "24.8.0",
+    "jest-extended": "0.11.1",
     "nodemon": "1.18.6",
     "protobufjs": "6.8.8",
     "ts-protoc-gen": "0.7.7"
   },
   "jest": {
     "testEnvironment": "node",
-    "setupTestFrameworkScriptFile": "jest-extended"
+    "setupFilesAfterEnv": [
+      "jest-extended"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/src.grpc/generated/"
+    ]
   }
 }
