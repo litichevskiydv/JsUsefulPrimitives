@@ -1386,3 +1386,13 @@ describe("Should test sequenceEqual", () => {
     expect(actual).toBe(testCase.expected);
   });
 });
+
+describe("Should not use toString", () => {
+  const testCases = [
+    {
+      toString: () => "Clear test title"
+    }
+  ];
+
+  test.each(testCases)("%s", testCase => {});
+});
