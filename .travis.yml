@@ -12,6 +12,7 @@ branches:
     - /^release\/.*$/
     - develop
 script:
+  - npx envinfo --preset jest
   - npm link
   - npm run build:server:protos
   - npm run build:client
