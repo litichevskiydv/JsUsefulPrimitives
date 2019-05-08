@@ -1,7 +1,9 @@
+dist: xenial
 language: node_js
 node_js:
   - "8"
   - "10"
+  - "12"
   - "lts/*"
   - "node"
 branches:
@@ -11,5 +13,6 @@ branches:
     - develop
 script:
   - npm link
-  - npm run build
+  - npm run build:server:protos
+  - npm run build:client
   - npm test
