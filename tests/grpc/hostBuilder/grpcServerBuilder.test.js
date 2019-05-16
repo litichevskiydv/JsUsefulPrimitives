@@ -10,6 +10,16 @@ const {
   GreeterClient
 } = require("../../../src/grpc/generated/client/greeter_client_pb").v1;
 
+expect.extend({
+  containsError(received) {
+    if (Object.values(received).find(x => x instanceof Error)) return { pass: true };
+    return {
+      pass: false,
+      message: () => `expected ${received} contains error`
+    };
+  }
+});
+
 const grpcBind = "0.0.0.0:3000";
 const packageObject = grpc.loadPackageDefinition(
   protoLoader.loadSync(path.join(__dirname, "../../../src/grpc/protos/greeter.proto"), {
@@ -119,7 +129,7 @@ test("Must catch and log common error", async () => {
 
   // When, Then
   await expect(getMessage("Tom")).rejects.toEqual(new Error("13 INTERNAL: Something went wrong"));
-  expect(mockLogger.error).toBeCalledTimes(1);
+  expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
 
   server.forceShutdown();
 });
