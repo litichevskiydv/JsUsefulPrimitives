@@ -40,6 +40,7 @@ const createHook = contextStorage => {
 
 /**
  * @param {string} contextName
+ * @returns {Map<any, any>}
  */
 const createContext = contextName => {
   let contextStorage;
@@ -60,7 +61,7 @@ const createContext = contextName => {
     }
   }
 
-  contextStorage.createContext();
+  return contextStorage.createContext();
 };
 
 const getValue = key => {
