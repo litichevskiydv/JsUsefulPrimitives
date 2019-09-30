@@ -79,7 +79,10 @@ declare class GrpcServerBuilder {
 
 export = GrpcServerBuilder;
 
-type ServerContext = { createLogger: (options?: object) => Logging.ILogger };
+type ServerContext = {
+  createLogger: (options?: object) => Logging.ILogger;
+  callsIdsGenerator: () => string;
+};
 
 type ServiceCall = ServerUnaryCall<any> | ServerReadableStream<any> | ServerWriteableStream<any> | ServerDuplexStream<any, any>;
 type sendUnaryData<ResponseType> = (error: ServiceError | null, value: ResponseType | null, trailer?: Metadata, flags?: number) => void;
