@@ -1,6 +1,8 @@
+const uuid = require("uuid/v1");
 const { Server, ServerCredentials } = require("grpc");
 const { createLogger } = require("./logging/defaultLoggersFactory");
 const ExceptionsHandler = require("./interceptors/exceptionsHandler");
+const ContextsInitializer = require("./interceptors/contextsInitializer");
 
 module.exports = class GrpcServerBuilder {
   /**
@@ -11,18 +13,27 @@ module.exports = class GrpcServerBuilder {
     this._interceptorsDefinitions = [];
     this._servicesDefinitions = [];
 
-    this._serverContext = { createLogger };
     this._server = new Server(options);
+    this._serverContext = { createLogger, callsIdsGenerator: uuid };
 
-    this.addInterceptor(ExceptionsHandler);
+    this.addInterceptor(ExceptionsHandler).addInterceptor(ContextsInitializer);
   }
 
   /**
-   * Changes default loggers factory/
+   * Changes default loggers factory.
    * @param {loggersFactory} createLogger Factory method for loggers creation.
    */
   useLoggersFactory(createLogger) {
     this._serverContext.createLogger = createLogger;
+    return this;
+  }
+
+  /**
+   * Changes default calls ids generator.
+   * @param {idsGenerator} callsIdsGenerator Factory method for loggers creation.
+   */
+  useCallsIdsGenerator(callsIdsGenerator) {
+    this._serverContext.callsIdsGenerator = callsIdsGenerator;
     return this;
   }
 
@@ -150,4 +161,9 @@ module.exports = class GrpcServerBuilder {
  * @callback loggersFactory
  * @param {*} [options] Logger cration options.
  * @returns {Logger}
+ */
+
+/**
+ * @callback idsGenerator
+ * @returns {string}
  */

@@ -19,10 +19,16 @@ declare class GrpcServerBuilder {
   constructor(options?: object);
 
   /**
-   * Changes default loggers factory
+   * Changes default loggers factory.
    * @param createLogger Factory method for loggers creation.
    */
   useLoggersFactory(loggersFactory: (options?: object) => Logging.ILogger): GrpcServerBuilder;
+
+  /**
+   * Changes default loggers factory.
+   * @param callsIdsGenerator Function for calls ids generation.
+   */
+  useCallsIdsGenerator(callsIdsGenerator: () => string): GrpcServerBuilder;
 
   /**
    * Adds new interceptor to pipeline.
