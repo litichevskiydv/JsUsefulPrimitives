@@ -2,7 +2,8 @@ const path = require("path");
 const grpc = require("grpc");
 const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
-const GrpcServerBuilder = require("../../../src/grpc/hostBuilder/index");
+const GrpcServerBuilder = require("../../../src/grpc/hostBuilder");
+const asyncContext = require("../../../src/async-context");
 const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
   HelloRequest: ClientRequest,
@@ -39,7 +40,10 @@ const createServer = configurator => {
     .addService(packageObject.v1.Greeter.service, {
       sayHello: call => {
         const request = new ServerRequest(call.request);
-        return new ServerResponse({ message: `Hello, ${request.name}!` });
+        return new ServerResponse({
+          traceId: asyncContext.getValue("traceId"),
+          message: `Hello, ${request.name}!`
+        });
       }
     })
     .bind(grpcBind)
@@ -53,6 +57,21 @@ const getMessage = async name => {
   request.setName(name);
 
   return (await client.sayHello(request)).getMessage();
+};
+
+const getTraceId = async callerTraceId => {
+  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure());
+
+  const metadata = new grpc.Metadata();
+  if (callerTraceId) metadata.set("trace_id", callerTraceId);
+  const request = new ServerRequest({ name: "Tester" });
+
+  return (await new Promise((resolve, reject) => {
+    client.sayHello(request, metadata, (error, response) => {
+      if (error) reject(error);
+      else resolve(response);
+    });
+  })).traceId;
 };
 
 test("Must build simple server", async () => {
@@ -180,4 +199,33 @@ test("Must throw error if server method was not implemented", () => {
 
   // When, Then
   expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
+});
+
+test("Must return new trace id if source was not supplied", async () => {
+  // Given
+  const expectedTraceId = "test_trace_id";
+  const server = createServer(x => x.useTracesIdsGenerator(() => expectedTraceId));
+
+  // When
+  const actualTraceId = await getTraceId();
+
+  // When, Then
+  expect(actualTraceId).toBe(expectedTraceId);
+
+  server.forceShutdown();
+});
+
+test("Must return source trace id", async () => {
+  // Given
+  const newTraceId = "new_trace_id";
+  const expectedTraceId = "test_trace_id";
+  const server = createServer(x => x.useTracesIdsGenerator(() => newTraceId));
+
+  // When
+  const actualTraceId = await getTraceId(expectedTraceId);
+
+  // When, Then
+  expect(actualTraceId).toBe(expectedTraceId);
+
+  server.forceShutdown();
 });

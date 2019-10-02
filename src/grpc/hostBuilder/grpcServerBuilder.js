@@ -14,7 +14,7 @@ module.exports = class GrpcServerBuilder {
     this._servicesDefinitions = [];
 
     this._server = new Server(options);
-    this._serverContext = { createLogger, callsIdsGenerator: uuid };
+    this._serverContext = { createLogger, tracesIdsGenerator: uuid };
 
     this.addInterceptor(ExceptionsHandler).addInterceptor(ContextsInitializer);
   }
@@ -30,10 +30,10 @@ module.exports = class GrpcServerBuilder {
 
   /**
    * Changes default calls ids generator.
-   * @param {idsGenerator} callsIdsGenerator Factory method for loggers creation.
+   * @param {idsGenerator} tracesIdsGenerator Factory method for loggers creation.
    */
-  useCallsIdsGenerator(callsIdsGenerator) {
-    this._serverContext.callsIdsGenerator = callsIdsGenerator;
+  useTracesIdsGenerator(tracesIdsGenerator) {
+    this._serverContext.tracesIdsGenerator = tracesIdsGenerator;
     return this;
   }
 

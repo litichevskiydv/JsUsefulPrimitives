@@ -26,9 +26,9 @@ declare class GrpcServerBuilder {
 
   /**
    * Changes default loggers factory.
-   * @param callsIdsGenerator Function for calls ids generation.
+   * @param tracesIdsGenerator Function for calls ids generation.
    */
-  useCallsIdsGenerator(callsIdsGenerator: () => string): GrpcServerBuilder;
+  useTracesIdsGenerator(tracesIdsGenerator: () => string): GrpcServerBuilder;
 
   /**
    * Adds new interceptor to pipeline.
@@ -81,7 +81,7 @@ export = GrpcServerBuilder;
 
 type ServerContext = {
   createLogger: (options?: object) => Logging.ILogger;
-  callsIdsGenerator: () => string;
+  tracesIdsGenerator: () => string;
 };
 
 type ServiceCall = ServerUnaryCall<any> | ServerReadableStream<any> | ServerWriteableStream<any> | ServerDuplexStream<any, any>;
