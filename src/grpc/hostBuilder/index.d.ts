@@ -12,23 +12,23 @@ import {
 } from "grpc";
 import { type } from "os";
 
-declare class GrpcServerBuilder {
+declare class GrpcHostBuilder {
   /**
    * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
    */
   constructor(options?: object);
 
   /**
-   * Changes default loggers factory.
+   * Changes default loggers factory
    * @param createLogger Factory method for loggers creation.
    */
-  useLoggersFactory(loggersFactory: (options?: object) => Logging.ILogger): GrpcServerBuilder;
+  useLoggersFactory(loggersFactory: (options?: object) => Logging.ILogger): GrpcHostBuilder;
 
   /**
    * Changes default loggers factory.
    * @param tracesIdsGenerator Function for calls ids generation.
    */
-  useTracesIdsGenerator(tracesIdsGenerator: () => string): GrpcServerBuilder;
+  useTracesIdsGenerator(tracesIdsGenerator: () => string): GrpcHostBuilder;
 
   /**
    * Adds new interceptor to pipeline.
@@ -47,12 +47,12 @@ declare class GrpcServerBuilder {
       callback: sendUnaryData<any> | null,
       next: handleServiceCall<any, any>
     ) => Promise<void>
-  ): GrpcServerBuilder;
+  ): GrpcHostBuilder;
   /**
    * Adds new interceptor to pipeline.
    * @param interceptor Constructor for new interceptor.
    */
-  addInterceptor(interceporConstructor: new (serverContext: ServerContext) => IInterceptor): GrpcServerBuilder;
+  addInterceptor(interceporConstructor: new (serverContext: ServerContext) => IInterceptor): GrpcHostBuilder;
 
   /**
    * Adds implementation of a new service.
@@ -62,14 +62,14 @@ declare class GrpcServerBuilder {
   addService<ImplementationType = UntypedServiceImplementation>(
     definition: ServiceDefinition<ImplementationType>,
     implementation: ImplementationType
-  ): GrpcServerBuilder;
+  ): GrpcHostBuilder;
 
   /**
    * Binds server to endpoint.
    * @param grpcBind Bind for gRPC server in format "address:port".
    * @param [credentials = ServerCredentials.createInsecure()] Server credentials
    */
-  bind(grpcBind: string, credentials?: ServerCredentials): GrpcServerBuilder;
+  bind(grpcBind: string, credentials?: ServerCredentials): GrpcHostBuilder;
 
   /**
    * Builds the server.
@@ -77,7 +77,7 @@ declare class GrpcServerBuilder {
   build(): Server;
 }
 
-export = GrpcServerBuilder;
+export = GrpcHostBuilder;
 
 type ServerContext = {
   createLogger: (options?: object) => Logging.ILogger;

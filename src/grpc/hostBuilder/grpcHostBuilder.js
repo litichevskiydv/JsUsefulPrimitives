@@ -4,7 +4,7 @@ const { createLogger } = require("./logging/defaultLoggersFactory");
 const ExceptionsHandler = require("./interceptors/exceptionsHandler");
 const ContextsInitializer = require("./interceptors/contextsInitializer");
 
-module.exports = class GrpcServerBuilder {
+module.exports = class GrpcHostBuilder {
   /**
    * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
    */
@@ -20,7 +20,7 @@ module.exports = class GrpcServerBuilder {
   }
 
   /**
-   * Changes default loggers factory.
+   * Changes default loggers factory/
    * @param {loggersFactory} createLogger Factory method for loggers creation.
    */
   useLoggersFactory(createLogger) {
@@ -83,7 +83,7 @@ module.exports = class GrpcServerBuilder {
     if (methodImplementation === undefined) throw new Error(`Method ${methodDefinition.path} is not implemented`);
     methodImplementation = methodImplementation.bind(serviceImplementation);
 
-    const methodType = GrpcServerBuilder._getMethodType(methodDefinition);
+    const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
     let serviceCallHandler =
       methodType === "unary" || methodType === "client_stream"
         ? async (call, callback) => callback(null, await methodImplementation(call))
@@ -104,7 +104,7 @@ module.exports = class GrpcServerBuilder {
     for (const { index, definition, implementation } of this._servicesDefinitions)
       for (const methodName in definition) {
         const methodDefinition = definition[methodName];
-        const methodType = GrpcServerBuilder._getMethodType(methodDefinition);
+        const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
         const methodImplementation = this._getMethodImplementation(index, implementation, methodName, methodDefinition);
 
         this._server.register(
@@ -161,9 +161,4 @@ module.exports = class GrpcServerBuilder {
  * @callback loggersFactory
  * @param {*} [options] Logger cration options.
  * @returns {Logger}
- */
-
-/**
- * @callback idsGenerator
- * @returns {string}
  */

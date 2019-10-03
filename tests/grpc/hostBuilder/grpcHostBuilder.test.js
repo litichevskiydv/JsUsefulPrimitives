@@ -2,7 +2,7 @@ const path = require("path");
 const grpc = require("grpc");
 const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
-const GrpcServerBuilder = require("../../../src/grpc/hostBuilder");
+const GrpcHostBuilder = require("../../../src/grpc/hostBuilder");
 const asyncContext = require("../../../src/async-context");
 const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
@@ -33,10 +33,10 @@ const packageObject = grpc.loadPackageDefinition(
 
 /**
  * Creates and starts gRPC server
- * @param {function(GrpcServerBuilder):GrpcServerBuilder} configurator Server builder configurator
+ * @param {function(GrpcHostBuilder):GrpcHostBuilder} configurator Server builder configurator
  */
-const createServer = configurator => {
-  return configurator(new GrpcServerBuilder())
+const createHost = configurator => {
+  return configurator(new GrpcHostBuilder())
     .addService(packageObject.v1.Greeter.service, {
       sayHello: call => {
         const request = new ServerRequest(call.request);
@@ -80,7 +80,7 @@ const getTraceId = async callerTraceId => {
 
 test("Must build simple server", async () => {
   // Given
-  const server = createServer(x => x);
+  const server = createHost(x => x);
 
   // When
   const actualMessage = await getMessage("Tom");
@@ -92,7 +92,7 @@ test("Must build simple server", async () => {
 
 test("Must build server with stateless interceptors", async () => {
   // Given
-  const server = createServer(x =>
+  const server = createHost(x =>
     x
       .addInterceptor(async (call, methodDefinition, callback, next) => {
         if (call.request.name === "Tom") callback(null, { message: "Hello again, Tom!" });
@@ -125,7 +125,7 @@ class InterceptorForTom {
 
 test("Must build server with stateful interceptor", async () => {
   // Given
-  const server = createServer(x => x.addInterceptor(InterceptorForTom));
+  const server = createHost(x => x.addInterceptor(InterceptorForTom));
 
   // When
   const messageForTom = await getMessage("Tom");
@@ -142,7 +142,7 @@ test("Must catch and log common error", async () => {
   const mockLogger = { error: jest.fn() };
   const mockLoggersFactory = () => mockLogger;
 
-  const server = createServer(x =>
+  const server = createHost(x =>
     x
       .addInterceptor(() => {
         throw new Error("Something went wrong");
@@ -162,7 +162,7 @@ test("Must catch and not log GRPCError", async () => {
   const mockLogger = { error: jest.fn() };
   const mockLoggersFactory = () => mockLogger;
 
-  const server = createServer(x =>
+  const server = createHost(x =>
     x
       .addInterceptor(() => {
         throw new GRPCError("Wrong payload", grpc.status.INVALID_ARGUMENT, null);
@@ -182,7 +182,7 @@ test("Must handle error with non ASCII message", async () => {
   const mockLogger = { error: jest.fn() };
   const mockLoggersFactory = () => mockLogger;
 
-  const server = createServer(x =>
+  const server = createHost(x =>
     x
       .addInterceptor(() => {
         throw new Error("Что-то пошло не так");
@@ -199,7 +199,7 @@ test("Must handle error with non ASCII message", async () => {
 
 test("Must throw error if server method was not implemented", () => {
   // Given
-  const builder = new GrpcServerBuilder().addService(packageObject.v1.Greeter.service, {});
+  const builder = new GrpcHostBuilder().addService(packageObject.v1.Greeter.service, {});
 
   // When, Then
   expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
@@ -208,7 +208,7 @@ test("Must throw error if server method was not implemented", () => {
 test("Must return new trace id if source was not supplied", async () => {
   // Given
   const expectedTraceId = "test_trace_id";
-  const server = createServer(x => x.useTracesIdsGenerator(() => expectedTraceId));
+  const server = createHost(x => x.useTracesIdsGenerator(() => expectedTraceId));
 
   // When
   const actualTraceId = await getTraceId();
@@ -223,7 +223,7 @@ test("Must return source trace id", async () => {
   // Given
   const newTraceId = "new_trace_id";
   const expectedTraceId = "test_trace_id";
-  const server = createServer(x => x.useTracesIdsGenerator(() => newTraceId));
+  const server = createHost(x => x.useTracesIdsGenerator(() => newTraceId));
 
   // When
   const actualTraceId = await getTraceId(expectedTraceId);
