@@ -162,3 +162,8 @@ module.exports = class GrpcHostBuilder {
  * @param {*} [options] Logger cration options.
  * @returns {Logger}
  */
+
+/**
+ * @callback idsGenerator
+ * @returns {string}
+ */
