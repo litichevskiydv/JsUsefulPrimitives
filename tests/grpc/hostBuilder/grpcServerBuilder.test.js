@@ -51,27 +51,31 @@ const createServer = configurator => {
 };
 
 const getMessage = async name => {
-  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
-
   const request = new ClientRequest();
   request.setName(name);
 
-  return (await client.sayHello(request)).getMessage();
+  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+  const message = (await client.sayHello(request)).getMessage();
+  client.close();
+
+  return message;
 };
 
 const getTraceId = async callerTraceId => {
-  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure());
-
   const metadata = new grpc.Metadata();
   if (callerTraceId) metadata.set("trace_id", callerTraceId);
   const request = new ServerRequest({ name: "Tester" });
 
-  return (await new Promise((resolve, reject) => {
+  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure());
+  const traceId = (await new Promise((resolve, reject) => {
     client.sayHello(request, metadata, (error, response) => {
       if (error) reject(error);
       else resolve(response);
     });
   })).traceId;
+  client.close();
+
+  return traceId;
 };
 
 test("Must build simple server", async () => {
