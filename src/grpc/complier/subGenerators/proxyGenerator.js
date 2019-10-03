@@ -13,7 +13,7 @@ const generate = (builder, serviceDescriptor) => {
   const clientName = `${serviceDescriptor.getName()}Client`;
 
   builder
-    .appendLineIdented(`class ${clientName} {`)
+    .appendLineIdented(`${clientName}: class ${clientName} {`)
     .appendLineIdented("constructor(address, credentials) {", 1)
     .appendLineIdented(`this._client = new ${clientName}Raw(address, credentials);`, 2)
     .appendLineIdented("grpcPromise.promisifyAll(this._client);", 2)
@@ -50,7 +50,7 @@ const generate = (builder, serviceDescriptor) => {
         .appendLineIdented("}", 1);
   });
 
-  return builder.appendLineIdented("};");
+  return builder.appendLineIdented("},");
 };
 
 module.exports = { generate };

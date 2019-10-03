@@ -7,6 +7,7 @@ const { FileDescriptorProto, DescriptorProto, FieldDescriptorProto } = require("
 const ImportsCatalog = require("./importsCatalog");
 const StringBuilder = require("./stringBuilder");
 const requiresGenerator = require("./subGenerators/requiresGenerator");
+const messagesGenerator = require("./subGenerators/messagesGenerator");
 const messagesTypingsGenerator = require("./subGenerators/messagesTypingsGenerator");
 const proxyGenerator = require("./subGenerators/proxyGenerator");
 const proxyTypingsGenerator = require("./subGenerators/proxyTypingsGenerator");
@@ -60,6 +61,23 @@ const getUsedImports = (importsCatalog, fileDescriptor) => {
 const getClientFullName = (packageName, clientName) => (packageName.length > 0 ? `${packageName}.${clientName}` : clientName);
 
 /**
+ * @param {StringBuilder} builder
+ * @param {*} container
+ * @returns {StringBuilder}
+ */
+const generateExportsStructure = (builder, container) => {
+  for (const [key, value] of Object.entries(container))
+    if (typeof value === "function") value(builder);
+    else
+      builder
+        .appendLineIdented(`${key}: {`)
+        .append(generateExportsStructure(new StringBuilder(builder.defaultIdent + 1), value).toString())
+        .appendLineIdented("},");
+
+  return builder;
+};
+
+/**
  * Generates JavaScript code for client
  * @param {ImportsCatalog} importsCatalog Imports catalog
  * @param {FileDescriptorProto} fileDescriptor Descriptor for proto file
@@ -67,12 +85,9 @@ const getClientFullName = (packageName, clientName) => (packageName.length > 0 ?
 const generateJs = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder
-    .appendLine('const { set } = require("dot-prop");')
-    .appendLine('const grpcPromise = require("grpc-promise");')
-    .appendLine();
+  builder.appendLine('const grpcPromise = require("grpc-promise");').appendLine();
 
-  builder.appendLine("let root = {};").appendLine();
+  const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
 
   importsCatalog.importedFiles.forEach(fileDescriptor => {
@@ -80,25 +95,27 @@ const generateJs = (importsCatalog, fileDescriptor) => {
     if (usedImports.has(fileName) === false) return;
 
     const packageName = fileDescriptor.getPackage();
-    if (packageName.length > 0)
-      builder.appendLine(`set(root, "${packageName}", require("${requiresGenerator.getRequirePath(fileName)}"));`);
-    else builder.appendLine(`root = Object.assign(root, require("${requiresGenerator.getRequirePath(fileName)}"));`);
+    const fileBaseName = path.basename(fileName, path.extname(fileName));
+    const namespaceName = packageName.length > 0 ? `${packageName}.${fileBaseName}` : fileBaseName;
+
+    builder.appendLine(`const ${requiresGenerator.getNamespace(fileName)} = require("${requiresGenerator.getRequirePath(fileName)}");`);
+    set(root, namespaceName, builder => messagesGenerator.generate(builder, fileDescriptor));
   });
-  builder.appendLine();
 
   const requirePath = requiresGenerator.getRequirePath(fileDescriptor.getName(), "grpc_pb");
   const clientsList = fileDescriptor.getServiceList().map(x => `${x.getName()}Client: ${x.getName()}ClientRaw`);
   builder.appendLine(`const { ${clientsList.join(", ")} } = require("${requirePath}");`).appendLine();
 
-  fileDescriptor.getServiceList().forEach(service => {
-    const clientName = `${service.getName()}Client`;
-    proxyGenerator
-      .generate(builder, service)
-      .appendLine(`set(root, "${getClientFullName(fileDescriptor.getPackage(), clientName)}", ${clientName});`)
-      .appendLine();
+  fileDescriptor.getServiceList().forEach(serviceDescriptor => {
+    const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
+    set(root, clientFullName, builder => proxyGenerator.generate(builder, serviceDescriptor, importsCatalog));
   });
 
-  return builder.appendLine("module.exports = root;").toString();
+  return builder
+    .appendLine("module.exports = {")
+    .append(generateExportsStructure(new StringBuilder(builder.defaultIdent + 1), root))
+    .appendLine("};")
+    .toString();
 };
 
 /**
