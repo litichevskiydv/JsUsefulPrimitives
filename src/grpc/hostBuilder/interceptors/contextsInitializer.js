@@ -1,4 +1,4 @@
-const asyncContexts = require("../../../async-context");
+const asyncContext = require("../../../async-context");
 
 module.exports = class Interceptor {
   constructor(serverContext) {
@@ -9,7 +9,7 @@ module.exports = class Interceptor {
     let traceId = call.metadata.get("trace_id")[0];
     if (!traceId) traceId = this._tracesIdsGenerator();
 
-    asyncContexts.storage.createContext().set("traceId", traceId);
+    asyncContext.storage.createContext().set("traceId", traceId);
     await next(call, callback);
   }
 };

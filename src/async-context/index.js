@@ -29,7 +29,7 @@ const createHook = contextStorage => {
     .createHook({
       init: function(asyncId, type, triggerId, resource) {
         const parentContext = contextStorage._contextsByExecutionsIds.get(triggerId);
-        if (parentContext) contextStorage._contextsByExecutionsIds.set(asyncId, parentContext);
+        if (parentContext) contextStorage._contextsByExecutionsIds.set(asyncId, new Map(parentContext));
       },
       destroy: function(asyncId) {
         contextStorage._contextsByExecutionsIds.delete(asyncId);
@@ -55,7 +55,7 @@ const createContext = contextName => {
     contextStorage = namedStorages.get(contextName);
 
     if (!contextStorage) {
-      const contextStorage = new ContextsStorage();
+      contextStorage = new ContextsStorage();
       namedStorages.set(contextName, contextStorage);
       createHook(contextStorage);
     }
