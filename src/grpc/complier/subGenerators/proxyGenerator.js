@@ -26,26 +26,26 @@ const generate = (builder, serviceDescriptor) => {
     const methodName = camelCase(method.getName());
     if (method.getClientStreaming() === true && method.getServerStreaming() === true)
       builder
-        .appendLineIdented(`async *${methodName}(messages) {`, 1)
+        .appendLineIdented(`async *${methodName}(messages, metadata, options) {`, 1)
         .appendLineIdented(`const channel = this._client.${methodName}();`, 2)
         .appendLineIdented("for (const message of messages) yield await channel.sendMessage(message);", 2)
         .appendLineIdented("channel.end();", 2)
         .appendLineIdented("}", 1);
     else if (method.getClientStreaming() === true)
       builder
-        .appendLineIdented(`async ${methodName}(messages) {`, 1)
+        .appendLineIdented(`async ${methodName}(messages, metadata, options) {`, 1)
         .appendLineIdented(`const channel = this._client.${methodName}();`, 2)
         .appendLineIdented("for (const message of messages) channel.sendMessage(message);", 2)
         .appendLineIdented("return await channel.end();", 2)
         .appendLineIdented("}", 1);
     else if (method.getServerStreaming() === true)
       builder
-        .appendLineIdented(`async ${methodName}(message) {`, 1)
+        .appendLineIdented(`async ${methodName}(message, metadata, options) {`, 1)
         .appendLineIdented(`return await this._client.${methodName}().sendMessage(message);`, 2)
         .appendLineIdented("}", 1);
     else
       builder
-        .appendLineIdented(`async ${methodName}(message) {`, 1)
+        .appendLineIdented(`async ${methodName}(message, metadata, options) {`, 1)
         .appendLineIdented(`return await this._client.${methodName}().sendMessage(message);`, 2)
         .appendLineIdented("}", 1);
   });

@@ -143,7 +143,7 @@ const generateTypesStructure = (builder, container) => {
 const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder.appendLineIdented('import { ChannelCredentials } from "grpc";').appendLine();
+  builder.appendLine('import { ChannelCredentials, Metadata } from "grpc";').appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
@@ -164,7 +164,14 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
     set(root, clientFullName, builder => proxyTypingsGenerator.generate(builder, serviceDescriptor, importsCatalog));
   });
 
-  return generateTypesStructure(builder.appendLine(), root).toString();
+  builder
+    .appendLine()
+    .appendLine("type CallOptions = {")
+    .appendLineIdented("timeoutMilliseconds: number;", 1)
+    .appendLine("};")
+    .appendLine();
+
+  return generateTypesStructure(builder, root).toString();
 };
 
 module.exports = { generateJs, generateTypings };
