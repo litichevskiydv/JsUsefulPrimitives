@@ -9,7 +9,7 @@ module.exports = class Interceptor {
     let traceId = call.metadata.get("trace_id")[0];
     if (!traceId) traceId = this._tracesIdsGenerator();
 
-    asyncContext.storage.createContext().set("traceId", traceId);
+    asyncContext.create().set("traceId", traceId);
     await next(call, callback);
   }
 };

@@ -41,7 +41,7 @@ const createHost = configurator => {
       sayHello: call => {
         const request = new ServerRequest(call.request);
         return new ServerResponse({
-          traceId: asyncContext.getValue("traceId"),
+          traceId: asyncContext.default.get("traceId"),
           message: `Hello, ${request.name}!`
         });
       }

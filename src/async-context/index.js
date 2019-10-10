@@ -14,11 +14,10 @@ const isContextNameEmpty = contextName => (contextName || "").trim().length === 
 
 /**
  * @param {string} [contextName]
- * @param {number} [executionAsyncId]
  * @returns {Map<any, any>}
  */
-const getContext = (contextName, executionAsyncId) => {
-  const contextsStorage = isContextNameEmpty(contextName) ? defaultStorage : namedStorages.get(contextName, executionAsyncId);
+const obtainContext = contextName => {
+  const contextsStorage = isContextNameEmpty(contextName) ? defaultStorage : namedStorages.get(contextName);
   return contextsStorage ? contextsStorage.getContext() : undefined;
 };
 
@@ -32,7 +31,7 @@ const createHook = contextStorage => {
         const parentContext = contextStorage._contextsByExecutionsIds.get(triggerId);
         if (parentContext) contextStorage._contextsByExecutionsIds.set(asyncId, new Map(parentContext));
       },
-      after: function(asyncId) {
+      destroy: function(asyncId) {
         contextStorage._contextsByExecutionsIds.delete(asyncId);
       }
     })
@@ -66,20 +65,20 @@ const createContext = contextName => {
 };
 
 const getValue = key => {
-  const context = getContext();
+  const context = obtainContext();
   return context ? context.get(key) : undefined;
 };
 
 const setValue = (key, value) => {
-  const context = getContext();
+  const context = obtainContext();
   if (context) context.set(key, value);
 };
 
 module.exports = {
-  storage: {
-    getContext,
-    createContext
-  },
-  getValue,
-  setValue
+  obtain: obtainContext,
+  create: createContext,
+  default: {
+    get: getValue,
+    set: setValue
+  }
 };

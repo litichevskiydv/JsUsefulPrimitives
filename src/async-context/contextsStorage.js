@@ -16,10 +16,9 @@ module.exports = class ContextsStorage {
   }
 
   /**
-   * @param {number} [executionAsyncId]
    * @returns {Map<any, any>}
    */
-  getContext(executionAsyncId) {
-    return this._contextsByExecutionsIds.get(executionAsyncId || asyncHooks.executionAsyncId());
+  getContext() {
+    return this._contextsByExecutionsIds.get(asyncHooks.executionAsyncId());
   }
 };
