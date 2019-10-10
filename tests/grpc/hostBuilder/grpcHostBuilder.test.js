@@ -4,7 +4,7 @@ const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
 const GrpcHostBuilder = require("../../../src/grpc/hostBuilder");
 const asyncContext = require("../../../src/async-context");
-const defaultContext = asyncContext.default;
+const defaultContext = asyncContext.defaultContext;
 
 const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {

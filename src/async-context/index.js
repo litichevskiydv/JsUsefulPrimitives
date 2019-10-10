@@ -77,7 +77,7 @@ const setValue = (key, value) => {
 module.exports = {
   obtain: obtainContext,
   create: createContext,
-  default: {
+  defaultContext: {
     get: getValue,
     set: setValue
   }

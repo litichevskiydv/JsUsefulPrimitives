@@ -1,6 +1,6 @@
 const asyncHooks = require("async_hooks");
 const asyncContext = require("../../src/async-context");
-const defaultContext = asyncContext.default;
+const defaultContext = asyncContext.defaultContext;
 
 test("Must pass context to child asynchronous operation", async () => {
   // Given
