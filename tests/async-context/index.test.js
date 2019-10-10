@@ -1,5 +1,6 @@
 const asyncHooks = require("async_hooks");
 const asyncContext = require("../../src/async-context");
+const defaultContext = asyncContext.default;
 
 test("Must pass context to child asynchronous operation", async () => {
   // Given
@@ -8,7 +9,7 @@ test("Must pass context to child asynchronous operation", async () => {
 
   // When
   asyncContext.create().set(key, initialValue);
-  const actualValue = await new Promise(resolve => resolve(asyncContext.default.get(key) + 2));
+  const actualValue = await new Promise(resolve => resolve(defaultContext.get(key) + 2));
 
   // Then
   const expectedValue = 5;
@@ -24,10 +25,10 @@ test("Must not corrupt parent context", async () => {
   asyncContext.create().set(key, initialValue);
   const actualValue = await new Promise(async resolve => {
     await new Promise(childResolve => {
-      asyncContext.default.set(key, asyncContext.default.get(key) + 2);
+      defaultContext.set(key, defaultContext.get(key) + 2);
       childResolve();
     });
-    resolve(asyncContext.default.get(key));
+    resolve(defaultContext.get(key));
   });
 
   // Then
