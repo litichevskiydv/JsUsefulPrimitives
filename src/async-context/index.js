@@ -13,11 +13,12 @@ const namedStorages = new Map();
 const isContextNameEmpty = contextName => (contextName || "").trim().length === 0;
 
 /**
- * @param {string}
+ * @param {string} [contextName]
+ * @param {number} [executionAsyncId]
  * @returns {Map<any, any>}
  */
-const getContext = contextName => {
-  const contextsStorage = isContextNameEmpty(contextName) ? defaultStorage : namedStorages.get(contextName);
+const getContext = (contextName, executionAsyncId) => {
+  const contextsStorage = isContextNameEmpty(contextName) ? defaultStorage : namedStorages.get(contextName, executionAsyncId);
   return contextsStorage ? contextsStorage.getContext() : undefined;
 };
 
@@ -39,7 +40,7 @@ const createHook = contextStorage => {
 };
 
 /**
- * @param {string} contextName
+ * @param {string} [contextName]
  * @returns {Map<any, any>}
  */
 const createContext = contextName => {
