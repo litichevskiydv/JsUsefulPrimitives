@@ -70,6 +70,7 @@ test("Must delete context after the operation is completed", async () => {
       )
     )
   );
+  await Promise.resolve();
 
   // Then
   const expectedValue = 5;
