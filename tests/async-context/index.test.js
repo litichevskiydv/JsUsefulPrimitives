@@ -51,3 +51,19 @@ test("Must pass named context to child asynchronous operation", async () => {
   const expectedValue = 3;
   expect(actualValue).toBe(expectedValue);
 });
+
+test("Must delete context after the operation is completed", async () => {
+  // Given
+  const key = "counter";
+  const initialValue = 3;
+
+  // When
+  asyncContext.storage.createContext().set(key, initialValue);
+  const actualComputedValue = await new Promise(resolve => resolve(asyncContext.getValue(key) + 2));
+  const actualInitialValue = asyncContext.getValue(key);
+
+  // Then
+  const expectedComputedValue = 5;
+  expect(actualComputedValue).toBe(expectedComputedValue);
+  expect(actualInitialValue).toBeUndefined();
+});
