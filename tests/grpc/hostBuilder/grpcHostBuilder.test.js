@@ -43,7 +43,7 @@ const createHost = configurator => {
       sayHello: call => {
         const request = new ServerRequest(call.request);
         return new ServerResponse({
-          traceId: defaultContext.get("traceId"),
+          spanId: defaultContext.get("spanId"),
           message: `Hello, ${request.name}!`
         });
       }
@@ -63,21 +63,21 @@ const getMessage = async name => {
   return message;
 };
 
-const getTraceId = async callerTraceId => {
+const getSpanId = async callerSpanId => {
   const metadata = new grpc.Metadata();
-  if (callerTraceId) metadata.set("trace_id", callerTraceId);
+  if (callerSpanId) metadata.set("span_id", callerSpanId);
   const request = new ServerRequest({ name: "Tester" });
 
   const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure());
-  const traceId = (await new Promise((resolve, reject) => {
+  const spanId = (await new Promise((resolve, reject) => {
     client.sayHello(request, metadata, (error, response) => {
       if (error) reject(error);
       else resolve(response);
     });
-  })).traceId;
+  })).spanId;
   client.close();
 
-  return traceId;
+  return spanId;
 };
 
 test("Must build simple server", async () => {
@@ -207,31 +207,16 @@ test("Must throw error if server method was not implemented", () => {
   expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
 });
 
-test("Must return new trace id if source was not supplied", async () => {
+test("Must return parent span id", async () => {
   // Given
-  const expectedTraceId = "test_trace_id";
-  const server = createHost(x => x.useTracesIdsGenerator(() => expectedTraceId));
+  const expectedSpanId = "test_span_id";
+  const server = createHost(x => x);
 
   // When
-  const actualTraceId = await getTraceId();
+  const actualSpanId = await getSpanId(expectedSpanId);
 
-  // When, Then
-  expect(actualTraceId).toBe(expectedTraceId);
-
-  server.forceShutdown();
-});
-
-test("Must return source trace id", async () => {
-  // Given
-  const newTraceId = "new_trace_id";
-  const expectedTraceId = "test_trace_id";
-  const server = createHost(x => x.useTracesIdsGenerator(() => newTraceId));
-
-  // When
-  const actualTraceId = await getTraceId(expectedTraceId);
-
-  // When, Then
-  expect(actualTraceId).toBe(expectedTraceId);
+  // Then
+  expect(actualSpanId).toBe(expectedSpanId);
 
   server.forceShutdown();
 });

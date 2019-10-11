@@ -1,15 +1,12 @@
 const asyncContext = require("../../../async-context");
 
 module.exports = class Interceptor {
-  constructor(serverContext) {
-    this._tracesIdsGenerator = serverContext.tracesIdsGenerator;
-  }
-
   async invoke(call, methodDefinition, callback, next) {
-    let traceId = call.metadata.get("trace_id")[0];
-    if (!traceId) traceId = this._tracesIdsGenerator();
+    const currentContext = asyncContext.create();
 
-    asyncContext.create().set("traceId", traceId);
+    const spanId = call.metadata.get("span_id")[0];
+    if (spanId) currentContext.set("spanId", spanId);
+
     await next(call, callback);
   }
 };

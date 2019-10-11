@@ -26,5 +26,5 @@ message HelloRequest {
 message HelloResponse {
   string message = 1;
 
-  string trace_id = 2;
+  string span_id = 2;
 }
