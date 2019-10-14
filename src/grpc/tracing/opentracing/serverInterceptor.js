@@ -1,4 +1,3 @@
-const os = require("os");
 const GRPCError = require("grpc-error");
 const opentracing = require("opentracing");
 const defaultContext = require("../../../async-context").defaultContext;
@@ -17,6 +16,8 @@ module.exports = async function(call, methodDefinition, callback, next) {
       span.setTag(opentracing.Tags.ERROR, true);
       span.log({ event: "error", "error.object": error, message: error.message, stack: error.stack });
     }
+
+    throw error;
   } finally {
     span.finish();
   }
