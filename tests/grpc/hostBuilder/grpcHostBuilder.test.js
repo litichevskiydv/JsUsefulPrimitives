@@ -43,7 +43,7 @@ const createHost = configurator => {
       sayHello: call => {
         const request = new ServerRequest(call.request);
         return new ServerResponse({
-          spanId: defaultContext.get("spanId"),
+          spanId: call.metadata.get("span_id")[0],
           message: `Hello, ${request.name}!`
         });
       }
@@ -207,7 +207,7 @@ test("Must throw error if server method was not implemented", () => {
   expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
 });
 
-test("Must return parent span id", async () => {
+test("Must transfer value through metadata", async () => {
   // Given
   const expectedSpanId = "test_span_id";
   const server = createHost(x => x);
