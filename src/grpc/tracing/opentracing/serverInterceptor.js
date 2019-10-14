@@ -1,23 +1,11 @@
 const os = require("os");
 const GRPCError = require("grpc-error");
 const opentracing = require("opentracing");
-const initTracer = require("jaeger-client").initTracer;
 const defaultContext = require("../../../async-context").defaultContext;
 
-const tracer = initTracer(
-  {
-    serviceName: rocess.env.npm_package_name
-  },
-  {
-    tags: {
-      [`${rocess.env.npm_package_name}.hostName`]: os.hostname(),
-      [`${rocess.env.npm_package_name}.version`]: process.env.npm_package_version,
-      [`${rocess.env.npm_package_name}.environment`]: process.env.NAMESPACE || process.env.NODE_ENV
-    }
-  }
-);
-
 module.exports = async function(call, methodDefinition, callback, next) {
+  const tracer = opentracing.globalTracer();
+
   const parentSpanContext = tracer.extract(opentracing.FORMAT_HTTP_HEADERS, call.metadata.getMap());
   const span = tracer.startSpan(methodDefinition.path, { childOf: parentSpanContext });
   defaultContext.set("currentSpan", span);
