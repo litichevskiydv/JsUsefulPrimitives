@@ -3,6 +3,8 @@ const grpc = require("grpc");
 const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
 const GrpcHostBuilder = require("../../../src/grpc/hostBuilder");
+const serverInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
+const clientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
 
 const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
@@ -37,6 +39,7 @@ const packageObject = grpc.loadPackageDefinition(
  */
 const createHost = configurator => {
   return configurator(new GrpcHostBuilder())
+    .addInterceptor(serverInterceptor)
     .addService(packageObject.v1.Greeter.service, {
       sayHello: call => {
         const request = new ServerRequest(call.request);
@@ -66,7 +69,7 @@ const getSpanId = async callerSpanId => {
   if (callerSpanId) metadata.set("span_id", callerSpanId);
   const request = new ServerRequest({ name: "Tester" });
 
-  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure());
+  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
   const spanId = (await new Promise((resolve, reject) => {
     client.sayHello(request, metadata, (error, response) => {
       if (error) reject(error);
@@ -205,7 +208,7 @@ test("Must throw error if server method was not implemented", () => {
   expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
 });
 
-test("Must transfer value through metadata", async () => {
+test.only("Must transfer value through metadata", async () => {
   // Given
   const expectedSpanId = "test_span_id";
   const server = createHost(x => x);
