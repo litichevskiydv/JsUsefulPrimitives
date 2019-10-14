@@ -208,7 +208,7 @@ test("Must throw error if server method was not implemented", () => {
   expect(() => builder.build()).toThrowWithMessage(Error, "Method /v1.Greeter/SayHello is not implemented");
 });
 
-test.only("Must transfer value through metadata", async () => {
+test("Must transfer value through metadata", async () => {
   // Given
   const expectedSpanId = "test_span_id";
   const server = createHost(x => x);
