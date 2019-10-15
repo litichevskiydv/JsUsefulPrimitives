@@ -14,8 +14,8 @@ const generate = (builder, serviceDescriptor) => {
 
   builder
     .appendLineIdented(`${clientName}: class ${clientName} {`)
-    .appendLineIdented("constructor(address, credentials) {", 1)
-    .appendLineIdented(`this._client = new ${clientName}Raw(address, credentials);`, 2)
+    .appendLineIdented("constructor(address, credentials, options) {", 1)
+    .appendLineIdented(`this._client = new ${clientName}Raw(address, credentials, options);`, 2)
     .appendLineIdented("grpcPromise.promisifyAll(this._client);", 2)
     .appendLineIdented("}", 1)
     .appendLineIdented("close() {", 1)

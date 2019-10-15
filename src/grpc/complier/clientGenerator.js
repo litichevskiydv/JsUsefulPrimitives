@@ -9,6 +9,7 @@ const StringBuilder = require("./stringBuilder");
 const requiresGenerator = require("./subGenerators/requiresGenerator");
 const messagesGenerator = require("./subGenerators/messagesGenerator");
 const messagesTypingsGenerator = require("./subGenerators/messagesTypingsGenerator");
+const clientOptionsTypingGenerator = require("./subGenerators/clientOptionsTypingGenerator");
 const proxyGenerator = require("./subGenerators/proxyGenerator");
 const proxyTypingsGenerator = require("./subGenerators/proxyTypingsGenerator");
 
@@ -143,7 +144,7 @@ const generateTypesStructure = (builder, container) => {
 const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder.appendLine('import { ChannelCredentials, Metadata, CallOptions } from "grpc";').appendLine();
+  builder.appendLine('import { ChannelCredentials, Metadata, CallOptions, InterceptingCall, MethodDefinition } from "grpc";').appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
@@ -163,6 +164,8 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
     const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
     set(root, clientFullName, builder => proxyTypingsGenerator.generate(builder, serviceDescriptor, importsCatalog));
   });
+
+  clientOptionsTypingGenerator.generate(builder.appendLine());
 
   return generateTypesStructure(builder.appendLine(), root).toString();
 };
