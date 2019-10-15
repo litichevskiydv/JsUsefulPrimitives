@@ -16,7 +16,6 @@ const generate = (builder, serviceDescriptor) => {
     .appendLineIdented(`${clientName}: class ${clientName} {`)
     .appendLineIdented("constructor(address, credentials, options) {", 1)
     .appendLineIdented(`this._client = new ${clientName}Raw(address, credentials, options);`, 2)
-    .appendLineIdented("grpcPromise.promisifyAll(this._client);", 2)
     .appendLineIdented("}", 1)
     .appendLineIdented("close() {", 1)
     .appendLineIdented("this._client.close();", 2)
@@ -46,7 +45,12 @@ const generate = (builder, serviceDescriptor) => {
     else
       builder
         .appendLineIdented(`async ${methodName}(message, metadata, options) {`, 1)
-        .appendLineIdented(`return await this._client.${methodName}().sendMessage(message);`, 2)
+        .appendLineIdented("return await new Promise((resolve, reject) => {", 2)
+        .appendLineIdented(`this._client.${methodName}(message, metadata, options, (error, response) => {`, 3)
+        .appendLineIdented("if (error) reject(error);", 4)
+        .appendLineIdented("else resolve(response);", 4)
+        .appendLineIdented("});", 3)
+        .appendLineIdented("});", 2)
         .appendLineIdented("}", 1);
   });
 

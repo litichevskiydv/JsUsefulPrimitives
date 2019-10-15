@@ -86,8 +86,6 @@ const generateExportsStructure = (builder, container) => {
 const generateJs = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  builder.appendLine('const grpcPromise = require("grpc-promise");').appendLine();
-
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
 

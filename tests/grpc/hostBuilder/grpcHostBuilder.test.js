@@ -57,7 +57,7 @@ const getMessage = async name => {
   const request = new ClientRequest();
   request.setName(name);
 
-  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
   const message = (await client.sayHello(request)).getMessage();
   client.close();
 
@@ -67,15 +67,12 @@ const getMessage = async name => {
 const getSpanId = async callerSpanId => {
   const metadata = new grpc.Metadata();
   if (callerSpanId) metadata.set("span_id", callerSpanId);
-  const request = new ServerRequest({ name: "Tester" });
 
-  const client = new packageObject.v1.Greeter(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
-  const spanId = (await new Promise((resolve, reject) => {
-    client.sayHello(request, metadata, (error, response) => {
-      if (error) reject(error);
-      else resolve(response);
-    });
-  })).spanId;
+  const request = new ClientRequest();
+  request.setName("Tester");
+
+  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
+  const spanId = (await client.sayHello(request, metadata)).getSpanId();
   client.close();
 
   return spanId;
