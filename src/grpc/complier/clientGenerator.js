@@ -118,6 +118,17 @@ const generateJs = (importsCatalog, fileDescriptor) => {
 };
 
 /**
+ * @param {FileDescriptorProto} fileDescriptor
+ * @returns {boolean}
+ */
+const isRxJsNeeded = fileDescriptor =>
+  fileDescriptor
+    .getServiceList()
+    .some(serviceDescriptor =>
+      serviceDescriptor.getMethodList().some(method => method.getClientStreaming() === true || method.getServerStreaming() === true)
+    );
+
+/**
  * @param {StringBuilder} builder
  * @param {*} container
  * @returns {StringBuilder}
@@ -142,11 +153,11 @@ const generateTypesStructure = (builder, container) => {
 const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
+  if (isRxJsNeeded(fileDescriptor)) builder.appendLine('import { Subscribable } from "rxjs";');
   builder.appendLine('import { ChannelCredentials, Metadata, CallOptions, InterceptingCall, MethodDefinition } from "grpc";').appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
-
   importsCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
     if (usedImports.has(fileName) === false) return;
@@ -164,7 +175,6 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
   });
 
   clientOptionsTypingGenerator.generate(builder.appendLine());
-
   return generateTypesStructure(builder.appendLine(), root).toString();
 };
 

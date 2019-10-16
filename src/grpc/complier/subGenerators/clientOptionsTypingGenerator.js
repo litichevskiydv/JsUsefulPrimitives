@@ -6,7 +6,6 @@ const StringBuilder = require("../stringBuilder");
  */
 const generate = builder =>
   builder
-    .appendLine()
     .appendLine("type NextCall = (options: CallOptions) => InterceptingCall;")
     .appendLine("type Interceptor = (options: CallOptions, nextCall: NextCall) => InterceptingCall;")
     .appendLine("type InterceptorProvider = (methodDefinition: MethodDefinition<any, any>) => Interceptor | null;")
