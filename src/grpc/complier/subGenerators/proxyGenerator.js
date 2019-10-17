@@ -53,8 +53,8 @@ const generate = (builder, serviceDescriptor) => {
         .appendLineIdented("}", 1);
     else if (method.getServerStreaming() === true)
       builder
-        .appendLineIdented(`async ${methodName}(message, metadata, options) {`, 1)
-        .appendLineIdented(`return await this._client.${methodName}().sendMessage(message);`, 2)
+        .appendLineIdented(`${methodName}(message, metadata, options) {`, 1)
+        .appendLineIdented(`return streamToRx(this._client.${methodName}(message, metadata, options));`, 2)
         .appendLineIdented("}", 1);
     else
       builder

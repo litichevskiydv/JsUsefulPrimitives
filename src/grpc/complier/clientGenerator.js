@@ -62,6 +62,15 @@ const getUsedImports = (importsCatalog, fileDescriptor) => {
 const getClientFullName = (packageName, clientName) => (packageName.length > 0 ? `${packageName}.${clientName}` : clientName);
 
 /**
+ * @param {FileDescriptorProto} fileDescriptor
+ * @returns {boolean}
+ */
+const isRxJsStreamNeeded = fileDescriptor =>
+  fileDescriptor
+    .getServiceList()
+    .some(serviceDescriptor => serviceDescriptor.getMethodList().some(method => method.getServerStreaming() === true));
+
+/**
  * @param {StringBuilder} builder
  * @param {*} container
  * @returns {StringBuilder}
@@ -86,9 +95,10 @@ const generateExportsStructure = (builder, container) => {
 const generateJs = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
+  if (isRxJsStreamNeeded(fileDescriptor)) builder.appendLine('const { streamToRx } = require("rxjs-stream")').appendLine();
+
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
-
   importsCatalog.importedFiles.forEach(fileDescriptor => {
     const fileName = fileDescriptor.getName();
     if (usedImports.has(fileName) === false) return;
@@ -153,7 +163,7 @@ const generateTypesStructure = (builder, container) => {
 const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  if (isRxJsNeeded(fileDescriptor)) builder.appendLine('import { Subscribable } from "rxjs";');
+  if (isRxJsNeeded(fileDescriptor)) builder.appendLine('import { Subscribable, Observable } from "rxjs";');
   builder.appendLine('import { ChannelCredentials, Metadata, CallOptions, InterceptingCall, MethodDefinition } from "grpc";').appendLine();
 
   const root = {};

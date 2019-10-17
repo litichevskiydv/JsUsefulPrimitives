@@ -28,7 +28,7 @@ const generate = (builder, serviceDescriptor, importsCatalog) => {
     else if (method.getClientStreaming() === true)
       builder.appendLineIdented(`${methodName}(messages: Subscribable<${inputTypeName}>, metadata?: Metadata, options?: CallOptions): Promise<${outputTypeName}>;`, 1); // prettier-ignore
     else if (method.getServerStreaming() === true)
-      builder.appendLineIdented(`${methodName}(message: ${inputTypeName}, metadata?: Metadata, options?: CallOptions): Promise<Array<${outputTypeName}>>;`, 1); // prettier-ignore
+      builder.appendLineIdented(`${methodName}(message: ${inputTypeName}, metadata?: Metadata, options?: CallOptions): Observable<${outputTypeName}>;`, 1); // prettier-ignore
     else builder.appendLineIdented(`${methodName}(message: ${inputTypeName}, metadata?: Metadata, options?: CallOptions): Promise<${outputTypeName}>;`, 1); // prettier-ignore
   });
 
