@@ -34,7 +34,7 @@ const generate = (builder, serviceDescriptor) => {
       builder
         .appendLineIdented(`async ${methodName}(messages, metadata, options) {`, 1)
         .appendLineIdented("return await new Promise((resolve, reject) => {", 2)
-        .appendLineIdented(`const stream = this._client.${methodName}(message, metadata, options, (error, response) => {`, 3)
+        .appendLineIdented(`const stream = this._client.${methodName}(metadata, options, (error, response) => {`, 3)
         .appendLineIdented("if (error) reject(error);", 4)
         .appendLineIdented("else resolve(response);", 4)
         .appendLineIdented("});", 3)
