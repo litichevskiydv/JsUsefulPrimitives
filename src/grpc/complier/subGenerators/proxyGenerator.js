@@ -25,10 +25,20 @@ const generate = (builder, serviceDescriptor) => {
     const methodName = camelCase(method.getName());
     if (method.getClientStreaming() === true && method.getServerStreaming() === true)
       builder
-        .appendLineIdented(`async *${methodName}(messages, metadata, options) {`, 1)
-        .appendLineIdented(`const channel = this._client.${methodName}();`, 2)
-        .appendLineIdented("for (const message of messages) yield await channel.sendMessage(message);", 2)
-        .appendLineIdented("channel.end();", 2)
+        .appendLineIdented(`${methodName}(messages, metadata, options) {`, 1)
+        .appendLineIdented(`const stream = this._client.${methodName}(metadata, options);`, 2)
+        .appendLineIdented("messages.subscribe({", 2)
+        .appendLineIdented("next(message) {", 3)
+        .appendLineIdented("stream.write(message);", 4)
+        .appendLineIdented("},", 3)
+        .appendLineIdented("error(err) {", 3)
+        .appendLineIdented("throw err;", 4)
+        .appendLineIdented("},", 3)
+        .appendLineIdented("complete() {", 3)
+        .appendLineIdented("stream.end();", 4)
+        .appendLineIdented("}", 3)
+        .appendLineIdented("});", 2)
+        .appendLineIdented(`return streamToRx(stream);`, 2)
         .appendLineIdented("}", 1);
     else if (method.getClientStreaming() === true)
       builder
