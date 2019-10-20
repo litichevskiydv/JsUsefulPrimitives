@@ -9,6 +9,8 @@ module.exports = async function(call, methodDefinition, callback, next) {
   const span = tracer.startSpan(methodDefinition.path, { childOf: parentSpanContext });
   defaultContext.set("currentSpan", span);
 
+  if (call.request) span.setTag("request", JSON.stringify(call.request));
+
   try {
     await next(call, callback);
   } catch (error) {
