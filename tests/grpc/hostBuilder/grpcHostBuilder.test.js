@@ -2,7 +2,7 @@ const path = require("path");
 const grpc = require("grpc");
 const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
-const GrpcHostBuilder = require("../../../src/grpc/hostBuilder");
+const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const serverInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
 const clientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
 
