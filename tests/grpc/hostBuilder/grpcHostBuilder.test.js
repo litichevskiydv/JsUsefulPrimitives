@@ -5,11 +5,17 @@ const protoLoader = require("@grpc/proto-loader");
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const serverInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
 const clientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
+const { from } = require("rxjs");
+const { reduce } = require("rxjs/operators");
 
-const { HelloRequest: ServerRequest, HelloResponse: ServerResponse } = require("../../../src/grpc/generated/server/greeter_pb").v1;
+const {
+  HelloRequest: ServerRequest,
+  HelloResponse: ServerResponse,
+  SumResponse: ServerIngoingStreamingResponse
+} = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
   HelloRequest: ClientRequest,
-  HelloResponse: ClientResponse,
+  SumRequest: ClientOutgoingStreamingRequest,
   GreeterClient
 } = require("../../../src/grpc/generated/client/greeter_client_pb").v1;
 
@@ -47,7 +53,14 @@ const createHost = configurator => {
           spanId: call.metadata.get("span_id")[0],
           message: `Hello, ${request.name}!`
         });
-      }
+      },
+      sum: source =>
+        source.pipe(
+          reduce((acc, one) => {
+            acc.result = acc.result + one.number;
+            return acc;
+          }, new ServerIngoingStreamingResponse({ result: 0 }))
+        )
     })
     .bind(grpcBind)
     .build();
@@ -78,7 +91,7 @@ const getSpanId = async callerSpanId => {
   return spanId;
 };
 
-test("Must build simple server", async () => {
+test("Must perform unary call", async () => {
   // Given
   const server = createHost(x => x);
 
@@ -88,6 +101,30 @@ test("Must build simple server", async () => {
 
   // Then
   expect(actualMessage).toBe("Hello, Tom!");
+});
+
+test("Must perform client streaming call", async () => {
+  // Given
+  const server = createHost(x => x);
+  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+  const numbers = [1, 2, 3, 4, 5, 6, 7];
+
+  // When
+  const actualSum = (await client.sum(
+    from(
+      numbers.map(x => {
+        const request = new ClientOutgoingStreamingRequest();
+        request.setNumber(x);
+        return request;
+      })
+    )
+  )).getResult();
+  client.close();
+  server.forceShutdown();
+
+  // Then
+  const expectedSum = numbers.reduce((acc, one) => acc + one, 0);
+  expect(actualSum).toBe(expectedSum);
 });
 
 test("Must build server with stateless interceptors", async () => {

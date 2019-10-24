@@ -10,7 +10,7 @@ import {
   ServerCredentials,
   Server
 } from "grpc";
-import { type } from "os";
+import { Observable } from "rxjs";
 
 export class GrpcHostBuilder {
   /**
@@ -102,8 +102,9 @@ type serviceMethodImplementation<RequestType, ResponseType> =
   | handleBidiStreamingCall<RequestType, ResponseType>;
 type serviceUnaryMethodImplementation<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>;
 type serviceClientStreamingMethodImplementation<RequestType, ResponseType> = (
-  call: ServerReadableStream<RequestType>
-) => Promise<ResponseType>;
+  source: Observable<RequestType>,
+  metadata: Metadata
+) => Promise<Observable<ResponseType>>;
 
 interface IInterceptor {
   /**

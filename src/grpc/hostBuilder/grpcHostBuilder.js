@@ -1,4 +1,6 @@
 const { Server, ServerCredentials } = require("grpc");
+const { streamToRx } = require("rxjs-stream");
+
 const { createLogger } = require("./logging/defaultLoggersFactory");
 const ExceptionsHandler = require("./interceptors/exceptionsHandler");
 const ContextsInitializer = require("./interceptors/contextsInitializer");
@@ -73,11 +75,22 @@ module.exports = class GrpcHostBuilder {
     if (methodImplementation === undefined) throw new Error(`Method ${methodDefinition.path} is not implemented`);
     methodImplementation = methodImplementation.bind(serviceImplementation);
 
+    let serviceCallHandler = null;
     const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
-    let serviceCallHandler =
-      methodType === "unary" || methodType === "client_stream"
-        ? async (call, callback) => callback(null, await methodImplementation(call))
-        : methodImplementation;
+    if (methodType === "unary") serviceCallHandler = async (call, callback) => callback(null, await methodImplementation(call));
+    else if (methodType === "client_stream")
+      serviceCallHandler = async (call, callback) => {
+        const result = await methodImplementation(streamToRx(call), call.metadata);
+        result.subscribe({
+          next(message) {
+            callback(null, message);
+          },
+          error(err) {
+            callback(err);
+          }
+        });
+      };
+    else serviceCallHandler = methodImplementation;
 
     for (let i = this._interceptorsDefinitions.length - 1; i > -1; i--) {
       const interceptorDefinition = this._interceptorsDefinitions[i];
