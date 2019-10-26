@@ -54,8 +54,8 @@ const createHost = configurator => {
           message: `Hello, ${request.name}!`
         });
       },
-      sum: source =>
-        source.pipe(
+      sum: call =>
+        call.source.pipe(
           reduce((acc, one) => {
             acc.result = acc.result + one.number;
             return acc;

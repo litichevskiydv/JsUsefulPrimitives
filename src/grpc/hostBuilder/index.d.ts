@@ -83,28 +83,51 @@ type handleServiceCall<RequestType, ResponseType> =
   | handleClientStreamingCall<RequestType, ResponseType>
   | handleServerStreamingCall<RequestType, ResponseType>
   | handleBidiStreamingCall<RequestType, ResponseType>;
-type handleUnaryCall<RequestType, ResponseType> = (
-  call: ServerUnaryCall<RequestType>,
-  callback: sendUnaryData<ResponseType>
-) => Promise<void>;
-type handleClientStreamingCall<RequestType, ResponseType> = (
-  call: ServerReadableStream<RequestType>,
-  callback: sendUnaryData<ResponseType>
-) => Promise<void>;
+type handleUnaryCall<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>, callback: sendUnaryData<ResponseType>) => Promise<void>; // prettier-ignore
+type handleClientStreamingCall<RequestType, ResponseType> = (call: ServerReadableStream<RequestType>, callback: sendUnaryData<ResponseType>) => Promise<void>; // prettier-ignore
 type handleServerStreamingCall<RequestType, ResponseType> = (call: ServerWriteableStream<RequestType>) => Promise<void>;
 type handleBidiStreamingCall<RequestType, ResponseType> = (call: ServerDuplexStream<RequestType, ResponseType>) => Promise<void>;
 
-type UntypedServiceImplementation = { [name: string]: serviceMethodImplementation<any, any> };
+/**
+ * Used for calls that are streaming from the client side.
+ */
+export interface ServerIngoingStreamingCall<RequestType> {
+  /**
+   * Indicates if the call has been cancelled
+   */
+  cancelled: boolean;
+
+  /**
+   * The request metadata from the client
+   */
+  metadata: Metadata;
+
+  /**
+   * Client streaming data
+   */
+  source: Observable<RequestType>;
+
+  /**
+   * Get the endpoint this call/stream is connected to.
+   * @return The URI of the endpoint
+   */
+  getPeer(): string;
+
+  /**
+   * Send the initial metadata for a writable stream.
+   * @param responseMetadata Metadata to send
+   */
+  sendMetadata(responseMetadata: Metadata): void;
+}
+
 type serviceMethodImplementation<RequestType, ResponseType> =
   | serviceUnaryMethodImplementation<RequestType, ResponseType>
   | serviceClientStreamingMethodImplementation<RequestType, ResponseType>
   | handleServerStreamingCall<RequestType, ResponseType>
   | handleBidiStreamingCall<RequestType, ResponseType>;
 type serviceUnaryMethodImplementation<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>;
-type serviceClientStreamingMethodImplementation<RequestType, ResponseType> = (
-  source: Observable<RequestType>,
-  metadata: Metadata
-) => Promise<Observable<ResponseType>>;
+type serviceClientStreamingMethodImplementation<RequestType, ResponseType> = (call: ServerIngoingStreamingCall<RequestType>) => Promise<Observable<ResponseType> | ResponseType>; // prettier-ignore
+type UntypedServiceImplementation = { [name: string]: serviceMethodImplementation<any, any> };
 
 interface IInterceptor {
   /**

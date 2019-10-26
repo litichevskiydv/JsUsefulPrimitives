@@ -1,37 +1,10 @@
 const { Server, ServerCredentials } = require("grpc");
-const { streamToRx } = require("rxjs-stream");
 
 const { createLogger } = require("./logging/defaultLoggersFactory");
 const ExceptionsHandler = require("./interceptors/exceptionsHandler");
 const ContextsInitializer = require("./interceptors/contextsInitializer");
 
 module.exports = class GrpcHostBuilder {
-  static _wrapUnaryImplementation(methodImplementation) {
-    return async (call, callback) => callback(null, await methodImplementation(call));
-  }
-
-  static _wrapIngoingStreamingImplementation(methodImplementation) {
-    return async (call, callback) => {
-      const result = await methodImplementation(streamToRx(call), call.metadata);
-      result.subscribe({
-        next(message) {
-          callback(null, message);
-        },
-        error(err) {
-          callback(err);
-        }
-      });
-    };
-  }
-
-  static _wrapOutgoingStreamingImplementation(methodImplementation) {
-    return methodImplementation;
-  }
-
-  static _wrapBidirectionalStreamingImplementation(methodImplementation) {
-    return methodImplementation;
-  }
-
   /**
    * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
    */
@@ -40,10 +13,10 @@ module.exports = class GrpcHostBuilder {
     this._interceptorsDefinitions = [];
     this._servicesDefinitions = [];
     this._methodsImplementationsWrappers = new Map()
-      .set("unary", GrpcHostBuilder._wrapUnaryImplementation)
-      .set("client_stream", GrpcHostBuilder._wrapIngoingStreamingImplementation)
-      .set("server_stream", GrpcHostBuilder._wrapOutgoingStreamingImplementation)
-      .set("bidi", GrpcHostBuilder._wrapBidirectionalStreamingImplementation);
+      .set("unary", require("./implementationsWrappers/unaryCall"))
+      .set("client_stream", require("./implementationsWrappers/ingoingStreamingCall"))
+      .set("server_stream", require("./implementationsWrappers/outgoingStreamingCall"))
+      .set("bidi", require("./implementationsWrappers/bidirectionalStreamingCall"));
 
     this._server = new Server(options);
     this._serverContext = { createLogger };
