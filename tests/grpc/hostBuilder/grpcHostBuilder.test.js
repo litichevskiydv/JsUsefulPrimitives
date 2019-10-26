@@ -9,12 +9,12 @@ const { from } = require("rxjs");
 const { reduce } = require("rxjs/operators");
 
 const {
-  HelloRequest: ServerRequest,
-  HelloResponse: ServerResponse,
+  HelloRequest: ServerUnaryRequest,
+  HelloResponse: ServerUnaryResponse,
   SumResponse: ServerIngoingStreamingResponse
 } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
-  HelloRequest: ClientRequest,
+  HelloRequest: ClientUnaryRequest,
   SumRequest: ClientOutgoingStreamingRequest,
   GreeterClient
 } = require("../../../src/grpc/generated/client/greeter_client_pb").v1;
@@ -48,8 +48,8 @@ const createHost = configurator => {
     .addInterceptor(serverInterceptor)
     .addService(packageObject.v1.Greeter.service, {
       sayHello: call => {
-        const request = new ServerRequest(call.request);
-        return new ServerResponse({
+        const request = new ServerUnaryRequest(call.request);
+        return new ServerUnaryResponse({
           spanId: call.metadata.get("span_id")[0],
           message: `Hello, ${request.name}!`
         });
@@ -67,7 +67,7 @@ const createHost = configurator => {
 };
 
 const getMessage = async name => {
-  const request = new ClientRequest();
+  const request = new ClientUnaryRequest();
   request.setName(name);
 
   const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
@@ -81,7 +81,7 @@ const getSpanId = async callerSpanId => {
   const metadata = new grpc.Metadata();
   if (callerSpanId) metadata.set("span_id", callerSpanId);
 
-  const request = new ClientRequest();
+  const request = new ClientUnaryRequest();
   request.setName("Tester");
 
   const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
