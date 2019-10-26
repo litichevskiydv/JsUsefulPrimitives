@@ -6,6 +6,32 @@ const ExceptionsHandler = require("./interceptors/exceptionsHandler");
 const ContextsInitializer = require("./interceptors/contextsInitializer");
 
 module.exports = class GrpcHostBuilder {
+  static _wrapUnaryImplementation(methodImplementation) {
+    return async (call, callback) => callback(null, await methodImplementation(call));
+  }
+
+  static _wrapIngoingStreamingImplementation(methodImplementation) {
+    return async (call, callback) => {
+      const result = await methodImplementation(streamToRx(call), call.metadata);
+      result.subscribe({
+        next(message) {
+          callback(null, message);
+        },
+        error(err) {
+          callback(err);
+        }
+      });
+    };
+  }
+
+  static _wrapOutgoingStreamingImplementation(methodImplementation) {
+    return methodImplementation;
+  }
+
+  static _wrapBidirectionalStreamingImplementation(methodImplementation) {
+    return methodImplementation;
+  }
+
   /**
    * @param {object} [options] grpc native options https://grpc.io/grpc/cpp/group__grpc__arg__keys.html
    */
@@ -13,6 +39,11 @@ module.exports = class GrpcHostBuilder {
     this._index = 0;
     this._interceptorsDefinitions = [];
     this._servicesDefinitions = [];
+    this._methodsImplementationsWrappers = new Map()
+      .set("unary", GrpcHostBuilder._wrapUnaryImplementation)
+      .set("client_stream", GrpcHostBuilder._wrapIngoingStreamingImplementation)
+      .set("server_stream", GrpcHostBuilder._wrapOutgoingStreamingImplementation)
+      .set("bidi", GrpcHostBuilder._wrapBidirectionalStreamingImplementation);
 
     this._server = new Server(options);
     this._serverContext = { createLogger };
@@ -75,22 +106,8 @@ module.exports = class GrpcHostBuilder {
     if (methodImplementation === undefined) throw new Error(`Method ${methodDefinition.path} is not implemented`);
     methodImplementation = methodImplementation.bind(serviceImplementation);
 
-    let serviceCallHandler = null;
     const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
-    if (methodType === "unary") serviceCallHandler = async (call, callback) => callback(null, await methodImplementation(call));
-    else if (methodType === "client_stream")
-      serviceCallHandler = async (call, callback) => {
-        const result = await methodImplementation(streamToRx(call), call.metadata);
-        result.subscribe({
-          next(message) {
-            callback(null, message);
-          },
-          error(err) {
-            callback(err);
-          }
-        });
-      };
-    else serviceCallHandler = methodImplementation;
+    let serviceCallHandler = this._methodsImplementationsWrappers.get(methodType)(methodImplementation);
 
     for (let i = this._interceptorsDefinitions.length - 1; i > -1; i--) {
       const interceptorDefinition = this._interceptorsDefinitions[i];
