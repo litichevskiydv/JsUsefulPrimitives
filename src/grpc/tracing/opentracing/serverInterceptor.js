@@ -14,11 +14,9 @@ module.exports = async function(call, methodDefinition, callback, next) {
   try {
     await next(call, callback);
   } catch (error) {
-    if (error instanceof GRPCError === false && error.constructor.toString() !== GRPCError.toString()) {
-      span.setTag(opentracing.Tags.ERROR, true);
-      span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);
-      span.log({ event: "error", "error.object": error, message: error.message, stack: error.stack });
-    }
+    span.setTag(opentracing.Tags.ERROR, true);
+    span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);
+    span.log({ event: "error", "error.object": error, message: error.message, stack: error.stack });
 
     throw error;
   } finally {
