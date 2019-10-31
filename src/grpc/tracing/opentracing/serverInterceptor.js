@@ -1,4 +1,3 @@
-const GRPCError = require("grpc-error");
 const opentracing = require("opentracing");
 const defaultContext = require("../../../async-context").defaultContext;
 
