@@ -40,6 +40,16 @@ message RangeResponse {
   int32 result = 1;
 }
 
+// Ingoing number
+message SelectRequest {
+  int32 value = 1;
+}
+
+// Outgoing number
+message SelectResponse {
+  int32 value = 1;
+}
+
 // The demo service definition.
 service Greeter {
   // Sends a greeting
@@ -62,6 +72,14 @@ service Greeter {
   rpc Range (RangeRequest) returns (stream RangeResponse) {
     option (google.api.http) = {
       post: "/v1/range"
+      body: "*"
+    };
+  }
+
+  // Generates bounded sequence of numbers
+  rpc Select (stream SelectRequest) returns (stream SelectResponse) {
+    option (google.api.http) = {
+      post: "/v1/select"
       body: "*"
     };
   }

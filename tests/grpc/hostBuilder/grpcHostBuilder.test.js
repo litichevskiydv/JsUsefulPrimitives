@@ -5,20 +5,22 @@ const protoLoader = require("@grpc/proto-loader");
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const serverInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
 const clientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
-const { from, Observable } = require("rxjs");
-const { reduce } = require("rxjs/operators");
+const { from, Observable, Subject } = require("rxjs");
+const { map, reduce } = require("rxjs/operators");
 
 const {
   HelloRequest: ServerUnaryRequest,
   HelloResponse: ServerUnaryResponse,
   SumResponse: ServerIngoingStreamingResponse,
   RangeRequest: ServerOutgoingStreamingRequest,
-  RangeResponse: ServerOutgoingStreamingResponse
+  RangeResponse: ServerOutgoingStreamingResponse,
+  SelectResponse: ServerBidiStreamingResponse
 } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
   HelloRequest: ClientUnaryRequest,
   SumRequest: ClientOutgoingStreamingRequest,
   RangeRequest: ClientIngoingStreamingRequest,
+  SelectRequest: ClientBidiStreamingRequest,
   GreeterClient
 } = require("../../../src/grpc/generated/client/greeter_client_pb").v1;
 
@@ -70,7 +72,8 @@ const createHost = configurator => {
           for (let i = request.from; i <= request.to; i++) subscriber.next(new ServerOutgoingStreamingResponse({ result: i }));
           subscriber.complete();
         });
-      }
+      },
+      select: call => call.source.pipe(map(x => new ServerBidiStreamingResponse({ value: x.value + 1 })))
     })
     .bind(grpcBind)
     .build();
@@ -155,6 +158,39 @@ test("Must perform server streaming call", async () => {
 
   // Then
   const expectedNumbers = [1, 2, 3];
+  expect(actualNumbers).toEqual(expectedNumbers);
+});
+
+test("Must perform bidirectional streaming call", async () => {
+  // Given
+  const server = createHost(x => x);
+  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+
+  // When
+  const actualNumbers = [];
+  const input = new Subject();
+  const output = client.select(input);
+  output.subscribe(message => {
+    actualNumbers.push(message.getValue());
+
+    if (message <= 5) {
+      const request = new ClientBidiStreamingRequest();
+      request.setValue(message.getValue() + 1);
+
+      input.next(request);
+    } else input.complete();
+  });
+
+  const firstRequest = new ClientBidiStreamingRequest();
+  firstRequest.setValue(1);
+  input.next(firstRequest);
+
+  await output.toPromise();
+  client.close();
+  server.forceShutdown();
+
+  // Then
+  const expectedNumbers = [2, 4, 6];
   expect(actualNumbers).toEqual(expectedNumbers);
 });
 
