@@ -28,6 +28,18 @@ message SumResponse {
   int32 result = 1;
 }
 
+// The request message containing numbers range.
+message RangeRequest {
+  int32 from = 1;
+
+  int32 to = 2;
+}
+
+// The request message containing generated number.
+message RangeResponse {
+  int32 result = 1;
+}
+
 // The demo service definition.
 service Greeter {
   // Sends a greeting
@@ -42,6 +54,14 @@ service Greeter {
   rpc Sum (stream SumRequest) returns (SumResponse) {
     option (google.api.http) = {
       post: "/v1/sum"
+      body: "*"
+    };
+  }
+
+  // Generates sequence of numbers within the given borders
+  rpc Range (RangeRequest) returns (stream RangeResponse) {
+    option (google.api.http) = {
+      post: "/v1/range"
       body: "*"
     };
   }

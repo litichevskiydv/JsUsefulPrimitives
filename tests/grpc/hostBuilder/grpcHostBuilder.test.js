@@ -5,17 +5,20 @@ const protoLoader = require("@grpc/proto-loader");
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const serverInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
 const clientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
-const { from } = require("rxjs");
+const { from, Observable } = require("rxjs");
 const { reduce } = require("rxjs/operators");
 
 const {
   HelloRequest: ServerUnaryRequest,
   HelloResponse: ServerUnaryResponse,
-  SumResponse: ServerIngoingStreamingResponse
+  SumResponse: ServerIngoingStreamingResponse,
+  RangeRequest: ServerOutgoingStreamingRequest,
+  RangeResponse: ServerOutgoingStreamingResponse
 } = require("../../../src/grpc/generated/server/greeter_pb").v1;
 const {
   HelloRequest: ClientUnaryRequest,
   SumRequest: ClientOutgoingStreamingRequest,
+  RangeRequest: ClientIngoingStreamingRequest,
   GreeterClient
 } = require("../../../src/grpc/generated/client/greeter_client_pb").v1;
 
@@ -60,7 +63,14 @@ const createHost = configurator => {
             acc.result = acc.result + one.number;
             return acc;
           }, new ServerIngoingStreamingResponse({ result: 0 }))
-        )
+        ),
+      range: call => {
+        const request = new ServerOutgoingStreamingRequest(call.request);
+        return new Observable(subscriber => {
+          for (let i = request.from; i <= request.to; i++) subscriber.next(new ServerOutgoingStreamingResponse({ result: i }));
+          subscriber.complete();
+        });
+      }
     })
     .bind(grpcBind)
     .build();
@@ -125,6 +135,27 @@ test("Must perform client streaming call", async () => {
   // Then
   const expectedSum = numbers.reduce((acc, one) => acc + one, 0);
   expect(actualSum).toBe(expectedSum);
+});
+
+test("Must perform server streaming call", async () => {
+  // Given
+  const server = createHost(x => x);
+  const client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+
+  // When
+  const rangeRequest = new ClientIngoingStreamingRequest();
+  rangeRequest.setFrom(1);
+  rangeRequest.setTo(3);
+
+  const actualNumbers = [];
+  await client.range(rangeRequest).forEach(x => actualNumbers.push(x.getResult()));
+
+  client.close();
+  server.forceShutdown();
+
+  // Then
+  const expectedNumbers = [1, 2, 3];
+  expect(actualNumbers).toEqual(expectedNumbers);
 });
 
 test("Must build server with stateless interceptors", async () => {
