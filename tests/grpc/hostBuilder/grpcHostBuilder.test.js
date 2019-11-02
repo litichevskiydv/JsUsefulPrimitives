@@ -346,6 +346,60 @@ describe("Must test the handling of exceptions thrown in a server streaming call
   });
 });
 
+describe("Must test the handling of exceptions thrown in a server bidirectional call implementation", () => {
+  const testCases = [
+    {
+      toString: () => "Exception caused by calling subscriber's error method",
+      implementation: () => {
+        return new Observable(subscriber => {
+          subscriber.error(new Error("Something went wrong"));
+        });
+      }
+    },
+    {
+      toString: () => "Exception caused in Observable next method",
+      implementation: () =>
+        from([1]).pipe(
+          map(x => {
+            if (x === 1) throw new Error("Something went wrong");
+          })
+        )
+    },
+    {
+      toString: () => "Exception caused before result was returned",
+      implementation: () => {
+        throw new Error("Something went wrong");
+      }
+    }
+  ];
+
+  test.each(testCases)("%s", async testCase => {
+    // Given
+    const mockLogger = { error: jest.fn() };
+    const mockLoggersFactory = () => mockLogger;
+
+    server = new GrpcHostBuilder()
+      .useLoggersFactory(mockLoggersFactory)
+      .addService(packageObject.v1.Greeter.service, {
+        sayHello: () => {},
+        sum: () => {},
+        range: () => {},
+        select: testCase.implementation
+      })
+      .bind(grpcBind)
+      .build();
+
+    // When, Then
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+
+    const firstRequest = new ClientBidiStreamingRequest();
+    firstRequest.setValue(1);
+
+    await expect(client.select(from([firstRequest])).toPromise()).rejects.toEqual(new Error("13 INTERNAL: Something went wrong")); // prettier-ignore
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
+  });
+});
+
 test("Must transfer value through metadata", async () => {
   // Given
   const expectedSpanId = "test_span_id";
