@@ -1,4 +1,5 @@
 const { streamToRx } = require("rxjs-stream");
+const { catchError } = require("rxjs/operators");
 
 module.exports = function(methodImplementation) {
   return async (call, callback) => {
@@ -6,14 +7,13 @@ module.exports = function(methodImplementation) {
     const result = await methodImplementation(call);
 
     if (result.subscribe && typeof result.subscribe === "function")
-      result.subscribe({
-        next(message) {
-          callback(null, message);
-        },
-        error(err) {
-          callback(err);
-        }
-      });
+      await result
+        .pipe(
+          catchError(err => {
+            throw err;
+          })
+        )
+        .forEach(message => callback(null, message));
     else callback(null, result);
   };
 };
