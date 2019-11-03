@@ -139,6 +139,40 @@ test("Must perform client streaming call", async () => {
   expect(actualSum).toBe(expectedSum);
 });
 
+describe("Must handle client side errors during the client streaming call", () => {
+  const testCases = [
+    {
+      toString: () => "Exception caused by calling subscriber's error method",
+      messages: new Observable(subscriber => {
+        subscriber.error(new Error("Something went wrong"));
+      })
+    },
+    {
+      toString: () => "Exception caused in Observable next method",
+      messages: from([1]).pipe(
+        map(x => {
+          if (x === 1) throw new Error("Something went wrong");
+        })
+      )
+    },
+    {
+      toString: () => "Exception caused in Observable constructor",
+      messages: new Observable(subscriber => {
+        throw new Error("Something went wrong");
+      })
+    }
+  ];
+
+  test.each(testCases)("%s", async testCase => {
+    // Given
+    server = createHost(x => x);
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+
+    // When, Then
+    await expect(client.sum(testCase.messages)).rejects.toEqual(new Error("Something went wrong"));
+  });
+});
+
 test("Must perform server streaming call", async () => {
   // Given
   server = createHost(x => x);
