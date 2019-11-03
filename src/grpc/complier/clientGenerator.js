@@ -95,7 +95,11 @@ const generateExportsStructure = (builder, container) => {
 const generateJs = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
-  if (isRxJsStreamNeeded(fileDescriptor)) builder.appendLine('const { streamToRx } = require("rxjs-stream")').appendLine();
+  if (isRxJsStreamNeeded(fileDescriptor))
+    builder
+      .appendLine('const { Subject } = require("rxjs");')
+      .appendLine('const { streamToRx } = require("rxjs-stream")')
+      .appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);

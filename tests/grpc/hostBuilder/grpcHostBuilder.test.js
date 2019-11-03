@@ -222,6 +222,41 @@ test("Must perform bidirectional streaming call", async () => {
   expect(actualNumbers).toEqual(expectedNumbers);
 });
 
+describe("Must handle client side errors during the bidirectional streaming call", () => {
+  const testCases = [
+    {
+      toString: () => "Exception caused by calling subscriber's error method",
+      messages: new Observable(subscriber => {
+        subscriber.error(new Error("Something went wrong"));
+      })
+    },
+    {
+      toString: () => "Exception caused in Observable next method",
+      messages: from([1]).pipe(
+        map(x => {
+          if (x === 1) throw new Error("Something went wrong");
+        })
+      )
+    },
+    {
+      toString: () => "Exception caused in Observable constructor",
+      messages: new Observable(subscriber => {
+        throw new Error("Something went wrong");
+      })
+    }
+  ];
+
+  test.each(testCases)("%s", async testCase => {
+    // Given
+    server = createHost(x => x);
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure());
+
+    // When, Then
+    const output = client.select(testCase.messages);
+    await expect(output.toPromise()).rejects.toEqual(new Error("Something went wrong"));
+  });
+});
+
 test("Must build server with stateless interceptors", async () => {
   // Given
   server = createHost(x =>
