@@ -1,4 +1,5 @@
 const opentracing = require("opentracing");
+const { serializeError } = require("serialize-error");
 const defaultContext = require("../../../async-context").defaultContext;
 
 module.exports = async function(call, methodDefinition, callback, next) {
@@ -8,14 +9,14 @@ module.exports = async function(call, methodDefinition, callback, next) {
   const span = tracer.startSpan(methodDefinition.path, { childOf: parentSpanContext });
   defaultContext.set("currentSpan", span);
 
-  if (call.request) span.setTag("request", JSON.stringify(call.request));
+  if (call.request) span.setTag("request", serializeError(call.request));
 
   try {
     await next(call, callback);
   } catch (error) {
     span.setTag(opentracing.Tags.ERROR, true);
     span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);
-    span.log({ event: "error", "error.object": error, message: error.message, stack: error.stack });
+    span.log({ event: "error", "error.object": serializeError(error), message: error.message, stack: error.stack });
 
     throw error;
   } finally {
