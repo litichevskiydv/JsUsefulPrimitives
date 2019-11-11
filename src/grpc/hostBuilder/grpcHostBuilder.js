@@ -36,15 +36,19 @@ module.exports = class GrpcHostBuilder {
   /**
    * Adds new interceptor to pipeline.
    * @param {interceptorFunction | interceptorConstructor} interceptor New interceptor.
+   * @param  {...any} interceptorArguments Interceptor additional arguments.
    */
-  addInterceptor(interceptor) {
+  addInterceptor(interceptor, ...interceptorArguments) {
     if (interceptor.prototype && typeof interceptor.prototype.invoke === "function")
       return this.addInterceptor(
         async (call, methodDefinition, callback, next) =>
-          await new interceptor(this._serverContext).invoke(call, methodDefinition, callback, next)
+          await new interceptor(this._serverContext, ...interceptorArguments).invoke(call, methodDefinition, callback, next)
       );
 
-    this._interceptorsDefinitions.push({ index: this._index++, interceptor: interceptor });
+    this._interceptorsDefinitions.push({
+      index: this._index++,
+      interceptor: (call, methodDefinition, callback, next) => interceptor(call, methodDefinition, callback, next, ...interceptorArguments)
+    });
     return this;
   }
 
@@ -127,6 +131,7 @@ module.exports = class GrpcHostBuilder {
  * @param {*} methodDefinition Metadata for method implementation.
  * @param {*} callback gRPC server callback.
  * @param {*} next Next layers executor.
+ * @param {...any} arguments Additional interceptor arguments that were passed during registration.
  * @returns {void}
  */
 
@@ -138,6 +143,7 @@ module.exports = class GrpcHostBuilder {
 /**
  * @callback interceptorConstructor
  * @param {*} serverContext Context of the gRPC server.
+ * @param {...any} arguments Additional interceptor arguments that were passed during registration.
  * @returns {Interceptor}
  */
 
