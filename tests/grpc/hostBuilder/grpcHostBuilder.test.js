@@ -3,8 +3,9 @@ const grpc = require("grpc");
 const GRPCError = require("grpc-error");
 const protoLoader = require("@grpc/proto-loader");
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
-const serverInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
-const clientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
+const tracingServerInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
+const tracingClientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
+const metricsServerInterceptorsFactory = require("../../../src/grpc/metrics/prometheus/serverInterceptor");
 const { from, Observable, Subject } = require("rxjs");
 const { map, reduce } = require("rxjs/operators");
 
@@ -44,6 +45,7 @@ const packageObject = grpc.loadPackageDefinition(
     ]
   })
 );
+const metricsServerInterceptor = metricsServerInterceptorsFactory();
 let server = null;
 let client = null;
 
@@ -52,8 +54,7 @@ let client = null;
  * @param {function(GrpcHostBuilder):GrpcHostBuilder} configurator Server builder configurator
  */
 const createHost = configurator => {
-  return configurator(new GrpcHostBuilder())
-    .addInterceptor(serverInterceptor)
+  return configurator(new GrpcHostBuilder().addInterceptor(metricsServerInterceptor).addInterceptor(tracingServerInterceptor))
     .addService(packageObject.v1.Greeter.service, {
       sayHello: call => {
         const request = new ServerUnaryRequest(call.request);
@@ -86,7 +87,7 @@ const getMessage = async name => {
   const request = new ClientUnaryRequest();
   request.setName(name);
 
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
   return (await client.sayHello(request)).getMessage();
 };
 
@@ -97,7 +98,7 @@ const getSpanId = async callerSpanId => {
   const request = new ClientUnaryRequest();
   request.setName("Tester");
 
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [clientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
   return (await client.sayHello(request, metadata)).getSpanId();
 };
 
