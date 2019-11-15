@@ -1,7 +1,25 @@
 const { status } = require("grpc");
 const { Counter, Histogram } = require("prom-client");
 
-const statusesByCodes = new Map(Object.entries(status).map(([key, value]) => [value, key]));
+const statusesByCodes = new Map([
+  [status.OK, "OK"],
+  [status.CANCELLED, "Canceled"],
+  [status.UNKNOWN, "Unknown"],
+  [status.INVALID_ARGUMENT, "InvalidArgument"],
+  [status.DEADLINE_EXCEEDED, "DeadlineExceeded"],
+  [status.NOT_FOUND, "NotFound"],
+  [status.ALREADY_EXISTS, "AlreadyExists"],
+  [status.PERMISSION_DENIED, "PermissionDenied"],
+  [status.RESOURCE_EXHAUSTED, "ResourceExhausted"],
+  [status.FAILED_PRECONDITION, "FailedPrecondition"],
+  [status.ABORTED, "Aborted"],
+  [status.OUT_OF_RANGE, "OutOfRange"],
+  [status.UNIMPLEMENTED, "Unimplemented"],
+  [status.INTERNAL, "Internal"],
+  [status.UNAVAILABLE, "Unavailable"],
+  [status.DATA_LOSS, "DataLoss"],
+  [status.UNAUTHENTICATED, "Unauthenticated"]
+]);
 const defaultTimeBuckets = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 10];
 
 /**
