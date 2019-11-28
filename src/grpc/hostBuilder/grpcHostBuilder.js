@@ -41,9 +41,8 @@ module.exports = class GrpcHostBuilder {
    */
   addInterceptor(interceptor, ...interceptorArguments) {
     if (interceptor.prototype && typeof interceptor.prototype.invoke === "function")
-      return this.addInterceptor(
-        async (call, methodDefinition, next) =>
-          await new interceptor(this._serverContext, ...interceptorArguments).invoke(call, methodDefinition, next)
+      return this.addInterceptor(async (call, methodDefinition, next) =>
+        new interceptor(this._serverContext, ...interceptorArguments).invoke(call, methodDefinition, next)
       );
 
     this._interceptorsDefinitions.push({
@@ -92,7 +91,7 @@ module.exports = class GrpcHostBuilder {
       if (interceptorDefinition.index > serviceIndex) continue;
 
       const next = serviceCallHandler;
-      serviceCallHandler = call => interceptorDefinition.interceptor(call, methodDefinition, next);
+      serviceCallHandler = async call => interceptorDefinition.interceptor(call, methodDefinition, next);
     }
 
     const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
