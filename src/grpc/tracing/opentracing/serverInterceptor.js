@@ -9,10 +9,13 @@ module.exports = async function(call, methodDefinition, next) {
   const span = tracer.startSpan(methodDefinition.path, { childOf: parentSpanContext });
   defaultContext.set("currentSpan", span);
 
-  if (call.request) span.setTag("request", serializeError(call.request));
+  if (call.request) span.log({ "gRPC request": serializeError(call.request) });
 
   try {
-    return await next(call);
+    const response = await next(call);
+    if (response) span.log({ "gRPC response": serializeError(response) });
+
+    return response;
   } catch (error) {
     span.setTag(opentracing.Tags.ERROR, true);
     span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);
