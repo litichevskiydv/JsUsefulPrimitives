@@ -33,17 +33,15 @@ export class GrpcHostBuilder {
     /**
      * @param call Server call.
      * @param methodDefinition Metadata for method implementation.
-     * @param callback gRPC server callback.
      * @param next Next layers executor.
      * @param arguments Interceptor additional arguments.
      */
     interceptor: (
       call: ServiceCall,
       methodDefinition: MethodDefinition<any, any>,
-      callback: sendUnaryData<any> | null,
       next: handleServiceCall<any, any>,
       ...arguments: any[]
-    ) => Promise<void>,
+    ) => Promise<any>,
     ...interceptorArguments: any[]
   ): GrpcHostBuilder;
   /**
@@ -84,15 +82,14 @@ type ServerContext = {
 };
 
 type ServiceCall = ServerUnaryCall<any> | ServerReadableStream<any> | ServerWriteableStream<any> | ServerDuplexStream<any, any>;
-type sendUnaryData<ResponseType> = (error: ServiceError | null, value: ResponseType | null, trailer?: Metadata, flags?: number) => void;
 
 type handleServiceCall<RequestType, ResponseType> =
   | handleUnaryCall<RequestType, ResponseType>
   | handleClientStreamingCall<RequestType, ResponseType>
   | handleServerStreamingCall<RequestType, ResponseType>
   | handleBidiStreamingCall<RequestType, ResponseType>;
-type handleUnaryCall<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>, callback: sendUnaryData<ResponseType>) => Promise<void>; // prettier-ignore
-type handleClientStreamingCall<RequestType, ResponseType> = (call: ServerReadableStream<RequestType>, callback: sendUnaryData<ResponseType>) => Promise<void>; // prettier-ignore
+type handleUnaryCall<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>;
+type handleClientStreamingCall<RequestType, ResponseType> = (call: ServerReadableStream<RequestType>) => Promise<ResponseType>;
 type handleServerStreamingCall<RequestType, ResponseType> = (call: ServerWriteableStream<RequestType>) => Promise<void>;
 type handleBidiStreamingCall<RequestType, ResponseType> = (call: ServerDuplexStream<RequestType, ResponseType>) => Promise<void>;
 
@@ -208,15 +205,9 @@ interface IInterceptor {
    * Interceptor implementation.
    * @param call Server call.
    * @param methodDefinition Metadata for method implementation.
-   * @param callback gRPC server callback.
    * @param next Next layers executor.
    */
-  invoke(
-    call: ServiceCall,
-    methodDefinition: MethodDefinition<any, any>,
-    callback: sendUnaryData<any> | null,
-    next: handleServiceCall<any, any>
-  ): Promise<void>;
+  invoke(call: ServiceCall, methodDefinition: MethodDefinition<any, any>, next: handleServiceCall<any, any>): Promise<any>;
 }
 
 declare namespace Logging {

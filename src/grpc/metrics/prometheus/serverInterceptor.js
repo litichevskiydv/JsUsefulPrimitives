@@ -72,14 +72,14 @@ module.exports = function(options) {
   const opts = options || {};
   const { grpcServerHandledTotal, grpcServerHandlingSeconds } = configureMetrics(opts.timeBuckets || defaultTimeBuckets);
 
-  return async (call, methodDefinition, callback, next) => {
+  return async (call, methodDefinition, next) => {
     const { serviceName, methodName } = parseMethodPath(methodDefinition.path);
     const methodType = getMethodType(methodDefinition);
 
     let callStatus = statusesByCodes.get(status.OK);
     const startTime = process.hrtime();
     try {
-      await next(call, callback);
+      return await next(call);
     } catch (error) {
       callStatus = statusesByCodes.get(error.code) || statusesByCodes.get(status.INTERNAL);
       throw error;

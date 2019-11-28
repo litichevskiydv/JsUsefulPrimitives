@@ -264,9 +264,9 @@ describe("Must handle client side errors during the bidirectional streaming call
 
 test("Must build server with stateless interceptors", async () => {
   // Given
-  const interceptor = async (call, methodDefinition, callback, next, person, greetingText) => {
-    if (call.request.name === person) callback(null, { message: `${greetingText}, ${person}!` });
-    else await next(call, callback);
+  const interceptor = async (call, methodDefinition, next, person, greetingText) => {
+    if (call.request.name === person) return { message: `${greetingText}, ${person}!` };
+    return await next(call);
   };
   server = createHost(x => x.addInterceptor(interceptor, "Tom", "Hello again").addInterceptor(interceptor, "Jane", "Hello dear"));
 
@@ -286,9 +286,9 @@ class InterceptorForTom {
     this._person = person;
     this._greetingText = greetingText;
   }
-  async invoke(call, methodDefinition, callback, next) {
-    if (call.request.name === this._person) callback(null, { message: `${this._greetingText}, ${this._person}!` });
-    else await next(call, callback);
+  async invoke(call, methodDefinition, next) {
+    if (call.request.name === this._person) return { message: `${this._greetingText}, ${this._person}!` };
+    return await next(call);
   }
 }
 

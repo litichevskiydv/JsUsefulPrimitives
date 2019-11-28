@@ -1,8 +1,8 @@
 const { Server, ServerCredentials } = require("grpc");
 
 const { createLogger } = require("./logging/defaultLoggersFactory");
-const ExceptionsHandler = require("./interceptors/exceptionsHandler");
 const ContextsInitializer = require("./interceptors/contextsInitializer");
+const exceptionsHandler = require("./implementationsWrappers/exceptionsHandler");
 const rxToServerWritableStream = require("./implementationsWrappers/rxToServerWritableStream");
 
 module.exports = class GrpcHostBuilder {
@@ -14,15 +14,15 @@ module.exports = class GrpcHostBuilder {
     this._interceptorsDefinitions = [];
     this._servicesDefinitions = [];
     this._methodsImplementationsWrappers = new Map()
-      .set("unary", require("./implementationsWrappers/unaryCall"))
-      .set("client_stream", require("./implementationsWrappers/ingoingStreamingCall"))
-      .set("server_stream", require("./implementationsWrappers/outgoingStreamingCall"))
-      .set("bidi", require("./implementationsWrappers/bidirectionalStreamingCall"));
+      .set("unary", require("./implementationsWrappers/callsFinalizers/unaryCall"))
+      .set("client_stream", require("./implementationsWrappers/callsFinalizers/ingoingStreamingCall"))
+      .set("server_stream", require("./implementationsWrappers/callsFinalizers/outgoingStreamingCall"))
+      .set("bidi", require("./implementationsWrappers/callsFinalizers/bidirectionalStreamingCall"));
 
     this._server = new Server(options);
     this._serverContext = { createLogger };
 
-    this.addInterceptor(ExceptionsHandler).addInterceptor(ContextsInitializer);
+    this.addInterceptor(ContextsInitializer);
   }
 
   /**
@@ -42,13 +42,13 @@ module.exports = class GrpcHostBuilder {
   addInterceptor(interceptor, ...interceptorArguments) {
     if (interceptor.prototype && typeof interceptor.prototype.invoke === "function")
       return this.addInterceptor(
-        async (call, methodDefinition, callback, next) =>
-          await new interceptor(this._serverContext, ...interceptorArguments).invoke(call, methodDefinition, callback, next)
+        async (call, methodDefinition, next) =>
+          await new interceptor(this._serverContext, ...interceptorArguments).invoke(call, methodDefinition, next)
       );
 
     this._interceptorsDefinitions.push({
       index: this._index++,
-      interceptor: (call, methodDefinition, callback, next) => interceptor(call, methodDefinition, callback, next, ...interceptorArguments)
+      interceptor: (call, methodDefinition, next) => interceptor(call, methodDefinition, next, ...interceptorArguments)
     });
     return this;
   }
@@ -87,18 +87,18 @@ module.exports = class GrpcHostBuilder {
     let serviceCallHandler = methodImplementation;
     if (methodDefinition.responseStream) serviceCallHandler = rxToServerWritableStream(serviceCallHandler);
 
-    const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
-    serviceCallHandler = this._methodsImplementationsWrappers.get(methodType)(serviceCallHandler);
-
     for (let i = this._interceptorsDefinitions.length - 1; i > -1; i--) {
       const interceptorDefinition = this._interceptorsDefinitions[i];
       if (interceptorDefinition.index > serviceIndex) continue;
 
       const next = serviceCallHandler;
-      serviceCallHandler = async (call, callback) => await interceptorDefinition.interceptor(call, methodDefinition, callback, next);
+      serviceCallHandler = call => interceptorDefinition.interceptor(call, methodDefinition, next);
     }
 
-    return serviceCallHandler;
+    const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
+    serviceCallHandler = this._methodsImplementationsWrappers.get(methodType)(serviceCallHandler);
+
+    return exceptionsHandler(methodDefinition, serviceCallHandler, this._serverContext.createLogger());
   }
 
   _addServices() {
@@ -133,10 +133,9 @@ module.exports = class GrpcHostBuilder {
  * @callback interceptorFunction
  * @param {*} call Server call.
  * @param {*} methodDefinition Metadata for method implementation.
- * @param {*} callback gRPC server callback.
  * @param {*} next Next layers executor.
  * @param {...any} arguments Additional interceptor arguments that were passed during registration.
- * @returns {void}
+ * @returns {Promise<any>}
  */
 
 /**

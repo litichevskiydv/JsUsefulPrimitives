@@ -2,7 +2,7 @@ const opentracing = require("opentracing");
 const { serializeError } = require("serialize-error");
 const defaultContext = require("../../../async-context").defaultContext;
 
-module.exports = async function(call, methodDefinition, callback, next) {
+module.exports = async function(call, methodDefinition, next) {
   const tracer = opentracing.globalTracer();
 
   const parentSpanContext = tracer.extract(opentracing.FORMAT_HTTP_HEADERS, call.metadata.getMap());
@@ -12,7 +12,7 @@ module.exports = async function(call, methodDefinition, callback, next) {
   if (call.request) span.setTag("request", serializeError(call.request));
 
   try {
-    await next(call, callback);
+    return await next(call);
   } catch (error) {
     span.setTag(opentracing.Tags.ERROR, true);
     span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);

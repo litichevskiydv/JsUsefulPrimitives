@@ -1,6 +1,6 @@
 const asyncContext = require("../../../async-context");
 
-module.exports = async function(call, methodDefinition, callback, next) {
+module.exports = async function(call, methodDefinition, next) {
   asyncContext.create();
-  await next(call, callback);
+  return next(call);
 };
