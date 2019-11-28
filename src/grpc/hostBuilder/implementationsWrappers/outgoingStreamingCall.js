@@ -1,18 +1,6 @@
-const { fromEvent } = require("rxjs");
-const { takeUntil, catchError } = require("rxjs/operators");
-
-module.exports = function(methodImplementation) {
+module.exports = function(handler) {
   return async call => {
-    const result = await methodImplementation(call);
-    await result
-      .pipe(
-        takeUntil(fromEvent(call, "cancelled")),
-        catchError(err => {
-          throw err;
-        })
-      )
-      .forEach(message => call.write(message));
-
+    await handler(call);
     call.end();
   };
 };

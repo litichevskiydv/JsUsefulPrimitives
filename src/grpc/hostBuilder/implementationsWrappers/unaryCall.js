@@ -1,3 +1,3 @@
-module.exports = function(methodImplementation) {
-  return async (call, callback) => callback(null, await methodImplementation(call));
+module.exports = function(handler) {
+  return async (call, callback) => callback(null, await handler(call));
 };

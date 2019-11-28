@@ -3,6 +3,7 @@ const { Server, ServerCredentials } = require("grpc");
 const { createLogger } = require("./logging/defaultLoggersFactory");
 const ExceptionsHandler = require("./interceptors/exceptionsHandler");
 const ContextsInitializer = require("./interceptors/contextsInitializer");
+const rxToServerWritableStream = require("./implementationsWrappers/rxToServerWritableStream");
 
 module.exports = class GrpcHostBuilder {
   /**
@@ -83,8 +84,11 @@ module.exports = class GrpcHostBuilder {
     if (methodImplementation === undefined) throw new Error(`Method ${methodDefinition.path} is not implemented`);
     methodImplementation = methodImplementation.bind(serviceImplementation);
 
+    let serviceCallHandler = methodImplementation;
+    if (methodDefinition.responseStream) serviceCallHandler = rxToServerWritableStream(serviceCallHandler);
+
     const methodType = GrpcHostBuilder._getMethodType(methodDefinition);
-    let serviceCallHandler = this._methodsImplementationsWrappers.get(methodType)(methodImplementation);
+    serviceCallHandler = this._methodsImplementationsWrappers.get(methodType)(serviceCallHandler);
 
     for (let i = this._interceptorsDefinitions.length - 1; i > -1; i--) {
       const interceptorDefinition = this._interceptorsDefinitions[i];
