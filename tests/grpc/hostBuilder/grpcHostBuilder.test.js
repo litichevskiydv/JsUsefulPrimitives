@@ -1,7 +1,7 @@
 const path = require("path");
 const grpc = require("grpc");
 const GRPCError = require("grpc-error");
-const protoLoader = require("@grpc/proto-loader");
+const protoLoader = require("../../../src/grpc/pbfLoader").packageDefinition;
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const tracingServerInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
 const tracingClientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
@@ -37,14 +37,7 @@ expect.extend({
 });
 
 const grpcBind = "0.0.0.0:3000";
-const packageObject = grpc.loadPackageDefinition(
-  protoLoader.loadSync(path.join(__dirname, "../../../src/grpc/protos/greeter.proto"), {
-    includeDirs: [
-      path.join(__dirname, "../../../src/grpc/complier/include/"),
-      path.join(__dirname, "../../../node_modules/grpc-tools/bin/")
-    ]
-  })
-);
+const packageObject = grpc.loadPackageDefinition(protoLoader.loadSync(path.join(__dirname, "../../../src/grpc/protos/greeter.proto")));
 const metricsServerInterceptor = metricsServerInterceptorsFactory();
 let server = null;
 let client = null;

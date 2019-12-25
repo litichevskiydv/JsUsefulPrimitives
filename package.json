@@ -32,11 +32,11 @@
     "grpc-gen-client": "./src/grpc/complier/bin/grpc-gen-client.js"
   },
   "dependencies": {
-    "@grpc/proto-loader": "0.4.0",
     "bl": "3.0.0",
     "camelcase": "5.2.0",
     "del": "4.1.0",
     "dot-prop": "4.2.0",
+    "fs-extra": "8.1.0",
     "google-protobuf": "3.7.1",
     "grpc": "1.24.2",
     "grpc-error": "1.0.0",
@@ -45,7 +45,9 @@
     "make-dir": "3.0.0",
     "opentracing": "0.14.4",
     "path-key": "3.0.0",
+    "pbf": "3.2.1",
     "prom-client": "11.5.3",
+    "protocol-buffers-schema": "3.3.2",
     "rxjs": "6.5.3",
     "rxjs-stream": "3.0.2",
     "serialize-error": "5.0.0",
