@@ -51,7 +51,7 @@ function createPackageDefinition(protoFileScheme) {
   const formatters = compile(protoFileScheme);
   const packageName = protoFileScheme.package;
   for (const serviceScheme of protoFileScheme.services) {
-    const serviceName = packageName ? `${packageName}.${serviceScheme.name}` : serviceName;
+    const serviceName = packageName ? `${packageName}.${serviceScheme.name}` : serviceScheme.name;
     packageDefinition[serviceName] = createServiceDefinition(serviceName, serviceScheme, formatters);
   }
 
