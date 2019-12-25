@@ -6,22 +6,22 @@ const camelCase = require("camelcase");
 
 const schemeLoader = require("./schemeLoader");
 
-const createSerializer = formatter => {
-  return arg => {
+function createSerializer(formatter) {
+  return function serialize(arg) {
     const pbf = new Pbf();
     formatter.write(arg, pbf);
     return pbf.finish();
   };
-};
+}
 
-const createDeserializer = formatter => {
-  return argBuf => {
+function createDeserializer(formatter) {
+  return function deserialize(argBuf) {
     const pbf = new Pbf(argBuf);
     return formatter.read(pbf);
   };
-};
+}
 
-const createMethodDefinition = (serviceName, methodScheme, formatters) => {
+function createMethodDefinition(serviceName, methodScheme, formatters) {
   const requestFormatter = get(formatters, methodScheme.input_type);
   const responseFormatter = get(formatters, methodScheme.output_type);
 
@@ -35,17 +35,17 @@ const createMethodDefinition = (serviceName, methodScheme, formatters) => {
     responseSerialize: createSerializer(responseFormatter),
     responseDeserialize: createDeserializer(responseFormatter)
   };
-};
+}
 
-const createServiceDefinition = (serviceName, serviceScheme, formatters) => {
+function createServiceDefinition(serviceName, serviceScheme, formatters) {
   const serviceDefinition = {};
   for (const methodScheme of serviceScheme.methods)
     serviceDefinition[methodScheme.name] = createMethodDefinition(serviceName, methodScheme, formatters);
 
   return serviceDefinition;
-};
+}
 
-const createPackageDefinition = protoFileScheme => {
+function createPackageDefinition(protoFileScheme) {
   const packageDefinition = {};
 
   const formatters = compile(protoFileScheme);
@@ -56,23 +56,23 @@ const createPackageDefinition = protoFileScheme => {
   }
 
   return packageDefinition;
-};
+}
 
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
  */
-const load = async (protoFilePath, options) => {
+async function load(protoFilePath, options) {
   return createPackageDefinition(await schemeLoader.load(protoFilePath, options));
-};
+}
 
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
  */
-const loadSync = (protoFilePath, options) => {
+function loadSync(protoFilePath, options) {
   return createPackageDefinition(schemeLoader.loadSync(protoFilePath, options));
-};
+}
 
 module.exports = {
   load,

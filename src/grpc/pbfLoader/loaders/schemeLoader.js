@@ -11,7 +11,7 @@ const schemePreprocessors = require("./schemePreprocessors");
  * @param {string} protofileName
  * @param {Buffer} protoFileContent
  */
-const processFile = (packagesStructure, rootPackageName, protofileName, protoFileContent) => {
+function processFile(packagesStructure, rootPackageName, protofileName, protoFileContent) {
   const protoFileScheme = protobufSchema.parse(protoFileContent);
 
   const packageName = protoFileScheme.package;
@@ -21,13 +21,13 @@ const processFile = (packagesStructure, rootPackageName, protofileName, protoFil
   set(packagesStructure, namespaceName, protoFileScheme);
 
   return protoFileScheme;
-};
+}
 
 /**
  * @param {string} parentKey
  * @param {any} structure
  */
-const collectMessagesAndEnums = (parentKey, structure) => {
+function collectMessagesAndEnums(parentKey, structure) {
   const scheme = { enums: [], messages: [] };
   if (parentKey) Object.assign(scheme, { name: parentKey, fields: [] });
 
@@ -38,24 +38,24 @@ const collectMessagesAndEnums = (parentKey, structure) => {
     } else scheme.messages.push(collectMessagesAndEnums(key, childStructure));
 
   return scheme;
-};
+}
 
 /**
  * @param {DefinitionLoadingOptions} options
  */
-const prepareOptions = options => {
+function prepareOptions(options) {
   /**  @type {DefinitionLoadingOptions} */
   const opts = options || {};
   opts.includeDirs = (opts.includeDirs || []).concat([path.join(__dirname, "../include/")]);
 
   return opts;
-};
+}
 
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
  */
-const load = async (protoFilePath, options) => {
+async function load(protoFilePath, options) {
   let rootFileScheme = {};
   const opts = prepareOptions(options);
 
@@ -77,13 +77,13 @@ const load = async (protoFilePath, options) => {
   Object.assign(rootFileScheme, collectMessagesAndEnums(null, packagesStructure));
   if (!opts.keepCase) schemePreprocessors.convertFieldsCase(rootFileScheme);
   return rootFileScheme;
-};
+}
 
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
  */
-const loadSync = (protoFilePath, options) => {
+function loadSync(protoFilePath, options) {
   let rootFileScheme = {};
   const opts = prepareOptions(options);
 
@@ -105,7 +105,7 @@ const loadSync = (protoFilePath, options) => {
   Object.assign(rootFileScheme, collectMessagesAndEnums(null, packagesStructure));
   if (!opts.keepCase) schemePreprocessors.convertFieldsCase(rootFileScheme);
   return rootFileScheme;
-};
+}
 
 module.exports = {
   load,

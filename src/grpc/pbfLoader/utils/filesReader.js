@@ -6,7 +6,7 @@ const fs = require("fs-extra");
  * @param {string[]} includeDirs
  * @returns {Promise<Buffer>}
  */
-const read = async (protoFilePath, includeDirs) => {
+async function read(protoFilePath, includeDirs) {
   if (path.isAbsolute(protoFilePath)) return fs.readFile(protoFilePath);
 
   for (const includeDir of includeDirs) {
@@ -17,14 +17,14 @@ const read = async (protoFilePath, includeDirs) => {
   }
 
   throw new Error(`File ${protoFilePath} does not exist`);
-};
+}
 
 /**
  * @param {string} protoFilePath
  * @param {string[]} includeDirs
  * @returns {Buffer}
  */
-const readSync = (protoFilePath, includeDirs) => {
+function readSync(protoFilePath, includeDirs) {
   if (path.isAbsolute(protoFilePath)) return fs.readFileSync(protoFilePath);
 
   for (const includeDir of includeDirs) {
@@ -35,7 +35,7 @@ const readSync = (protoFilePath, includeDirs) => {
   }
 
   throw new Error(`File ${protoFilePath} does not exist`);
-};
+}
 
 module.exports = {
   read,
