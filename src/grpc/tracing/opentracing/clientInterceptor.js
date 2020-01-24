@@ -1,17 +1,49 @@
-const { InterceptingCall } = require("grpc");
+const { InterceptingCall, status: grpcStatus } = require("grpc");
 const opentracing = require("opentracing");
 const defaultContext = require("../../../async-context").defaultContext;
 
+const grpcStatusesByCodes = new Map(Object.entries(grpcStatus).map(([key, value]) => [value, key]));
+
+/**
+ * @param {{method_definition: import("grpc").MethodDefinition}} options
+ * @param {Function} nextCall
+ * @returns {InterceptingCall}
+ */
 module.exports = function(options, nextCall) {
   return new InterceptingCall(nextCall(options), {
-    start: (metadata, listener, next) => {
+    /**
+     * @param {import("grpc").Metadata} metadata
+     * @param {import("grpc").Listener} listener
+     * @param {Function} next
+     */
+    start: function(metadata, listener, next) {
       const tracer = opentracing.globalTracer();
+      const span = tracer.startSpan(`gRPC call to ${options.method_definition.path}`, { childOf: defaultContext.get("currentSpan") });
 
       const headers = {};
-      tracer.inject(defaultContext.get("currentSpan"), opentracing.FORMAT_HTTP_HEADERS, headers);
+      tracer.inject(span, opentracing.FORMAT_HTTP_HEADERS, headers);
       for (const key in headers) metadata.set(key, headers[key]);
 
-      next(metadata, listener);
+      next(metadata, {
+        /**
+         * @param {import("grpc").StatusObject} status
+         * @param {Function} next
+         */
+        onReceiveStatus: function(status, next) {
+          if (status.code !== grpcStatus.OK) {
+            span.setTag(opentracing.Tags.ERROR, true);
+            span.setTag(opentracing.Tags.SAMPLING_PRIORITY, 1);
+            span.log({
+              event: "error",
+              code: grpcStatusesByCodes.get(status.code) || grpcStatusesByCodes.get(grpcStatus.INTERNAL),
+              message: status.details
+            });
+          }
+
+          span.finish();
+          next(status);
+        }
+      });
     }
   });
 };
