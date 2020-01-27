@@ -6,6 +6,7 @@ const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const tracingServerInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
 const tracingClientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
 const metricsServerInterceptorsFactory = require("../../../src/grpc/metrics/prometheus/serverInterceptor");
+const clientsTrackingServerInterceptor = require("../../../src/grpc/clientsTracking/serverInterceptor");
 const { from, Observable, Subject } = require("rxjs");
 const { map, reduce } = require("rxjs/operators");
 
@@ -47,7 +48,12 @@ let client = null;
  * @param {function(GrpcHostBuilder):GrpcHostBuilder} configurator Server builder configurator
  */
 const createHost = configurator => {
-  return configurator(new GrpcHostBuilder().addInterceptor(metricsServerInterceptor).addInterceptor(tracingServerInterceptor))
+  return configurator(
+    new GrpcHostBuilder()
+      .addInterceptor(metricsServerInterceptor)
+      .addInterceptor(tracingServerInterceptor)
+      .addInterceptor(clientsTrackingServerInterceptor)
+  )
     .addService(packageObject.v1.Greeter.service, {
       sayHello: call => {
         const request = new ServerUnaryRequest(call.request);
