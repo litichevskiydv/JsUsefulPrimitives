@@ -16,7 +16,7 @@ function getConsumerDescription(metadata) {
 
   try {
     return JSON.parse(consumerDescriptionString);
-  } catch {
+  } catch (error) {
     return {};
   }
 }
