@@ -5,7 +5,6 @@ import {
   ServerReadableStream,
   ServerWriteableStream,
   ServerDuplexStream,
-  ServiceError,
   Metadata,
   ServerCredentials,
   Server
@@ -89,9 +88,9 @@ type handleServiceCall<RequestType, ResponseType> =
   | handleServerStreamingCall<RequestType, ResponseType>
   | handleBidiStreamingCall<RequestType, ResponseType>;
 type handleUnaryCall<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>;
-type handleClientStreamingCall<RequestType, ResponseType> = (call: ServerReadableStream<RequestType>) => Promise<ResponseType>;
+type handleClientStreamingCall<RequestType, ResponseType> = (call: ServerReadableStream<RequestType>) => Promise<ResponseType>; // prettier-ignore
 type handleServerStreamingCall<RequestType, ResponseType> = (call: ServerWriteableStream<RequestType>) => Promise<void>;
-type handleBidiStreamingCall<RequestType, ResponseType> = (call: ServerDuplexStream<RequestType, ResponseType>) => Promise<void>;
+type handleBidiStreamingCall<RequestType, ResponseType> = (call: ServerDuplexStream<RequestType, ResponseType>) => Promise<void>; // prettier-ignore
 
 /**
  * Used for calls that are streaming from the client side.
@@ -194,7 +193,7 @@ type serviceMethodImplementation<RequestType, ResponseType> =
   | serviceClientStreamingMethodImplementation<RequestType, ResponseType>
   | serviceServerStreamingMethodImplementation<RequestType, ResponseType>
   | serviceBidiStreamingMethodImplementation<RequestType, ResponseType>;
-type serviceUnaryMethodImplementation<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>;
+type serviceUnaryMethodImplementation<RequestType, ResponseType> = (call: ServerUnaryCall<RequestType>) => Promise<ResponseType>; // prettier-ignore
 type serviceClientStreamingMethodImplementation<RequestType, ResponseType> = (call: ServerIngoingStreamingCall<RequestType>) => Promise<ResponseType>; // prettier-ignore
 type serviceServerStreamingMethodImplementation<RequestType, ResponseType> = (call: ServerOutgoingStreamingCall<RequestType>) => Promise<Observable<ResponseType>>; // prettier-ignore
 type serviceBidiStreamingMethodImplementation<RequestType, ResponseType> = (call: ServerBidiStreamingCall<RequestType>) => Promise<Observable<ResponseType>>; // prettier-ignore
@@ -212,10 +211,11 @@ interface IInterceptor {
 
 declare namespace Logging {
   interface ILogger {
-    fatal(message: string, payload?: object): void;
     error(message: string, payload?: object): void;
     warn(message: string, payload?: object): void;
     info(message: string, payload?: object): void;
+    verbose(message: string, payload?: object): void;
     debug(message: string, payload?: object): void;
+    silly(message: string, payload?: object): void;
   }
 }
