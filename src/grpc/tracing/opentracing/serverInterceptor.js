@@ -2,6 +2,12 @@ const opentracing = require("opentracing");
 const { serializeError } = require("serialize-error");
 const defaultContext = require("../../../async-context").defaultContext;
 
+/**
+ * @param {import("grpc").ServerUnaryCall | import("grpc").ServerWritableStream | import("grpc").ServerReadableStream | import("grpc").ServerDuplexStream} call
+ * @param {import("grpc").MethodDefinition} methodDefinition
+ * @param {Function} next
+ * @returns {Promise<any>}
+ */
 module.exports = async function(call, methodDefinition, next) {
   const tracer = opentracing.globalTracer();
 
