@@ -1,26 +1,55 @@
+const path = require("path");
+const readPkgUp = require("read-pkg-up");
+const parentModule = require("parent-module");
 const { InterceptingCall } = require("grpc");
 
 /**
- * @param {{method_definition: import("grpc").MethodDefinition}} options
- * @param {Function} nextCall
- * @returns {InterceptingCall}
+ * @param {ConsumerDescription} options
+ * @returns {ConsumerDescription}
  */
-module.exports = function(options, nextCall) {
-  return new InterceptingCall(nextCall(options), {
-    /**
-     * @param {import("grpc").Metadata} metadata
-     * @param {import("grpc").Listener} listener
-     * @param {Function} next
-     */
-    start: function(metadata, listener, next) {
-      metadata.set(
-        "consumerDescription",
-        JSON.stringify({
-          consumerName: process.env.npm_package_name,
-          consumerVersion: process.env.npm_package_version
-        })
-      );
-      next(metadata, listener);
-    }
-  });
+function getConsumerDescription(options) {
+  const consumerDescription = options || {};
+
+  if (!consumerDescription.consumerName) consumerDescription.consumerName = process.env.npm_package_name;
+  if (!consumerDescription.consumerVersion) consumerDescription.consumerVersion = process.env.npm_package_version;
+
+  if (!consumerDescription.clientVersion) {
+    const { name: parentPackageName, version: parentPackageVersion } = readPkgUp.sync({ cwd: path.dirname(parentModule()) }).packageJson;
+    if (parentPackageName !== process.env.npm_package_name) consumerDescription.clientVersion = parentPackageVersion;
+  }
+
+  return consumerDescription;
+}
+
+/**
+ * @param {ConsumerDescription} options
+ */
+module.exports = function(options) {
+  const consumerDescription = getConsumerDescription(options);
+
+  /**
+   * @param {{method_definition: import("grpc").MethodDefinition}} options
+   * @param {Function} nextCall
+   * @returns {InterceptingCall}
+   */
+  return function(options, nextCall) {
+    return new InterceptingCall(nextCall(options), {
+      /**
+       * @param {import("grpc").Metadata} metadata
+       * @param {import("grpc").Listener} listener
+       * @param {Function} next
+       */
+      start: function(metadata, listener, next) {
+        metadata.set("consumerDescription", JSON.stringify(consumerDescription));
+        next(metadata, listener);
+      }
+    });
+  };
 };
+
+/**
+ * @typedef {Object} ConsumerDescription
+ * @property {string} [consumerName]
+ * @property {string} [consumerVersion]
+ * @property {string} [clientVersion]
+ */
