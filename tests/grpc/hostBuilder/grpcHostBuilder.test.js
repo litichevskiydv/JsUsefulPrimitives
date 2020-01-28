@@ -7,6 +7,7 @@ const tracingServerInterceptor = require("../../../src/grpc/tracing/opentracing/
 const tracingClientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
 const metricsServerInterceptorsFactory = require("../../../src/grpc/metrics/prometheus/serverInterceptor");
 const clientsTrackingServerInterceptor = require("../../../src/grpc/clientsTracking/serverInterceptor");
+const clientsTrackingClientInterceptor = require("../../../src/grpc/clientsTracking/clientInterceptor");
 const { from, Observable, Subject } = require("rxjs");
 const { map, reduce } = require("rxjs/operators");
 
@@ -88,7 +89,9 @@ const getMessage = async name => {
   const request = new ClientUnaryRequest();
   request.setName(name);
 
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+    interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+  });
   return (await client.sayHello(request)).getMessage();
 };
 
@@ -99,7 +102,9 @@ const getSpanId = async callerSpanId => {
   const request = new ClientUnaryRequest();
   request.setName("Tester");
 
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+    interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+  });
   return (await client.sayHello(request, metadata)).getSpanId();
 };
 
@@ -122,7 +127,9 @@ test("Must perform unary call", async () => {
 test("Must perform client streaming call", async () => {
   // Given
   server = createHost(x => x);
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+    interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+  });
   const numbers = [1, 2, 3, 4, 5, 6, 7];
 
   // When
@@ -170,7 +177,9 @@ describe("Must handle client side errors during the client streaming call", () =
   test.each(testCases)("%s", async testCase => {
     // Given
     server = createHost(x => x);
-    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+      interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+    });
 
     // When, Then
     await expect(client.sum(testCase.messages)).rejects.toEqual(new Error("Something went wrong"));
@@ -180,7 +189,9 @@ describe("Must handle client side errors during the client streaming call", () =
 test("Must perform server streaming call", async () => {
   // Given
   server = createHost(x => x);
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+    interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+  });
 
   // When
   const rangeRequest = new ClientIngoingStreamingRequest();
@@ -198,7 +209,9 @@ test("Must perform server streaming call", async () => {
 test("Must perform bidirectional streaming call", async () => {
   // Given
   server = createHost(x => x);
-  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+  client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+    interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+  });
 
   // When
   const actualNumbers = [];
@@ -253,7 +266,9 @@ describe("Must handle client side errors during the bidirectional streaming call
   test.each(testCases)("%s", async testCase => {
     // Given
     server = createHost(x => x);
-    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+      interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+    });
 
     // When, Then
     const output = client.select(testCase.messages);
@@ -412,7 +427,9 @@ describe("Must test the handling of exceptions thrown in a client streaming call
       .build();
 
     // When, Then
-    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+      interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+    });
 
     const firstRequest = new ClientOutgoingStreamingRequest();
     firstRequest.setNumber(1);
@@ -466,7 +483,9 @@ describe("Must test the handling of exceptions thrown in a server streaming call
       .build();
 
     // When, Then
-    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+      interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+    });
 
     await expect(client.range(new ClientIngoingStreamingRequest()).toPromise()).rejects.toEqual(new Error("13 INTERNAL: Something went wrong")); // prettier-ignore
     expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
@@ -517,7 +536,9 @@ describe("Must test the handling of exceptions thrown in a server bidirectional 
       .build();
 
     // When, Then
-    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), { interceptors: [tracingClientInterceptor] });
+    client = new GreeterClient(grpcBind, grpc.credentials.createInsecure(), {
+      interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptor]
+    });
 
     const firstRequest = new ClientBidiStreamingRequest();
     firstRequest.setValue(1);
