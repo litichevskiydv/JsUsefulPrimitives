@@ -15,7 +15,8 @@ function getConsumerDescription(options) {
 
   if (!consumerDescription.clientVersion) {
     const parentPackage = (readPkgUp.sync({ cwd: path.dirname(parentModule()) }) || {}).packageJson;
-    if (parentPackage && parentPackage.name !== consumerDescription.consumerName) consumerDescription.clientVersion = parentPackage.version;
+    if (parentPackage && parentPackage.name !== consumerDescription.consumerName)
+      consumerDescription.clientVersion = parentPackage.version;
   }
 
   return consumerDescription;

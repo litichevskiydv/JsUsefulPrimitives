@@ -3,7 +3,7 @@ const { Counter } = require("prom-client");
 const grpcServerCallsTotal = new Counter({
   name: "grpc_server_calls_total",
   labelNames: ["consumer_name", "consumer_version", "client_version", "grpc_method", "grpc_service", "grpc_type"],
-  help: "Total number of calls, made by various consumers."
+  help: "Total number of calls, made by various consumers.",
 });
 
 /**
@@ -25,7 +25,7 @@ function getConsumerDescription(metadata) {
  * @param {string} path
  * @returns {{serviceName: string, methodName: string}}
  */
-const parseMethodPath = path => {
+const parseMethodPath = (path) => {
   const [, serviceName, methodName] = path.split("/");
   return { serviceName, methodName };
 };
@@ -34,7 +34,7 @@ const parseMethodPath = path => {
  * @param {import("grpc").MethodDefinition} methodDefinition
  * @returns {"bidi" | "client_stream" | "server_stream" | "unary"}
  */
-const getMethodType = methodDefinition => {
+const getMethodType = (methodDefinition) => {
   if (methodDefinition.requestStream) return methodDefinition.responseStream ? "bidi" : "client_stream";
   return methodDefinition.responseStream ? "server_stream" : "unary";
 };
@@ -45,7 +45,7 @@ const getMethodType = methodDefinition => {
  * @param {Function} next
  * @returns {Promise<any>}
  */
-module.exports = function(call, methodDefinition, next) {
+module.exports = function (call, methodDefinition, next) {
   const { consumerName, consumerVersion, clientVersion } = getConsumerDescription(call.metadata);
   const { serviceName, methodName } = parseMethodPath(methodDefinition.path);
   const methodType = getMethodType(methodDefinition);

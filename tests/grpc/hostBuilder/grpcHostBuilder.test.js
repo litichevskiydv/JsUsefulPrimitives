@@ -8,8 +8,10 @@ const {
   clientInterceptor: tracingClientInterceptor,
 } = require("../../../src/grpc/tracing/opentracing");
 const { serverInterceptorsFactory: metricsServerInterceptorsFactory } = require("../../../src/grpc/metrics/prometheus");
-const clientsTrackingServerInterceptor = require("../../../src/grpc/clientsTracking/serverInterceptor");
-const clientsTrackingClientInterceptorsFactory = require("../../../src/grpc/clientsTracking/clientInterceptor");
+const {
+  serverInterceptor: clientsTrackingServerInterceptor,
+  clientInterceptorsFactory: clientsTrackingClientInterceptorsFactory,
+} = require("../../../src/grpc/clientsTracking");
 const { from, Observable, Subject } = require("rxjs");
 const { map, reduce } = require("rxjs/operators");
 
