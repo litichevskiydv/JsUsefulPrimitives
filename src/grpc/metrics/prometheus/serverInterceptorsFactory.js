@@ -49,7 +49,7 @@ const parseMethodPath = path => {
 };
 
 /**
- * @param {{requestStream: boolean, responseStream: boolean}} methodDefinition
+ * @param {import("grpc").MethodDefinition} methodDefinition
  * @returns {string}
  */
 const getMethodType = methodDefinition => {
@@ -70,7 +70,9 @@ const getElapsedMilliseconds = startTime => {
  */
 module.exports = function(options) {
   const opts = options || {};
-  const { grpcServerHandledTotal, grpcServerHandlingSeconds } = configureMetrics(opts.timeBuckets || defaultTimeBuckets);
+  const { grpcServerHandledTotal, grpcServerHandlingSeconds } = configureMetrics(
+    opts.timeBuckets || defaultTimeBuckets
+  );
 
   return async (call, methodDefinition, next) => {
     const { serviceName, methodName } = parseMethodPath(methodDefinition.path);
@@ -85,7 +87,9 @@ module.exports = function(options) {
       throw error;
     } finally {
       grpcServerHandledTotal.labels(callStatus, methodName, serviceName, methodType).inc();
-      grpcServerHandlingSeconds.labels(callStatus, methodName, serviceName, methodType).observe(getElapsedMilliseconds(startTime) / 1000);
+      grpcServerHandlingSeconds
+        .labels(callStatus, methodName, serviceName, methodType)
+        .observe(getElapsedMilliseconds(startTime) / 1000);
     }
   };
 };
