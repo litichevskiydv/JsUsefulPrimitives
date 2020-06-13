@@ -12,6 +12,7 @@ branches:
     - master
     - /^release\/.*$/
     - develop
+install: npm ci
 script:
   - npx envinfo --preset jest
   - npm link
