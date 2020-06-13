@@ -6,6 +6,10 @@ const camelCase = require("camelcase");
 
 const schemeLoader = require("./schemeLoader");
 
+/**
+ * @param {any} formatter
+ * @returns {function(any): Buffer}
+ */
 function createSerializer(formatter) {
   return function serialize(arg) {
     const pbf = new Pbf();
@@ -14,6 +18,10 @@ function createSerializer(formatter) {
   };
 }
 
+/**
+ * @param {any} formatter
+ * @returns {function(Buffer): any}
+ */
 function createDeserializer(formatter) {
   return function deserialize(argBuf) {
     const pbf = new Pbf(argBuf);
@@ -21,6 +29,12 @@ function createDeserializer(formatter) {
   };
 }
 
+/**
+ * @param {string} serviceName
+ * @param {import("protocol-buffers-schema/types").Method} methodScheme
+ * @param {any} formatters
+ * @returns {import("grpc").MethodDefinition}
+ */
 function createMethodDefinition(serviceName, methodScheme, formatters) {
   const requestFormatter = get(formatters, methodScheme.input_type);
   const responseFormatter = get(formatters, methodScheme.output_type);
@@ -33,10 +47,16 @@ function createMethodDefinition(serviceName, methodScheme, formatters) {
     requestSerialize: createSerializer(requestFormatter),
     requestDeserialize: createDeserializer(requestFormatter),
     responseSerialize: createSerializer(responseFormatter),
-    responseDeserialize: createDeserializer(responseFormatter)
+    responseDeserialize: createDeserializer(responseFormatter),
   };
 }
 
+/**
+ * @param {string} serviceName
+ * @param {import("protocol-buffers-schema/types").Service} serviceScheme
+ * @param {any} formatters
+ * @returns {import("grpc").ServiceDefinition<any>}
+ */
 function createServiceDefinition(serviceName, serviceScheme, formatters) {
   const serviceDefinition = {};
   for (const methodScheme of serviceScheme.methods)
@@ -45,6 +65,10 @@ function createServiceDefinition(serviceName, serviceScheme, formatters) {
   return serviceDefinition;
 }
 
+/**
+ * @param {import("protocol-buffers-schema/types").Schema} protoFileScheme
+ * @returns {import("grpc").PackageDefinition}
+ */
 function createPackageDefinition(protoFileScheme) {
   const packageDefinition = {};
 
@@ -61,6 +85,7 @@ function createPackageDefinition(protoFileScheme) {
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
+ * @returns {import("grpc").PackageDefinition}
  */
 async function load(protoFilePath, options) {
   return createPackageDefinition(await schemeLoader.load(protoFilePath, options));
@@ -69,6 +94,7 @@ async function load(protoFilePath, options) {
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
+ * @returns {import("grpc").PackageDefinition}
  */
 function loadSync(protoFilePath, options) {
   return createPackageDefinition(schemeLoader.loadSync(protoFilePath, options));
@@ -76,11 +102,11 @@ function loadSync(protoFilePath, options) {
 
 module.exports = {
   load,
-  loadSync
+  loadSync,
 };
 
 /**
  * @typedef {Object} DefinitionLoadingOptions
- * @property {boolean} keepCase Preserve field names. The default is to change them to camel case.
- * @property {string[]} includeDirs Paths to search for imported `.proto` files.
+ * @property {boolean} [keepCase] Preserve field names. The default is to change them to camel case.
+ * @property {string[]} [includeDirs] Paths to search for imported `.proto` files.
  */
