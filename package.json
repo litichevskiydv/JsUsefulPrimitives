@@ -57,13 +57,13 @@
     "yargs": "13.2.2"
   },
   "devDependencies": {
-    "@types/jest": "24.0.12",
-    "grpc-tools": "1.6.6",
-    "jest": "24.8.0",
-    "jest-extended": "0.11.1",
-    "nodemon": "1.18.6",
-    "protobufjs": "6.8.8",
-    "ts-protoc-gen": "0.7.7"
+    "@types/jest": "26.0.0",
+    "grpc-tools": "1.9.0",
+    "jest": "26.0.1",
+    "jest-extended": "0.11.5",
+    "nodemon": "2.0.4",
+    "protobufjs": "6.9.0",
+    "ts-protoc-gen": "0.12.0"
   },
   "jest": {
     "testEnvironment": "node",
