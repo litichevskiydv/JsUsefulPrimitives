@@ -3,8 +3,10 @@ const grpc = require("grpc");
 const GRPCError = require("grpc-error");
 const protoLoader = require("../../../src/grpc/pbfLoader").packageDefinition;
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
-const tracingServerInterceptor = require("../../../src/grpc/tracing/opentracing/serverInterceptor");
-const tracingClientInterceptor = require("../../../src/grpc/tracing/opentracing/clientInterceptor");
+const {
+  serverInterceptor: tracingServerInterceptor,
+  clientInterceptor: tracingClientInterceptor,
+} = require("../../../src/grpc/tracing/opentracing");
 const { serverInterceptorsFactory: metricsServerInterceptorsFactory } = require("../../../src/grpc/metrics/prometheus");
 const clientsTrackingServerInterceptor = require("../../../src/grpc/clientsTracking/serverInterceptor");
 const clientsTrackingClientInterceptorsFactory = require("../../../src/grpc/clientsTracking/clientInterceptor");
