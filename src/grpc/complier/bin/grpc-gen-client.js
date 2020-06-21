@@ -12,13 +12,13 @@ const { execFileSync } = require("child_process");
 /**
  * @param {CommandLineArguments} argv
  */
-const createOutputDirectory = async argv => await makeDir(argv.out);
+const createOutputDirectory = async (argv) => await makeDir(argv.out);
 
 /**
  * @param {string} name
  * @returns {string}
  */
-const prepareScriptName = name => `${name}${process.platform === "win32" ? ".cmd" : ""}`;
+const prepareScriptName = (name) => `${name}${process.platform === "win32" ? ".cmd" : ""}`;
 
 /**
  * @param {string} pluginName
@@ -64,16 +64,10 @@ const getFilesList = async (argv, env) => {
  * @param {string[]} filesList
  */
 const generateJs = (argv, env, filesList) => {
-  execFileSync(
-    prepareScriptName("grpc-gen-js"),
-    [`--js_out=import_style=commonjs,binary:${argv.out}`, ...prepareIncludes(argv.include), ...filesList],
-    { env }
-  );
-  execFileSync(
-    prepareScriptName("grpc-gen-js"),
-    [`--js_out=import_style=commonjs,binary:${argv.out}`, `--grpc_out=${argv.out}`, ...prepareIncludes(argv.include), argv.protoFile],
-    { env }
-  );
+  const scriptName = prepareScriptName("grpc-gen-js");
+  const jsOutOption = `--js_out=import_style=commonjs,binary:${argv.out}`;
+  execFileSync(scriptName, [jsOutOption, ...prepareIncludes(argv.include), ...filesList], { env });
+  execFileSync(scriptName, [jsOutOption, `--grpc_out=grpc_js:${argv.out}`, ...prepareIncludes(argv.include), argv.protoFile], { env });
 };
 
 /**
@@ -103,20 +97,20 @@ const generateClient = (argv, env) => {
       type: "string",
       array: true,
       nargs: 1,
-      description: "Include directory"
+      description: "Include directory",
     })
     .option("o", {
       alias: "out",
       type: "string",
       default: process.cwd(),
-      description: "Output directory"
+      description: "Output directory",
     }).argv;
 
   const env = { ...process.env };
   const pathKeyName = pathKey({ env });
   env[pathKeyName] = process.mainModule.paths
-    .map(x => path.join(x, "grpc-tools", "bin"))
-    .concat(process.mainModule.paths.map(x => path.join(x, ".bin")))
+    .map((x) => path.join(x, "grpc-tools", "bin"))
+    .concat(process.mainModule.paths.map((x) => path.join(x, ".bin")))
     .concat(env[pathKeyName])
     .join(path.delimiter);
 

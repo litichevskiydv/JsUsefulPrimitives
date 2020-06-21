@@ -32,14 +32,13 @@
     "grpc-gen-client": "./src/grpc/complier/bin/grpc-gen-client.js"
   },
   "dependencies": {
+    "@grpc/grpc-js": "1.1.1",
     "bl": "4.0.2",
     "camelcase": "6.0.0",
     "del": "5.1.0",
     "dot-prop": "5.2.0",
     "fs-extra": "9.0.1",
     "google-protobuf": "3.12.2",
-    "grpc": "1.24.3",
-    "grpc-error": "1.0.0",
     "jaeger-client": "3.18.0",
     "load-json-file": "6.2.0",
     "make-dir": "3.1.0",

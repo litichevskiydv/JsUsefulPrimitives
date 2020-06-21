@@ -7,7 +7,7 @@ const grpcServerCallsTotal = new Counter({
 });
 
 /**
- * @param {import("grpc").Metadata} metadata
+ * @param {import("@grpc/grpc-js").Metadata} metadata
  * @returns {ConsumerDescription}
  */
 function getConsumerDescription(metadata) {
@@ -31,17 +31,17 @@ const parseMethodPath = (path) => {
 };
 
 /**
- * @param {import("grpc").MethodDefinition} methodDefinition
- * @returns {"bidi" | "client_stream" | "server_stream" | "unary"}
+ * @param {import("@grpc/grpc-js").MethodDefinition} methodDefinition
+ * @returns {"bidi" | "clientStream" | "serverStream" | "unary"}
  */
 const getMethodType = (methodDefinition) => {
-  if (methodDefinition.requestStream) return methodDefinition.responseStream ? "bidi" : "client_stream";
-  return methodDefinition.responseStream ? "server_stream" : "unary";
+  if (methodDefinition.requestStream) return methodDefinition.responseStream ? "bidi" : "clientStream";
+  return methodDefinition.responseStream ? "serverStream" : "unary";
 };
 
 /**
- * @param {import("grpc").ServerUnaryCall | import("grpc").ServerWritableStream | import("grpc").ServerReadableStream | import("grpc").ServerDuplexStream} call
- * @param {import("grpc").MethodDefinition} methodDefinition
+ * @param {import("@grpc/grpc-js").ServerUnaryCall | import("@grpc/grpc-js").ServerWritableStream | import("@grpc/grpc-js").ServerReadableStream | import("@grpc/grpc-js").ServerDuplexStream} call
+ * @param {import("@grpc/grpc-js").MethodDefinition} methodDefinition
  * @param {Function} next
  * @returns {Promise<any>}
  */

@@ -1,5 +1,5 @@
 import { Schema } from "protocol-buffers-schema/types";
-import { PackageDefinition } from "grpc";
+import { PackageDefinition } from "@grpc/grpc-js";
 
 export interface DefinitionLoadingOptions {
   keepCase?: boolean;

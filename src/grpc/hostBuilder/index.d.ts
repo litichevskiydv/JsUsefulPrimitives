@@ -7,8 +7,8 @@ import {
   ServerDuplexStream,
   Metadata,
   ServerCredentials,
-  Server
-} from "grpc";
+  Server,
+} from "@grpc/grpc-js";
 import { Observable } from "rxjs";
 
 export class GrpcHostBuilder {
@@ -73,7 +73,7 @@ export class GrpcHostBuilder {
   /**
    * Builds the server.
    */
-  build(): Server;
+  buildAsync(): Promise<Server>;
 }
 
 type ServerContext = {

@@ -30,7 +30,7 @@ const scanMesage = (importsCatalog, message, usedImports) => {
     else if (type === FieldDescriptorProto.Type.TYPE_ENUM) usedImports.add(importsCatalog.getEnum(typeName).fileName);
   }
 
-  messageDescriptor.getNestedTypeList().forEach(nestedMessage => {
+  messageDescriptor.getNestedTypeList().forEach((nestedMessage) => {
     scanMesage(importsCatalog, importsCatalog.getMessage(`${message.fullName}.${nestedMessage.getName()}`), usedImports);
   });
 };
@@ -43,8 +43,8 @@ const scanMesage = (importsCatalog, message, usedImports) => {
 const getUsedImports = (importsCatalog, fileDescriptor) => {
   const usedImports = new Set();
 
-  fileDescriptor.getServiceList().forEach(service =>
-    service.getMethodList().forEach(method => {
+  fileDescriptor.getServiceList().forEach((service) =>
+    service.getMethodList().forEach((method) => {
       scanMesage(importsCatalog, importsCatalog.getMessage(method.getInputType()), usedImports);
       scanMesage(importsCatalog, importsCatalog.getMessage(method.getOutputType()), usedImports);
     })
@@ -65,10 +65,10 @@ const getClientFullName = (packageName, clientName) => (packageName.length > 0 ?
  * @param {FileDescriptorProto} fileDescriptor
  * @returns {boolean}
  */
-const isRxJsStreamNeeded = fileDescriptor =>
+const isRxJsStreamNeeded = (fileDescriptor) =>
   fileDescriptor
     .getServiceList()
-    .some(serviceDescriptor => serviceDescriptor.getMethodList().some(method => method.getServerStreaming() === true));
+    .some((serviceDescriptor) => serviceDescriptor.getMethodList().some((method) => method.getServerStreaming() === true));
 
 /**
  * @param {StringBuilder} builder
@@ -97,13 +97,14 @@ const generateJs = (importsCatalog, fileDescriptor) => {
 
   if (isRxJsStreamNeeded(fileDescriptor))
     builder
+      .appendLine('const { Metadata } = require("@grpc/grpc-js");')
       .appendLine('const { Subject } = require("rxjs");')
       .appendLine('const { streamToRx } = require("rxjs-stream")')
       .appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
-  importsCatalog.importedFiles.forEach(fileDescriptor => {
+  importsCatalog.importedFiles.forEach((fileDescriptor) => {
     const fileName = fileDescriptor.getName();
     if (usedImports.has(fileName) === false) return;
 
@@ -112,16 +113,16 @@ const generateJs = (importsCatalog, fileDescriptor) => {
     const namespaceName = packageName.length > 0 ? `${packageName}.${fileBaseName}` : fileBaseName;
 
     builder.appendLine(`const ${requiresGenerator.getNamespace(fileName)} = require("${requiresGenerator.getRequirePath(fileName)}");`);
-    set(root, namespaceName, builder => messagesGenerator.generate(builder, fileDescriptor));
+    set(root, namespaceName, (builder) => messagesGenerator.generate(builder, fileDescriptor));
   });
 
   const requirePath = requiresGenerator.getRequirePath(fileDescriptor.getName(), "grpc_pb");
-  const clientsList = fileDescriptor.getServiceList().map(x => `${x.getName()}Client: ${x.getName()}ClientRaw`);
+  const clientsList = fileDescriptor.getServiceList().map((x) => `${x.getName()}Client: ${x.getName()}ClientRaw`);
   builder.appendLine(`const { ${clientsList.join(", ")} } = require("${requirePath}");`).appendLine();
 
-  fileDescriptor.getServiceList().forEach(serviceDescriptor => {
+  fileDescriptor.getServiceList().forEach((serviceDescriptor) => {
     const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
-    set(root, clientFullName, builder => proxyGenerator.generate(builder, serviceDescriptor, importsCatalog));
+    set(root, clientFullName, (builder) => proxyGenerator.generate(builder, serviceDescriptor, importsCatalog));
   });
 
   return builder
@@ -135,11 +136,11 @@ const generateJs = (importsCatalog, fileDescriptor) => {
  * @param {FileDescriptorProto} fileDescriptor
  * @returns {boolean}
  */
-const isRxJsNeeded = fileDescriptor =>
+const isRxJsNeeded = (fileDescriptor) =>
   fileDescriptor
     .getServiceList()
-    .some(serviceDescriptor =>
-      serviceDescriptor.getMethodList().some(method => method.getClientStreaming() === true || method.getServerStreaming() === true)
+    .some((serviceDescriptor) =>
+      serviceDescriptor.getMethodList().some((method) => method.getClientStreaming() === true || method.getServerStreaming() === true)
     );
 
 /**
@@ -168,11 +169,13 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
   const builder = new StringBuilder();
 
   if (isRxJsNeeded(fileDescriptor)) builder.appendLine('import { Subscribable, Observable } from "rxjs";');
-  builder.appendLine('import { ChannelCredentials, Metadata, CallOptions, InterceptingCall, MethodDefinition } from "grpc";').appendLine();
+  builder
+    .appendLine('import { ChannelCredentials, Metadata, CallOptions, InterceptingCall, MethodDefinition } from "@grpc/grpc-js";')
+    .appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);
-  importsCatalog.importedFiles.forEach(fileDescriptor => {
+  importsCatalog.importedFiles.forEach((fileDescriptor) => {
     const fileName = fileDescriptor.getName();
     if (usedImports.has(fileName) === false) return;
 
@@ -181,11 +184,11 @@ const generateTypings = (importsCatalog, fileDescriptor) => {
     const namespaceName = packageName.length > 0 ? `${packageName}.${fileBaseName}` : fileBaseName;
 
     builder.appendLine(`import * as ${requiresGenerator.getNamespace(fileName)} from "${requiresGenerator.getRequirePath(fileName)}";`);
-    set(root, namespaceName, builder => messagesTypingsGenerator.generate(builder, fileDescriptor));
+    set(root, namespaceName, (builder) => messagesTypingsGenerator.generate(builder, fileDescriptor));
   });
-  fileDescriptor.getServiceList().forEach(serviceDescriptor => {
+  fileDescriptor.getServiceList().forEach((serviceDescriptor) => {
     const clientFullName = getClientFullName(fileDescriptor.getPackage(), `${serviceDescriptor.getName()}Client`);
-    set(root, clientFullName, builder => proxyTypingsGenerator.generate(builder, serviceDescriptor, importsCatalog));
+    set(root, clientFullName, (builder) => proxyTypingsGenerator.generate(builder, serviceDescriptor, importsCatalog));
   });
 
   clientOptionsTypingGenerator.generate(builder.appendLine());

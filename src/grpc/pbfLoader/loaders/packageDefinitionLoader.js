@@ -14,7 +14,7 @@ function createSerializer(formatter) {
   return function serialize(arg) {
     const pbf = new Pbf();
     formatter.write(arg, pbf);
-    return pbf.finish();
+    return Buffer.from(pbf.finish());
   };
 }
 
@@ -33,7 +33,7 @@ function createDeserializer(formatter) {
  * @param {string} serviceName
  * @param {import("protocol-buffers-schema/types").Method} methodScheme
  * @param {any} formatters
- * @returns {import("grpc").MethodDefinition}
+ * @returns {import("@grpc/grpc-js").MethodDefinition}
  */
 function createMethodDefinition(serviceName, methodScheme, formatters) {
   const requestFormatter = get(formatters, methodScheme.input_type);
@@ -55,7 +55,7 @@ function createMethodDefinition(serviceName, methodScheme, formatters) {
  * @param {string} serviceName
  * @param {import("protocol-buffers-schema/types").Service} serviceScheme
  * @param {any} formatters
- * @returns {import("grpc").ServiceDefinition<any>}
+ * @returns {import("@grpc/grpc-js").ServiceDefinition<any>}
  */
 function createServiceDefinition(serviceName, serviceScheme, formatters) {
   const serviceDefinition = {};
@@ -67,7 +67,7 @@ function createServiceDefinition(serviceName, serviceScheme, formatters) {
 
 /**
  * @param {import("protocol-buffers-schema/types").Schema} protoFileScheme
- * @returns {import("grpc").PackageDefinition}
+ * @returns {import("@grpc/grpc-js").PackageDefinition}
  */
 function createPackageDefinition(protoFileScheme) {
   const packageDefinition = {};
@@ -85,7 +85,7 @@ function createPackageDefinition(protoFileScheme) {
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
- * @returns {import("grpc").PackageDefinition}
+ * @returns {import("@grpc/grpc-js").PackageDefinition}
  */
 async function load(protoFilePath, options) {
   return createPackageDefinition(await schemeLoader.load(protoFilePath, options));
@@ -94,7 +94,7 @@ async function load(protoFilePath, options) {
 /**
  * @param {string} protoFilePath
  * @param {DefinitionLoadingOptions} [options]
- * @returns {import("grpc").PackageDefinition}
+ * @returns {import("@grpc/grpc-js").PackageDefinition}
  */
 function loadSync(protoFilePath, options) {
   return createPackageDefinition(schemeLoader.loadSync(protoFilePath, options));
