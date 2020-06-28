@@ -37,8 +37,13 @@ module.exports = class GrpcError extends Error {
     }
 
     const keyName = "details-bin";
-    if (isPassed(innerError)) result.add(keyName, Buffer.from(JSON.stringify({ message: innerError.message, stack: innerError.stack })));
-    else if (Array.isArray(details) === true) {
+    if (isPassed(innerError)) {
+      const stackEntries =
+        isPassed(innerError.stack === true) && typeof innerError.stack === "string"
+          ? innerError.stack.split("\n").map((line) => line.trim())
+          : [];
+      result.add(keyName, Buffer.from(JSON.stringify({ detail: innerError.message, stackEntries })));
+    } else if (Array.isArray(details) === true) {
       details.forEach((detail, i) => {
         const preparedDetail = Buffer.from(JSON.stringify(serializeError(detail)));
         if (i === 0) result.set(keyName, preparedDetail);

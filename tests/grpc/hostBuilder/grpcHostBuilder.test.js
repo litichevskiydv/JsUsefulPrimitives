@@ -116,7 +116,7 @@ const getSpanId = async (callerSpanId) => {
 const prepareErrorMatchingObject = (innerErrorMessage) =>
   expect.objectContaining({
     message: "13 INTERNAL: Unhandled exception has occurred",
-    details: [expect.objectContaining({ message: innerErrorMessage })],
+    details: [expect.objectContaining({ detail: innerErrorMessage })],
   });
 
 afterEach(() => {
