@@ -46,7 +46,7 @@ module.exports = class GrpcError extends Error {
 
   /**
    * @param {string} message
-   * @param {GrpcErrorOptions} options
+   * @param {GrpcErrorOptions} [options]
    */
   constructor(message, options = {}) {
     super(message);

@@ -1,6 +1,6 @@
 const path = require("path");
 const grpc = require("@grpc/grpc-js");
-const GrpcError = require("../../../src/grpc/error/grpcError");
+const { GrpcError } = require("../../../src/grpc/error");
 const protoLoader = require("../../../src/grpc/pbfLoader").packageDefinition;
 const { GrpcHostBuilder } = require("../../../src/grpc/hostBuilder");
 const {

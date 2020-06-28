@@ -1,5 +1,5 @@
 const grpc = require("@grpc/grpc-js");
-const GrpcError = require("../../error/grpcError");
+const { GrpcError } = require("../../error");
 
 /**
  * @param {Error} error
