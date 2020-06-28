@@ -1,4 +1,5 @@
 const grpc = require("@grpc/grpc-js");
+const { serializeError } = require("serialize-error");
 
 /**
  * @param {any} value
@@ -18,29 +19,33 @@ module.exports = class GrpcError extends Error {
   }
 
   /**
-   * @param {string} message
-   * @param {string | void} details
-   * @param {Error | void} innerError
-   * @returns {string}
-   */
-  static _getDetails(message, details, innerError) {
-    if (isPassed(innerError) && "message" in innerError && typeof innerError.message === "string") return innerError.message;
-    if (isPassed(details) && typeof details === "string") return details;
-    return message;
-  }
-
-  /**
    * @param {import("@grpc/grpc-js").Metadata | {[key: string]: string} | void} metadata
+   * @param {Array<any> | void} details
+   * @param {Error | void} innerError
    * @returns {import("@grpc/grpc-js").Metadata}
    */
-  static _getMetadata(metadata) {
-    if (isPassed(metadata) === false) return new grpc.Metadata();
-    if (metadata instanceof grpc.Metadata) return metadata;
+  static _getMetadata(metadata, details, innerError) {
+    /** @type {import("@grpc/grpc-js").Metadata} */
+    let result;
+    if (isPassed(metadata) === false) result = new grpc.Metadata();
+    else if (metadata instanceof grpc.Metadata) result = metadata.clone();
+    else {
+      result = new grpc.Metadata();
+      Object.entries(metadata).forEach(([key, value]) => {
+        if (typeof key === "string" && isPassed(value)) result.add(key, String(value));
+      });
+    }
 
-    const result = new grpc.Metadata();
-    Object.entries(metadata).forEach(([key, value]) => {
-      if (typeof key === "string" && isPassed(value)) result.add(key, String(value));
-    });
+    const keyName = "details-bin";
+    if (isPassed(innerError)) result.add(keyName, Buffer.from(JSON.stringify({ message: innerError.message, stack: innerError.stack })));
+    else if (Array.isArray(details) === true) {
+      details.forEach((detail, i) => {
+        const preparedDetail = Buffer.from(JSON.stringify(serializeError(detail)));
+        if (i === 0) result.set(keyName, preparedDetail);
+        else result.add(keyName, preparedDetail);
+      });
+    }
+
     return result;
   }
 
@@ -54,15 +59,14 @@ module.exports = class GrpcError extends Error {
     Error.captureStackTrace(this, this.constructor);
 
     this.code = GrpcError._getCode(options.statusCode);
-    this.details = GrpcError._getDetails(message, options.details, options.innerError);
-    this.metadata = GrpcError._getMetadata(options.metadata);
+    this.metadata = GrpcError._getMetadata(options.metadata, options.details, options.innerError);
   }
 };
 
 /**
  * @typedef {Object} GrpcErrorOptions
  * @property {import("@grpc/grpc-js").status} [statusCode] Response status code.
- * @property {string} [details] Response details.
  * @property {import("@grpc/grpc-js").Metadata | {[key: string]: string}} [metadata] Response metadata.
+ * @property {Array<any>} [details] Response details.
  * @property {Error} [innerError] The inner error information.
  */

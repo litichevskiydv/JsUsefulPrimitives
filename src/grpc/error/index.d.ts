@@ -1,16 +1,15 @@
-import { status, Metadata, StatusObject } from "@grpc/grpc-js";
+import { status, Metadata } from "@grpc/grpc-js";
 
 export interface GrpcErrorOptions {
   statusCode?: status;
-  details?: string;
   metadata?: Metadata | { [key: string]: string };
+  details?: Array<any>;
   innerError?: Error;
 }
 
-export class GrpcError extends Error implements StatusObject {
+export class GrpcError extends Error {
   constructor(message: string, options?: GrpcErrorOptions);
 
   code: status;
-  details: string;
   metadata: Metadata;
 }

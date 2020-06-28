@@ -113,6 +113,12 @@ const getSpanId = async (callerSpanId) => {
   return (await client.sayHello(request, metadata)).getSpanId();
 };
 
+const prepareErrorMatchingObject = (innerErrorMessage) =>
+  expect.objectContaining({
+    message: "13 INTERNAL: Unhandled exception has occurred",
+    details: [expect.objectContaining({ message: innerErrorMessage })],
+  });
+
 afterEach(() => {
   if (client) client.close();
   if (server) server.forceShutdown();
@@ -328,17 +334,18 @@ test("Must catch and log common error", async () => {
   // Given
   const mockLogger = { error: jest.fn() };
   const mockLoggersFactory = () => mockLogger;
+  const errorMessage = "Something went wrong";
 
   server = await createHost((x) =>
     x
       .addInterceptor(() => {
-        throw new Error("Something went wrong");
+        throw new Error(errorMessage);
       })
       .useLoggersFactory(mockLoggersFactory)
   );
 
   // When, Then
-  await expect(getMessage("Tom")).rejects.toEqual(new Error("13 INTERNAL: Something went wrong"));
+  await expect(getMessage("Tom")).rejects.toMatchObject(prepareErrorMatchingObject(errorMessage));
   expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
 });
 
@@ -364,17 +371,18 @@ test("Must handle error with non ASCII message", async () => {
   // Given
   const mockLogger = { error: jest.fn() };
   const mockLoggersFactory = () => mockLogger;
+  const errorMessage = "Что-то пошло не так";
 
   server = await createHost((x) =>
     x
       .addInterceptor(() => {
-        throw new Error("Что-то пошло не так");
+        throw new Error(errorMessage);
       })
       .useLoggersFactory(mockLoggersFactory)
   );
 
   // When, Then
-  await expect(getMessage("Tom")).rejects.toEqual(new Error("13 INTERNAL: Что-то пошло не так"));
+  await expect(getMessage("Tom")).rejects.toMatchObject(prepareErrorMatchingObject(errorMessage));
   expect(mockLogger.error).toBeCalledTimes(1);
 });
 
@@ -439,7 +447,7 @@ describe("Must test the handling of exceptions thrown in a client streaming call
     const firstRequest = new ClientOutgoingStreamingRequest();
     firstRequest.setNumber(1);
 
-    await expect(client.sum(from([firstRequest]))).rejects.toEqual(new Error("13 INTERNAL: Something went wrong")); // prettier-ignore
+    await expect(client.sum(from([firstRequest]))).rejects.toMatchObject(prepareErrorMatchingObject("Something went wrong"));
     expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
   });
 });
@@ -492,7 +500,7 @@ describe("Must test the handling of exceptions thrown in a server streaming call
       interceptors: [tracingClientInterceptor, clientsTrackingClientInterceptorsFactory()],
     });
 
-    await expect(client.range(new ClientIngoingStreamingRequest()).toPromise()).rejects.toEqual(new Error("13 INTERNAL: Something went wrong")); // prettier-ignore
+    await expect(client.range(new ClientIngoingStreamingRequest()).toPromise()).rejects.toMatchObject(prepareErrorMatchingObject("Something went wrong")); // prettier-ignore
     expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
   });
 });
@@ -548,7 +556,7 @@ describe("Must test the handling of exceptions thrown in a server bidirectional 
     const firstRequest = new ClientBidiStreamingRequest();
     firstRequest.setValue(1);
 
-    await expect(client.select(from([firstRequest])).toPromise()).rejects.toEqual(new Error("13 INTERNAL: Something went wrong")); // prettier-ignore
+    await expect(client.select(from([firstRequest])).toPromise()).rejects.toMatchObject(prepareErrorMatchingObject("Something went wrong")); // prettier-ignore
     expect(mockLogger.error).toHaveBeenCalledWith(expect.any(String), expect.containsError());
   });
 });

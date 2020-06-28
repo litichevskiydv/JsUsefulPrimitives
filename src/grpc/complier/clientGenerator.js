@@ -97,10 +97,10 @@ const generateJs = (importsCatalog, fileDescriptor) => {
 
   if (isRxJsStreamNeeded(fileDescriptor))
     builder
-      .appendLine('const { Metadata } = require("@grpc/grpc-js");')
       .appendLine('const { Subject } = require("rxjs");')
-      .appendLine('const { streamToRx } = require("rxjs-stream")')
-      .appendLine();
+      .appendLine('const { catchError } = require("rxjs/operators");')
+      .appendLine('const { streamToRx } = require("rxjs-stream")');
+  builder.appendLine('const { Metadata } = require("@grpc/grpc-js");').appendLine();
 
   const root = {};
   const usedImports = getUsedImports(importsCatalog, fileDescriptor);

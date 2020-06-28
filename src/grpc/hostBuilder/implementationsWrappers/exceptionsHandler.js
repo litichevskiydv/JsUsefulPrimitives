@@ -6,11 +6,7 @@ const { GrpcError } = require("../../error");
  * @returns {GrpcError}
  */
 const createGrpcError = (error) => {
-  const message = "Unhandled exception has occurred";
-  const stackTrace = error.stack.replace(/\r?\n|\r/g, " ");
-  return /^[ -~]*$/.test(stackTrace)
-    ? new GrpcError(message, { metadata: { stackTrace }, innerError: error })
-    : new GrpcError(message, { innerError: error });
+  return new GrpcError("Unhandled exception has occurred", { innerError: error });
 };
 
 /**
