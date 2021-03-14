@@ -32,22 +32,19 @@
     "grpc-gen-client": "./src/grpc/complier/bin/grpc-gen-client.js"
   },
   "dependencies": {
-    "@grpc/grpc-js": "1.1.1",
+    "@grpc/grpc-js": "1.2.11",
     "bl": "4.0.2",
     "camelcase": "6.0.0",
     "del": "5.1.0",
     "dot-prop": "5.2.0",
     "fs-extra": "9.0.1",
-    "google-protobuf": "3.12.2",
     "jaeger-client": "3.18.0",
     "load-json-file": "6.2.0",
     "make-dir": "3.1.0",
     "opentracing": "0.14.4",
     "parent-module": "2.0.0",
     "path-key": "3.1.1",
-    "pbf": "3.2.1",
     "prom-client": "12.0.0",
-    "protocol-buffers-schema": "3.4.0",
     "read-pkg-up": "7.0.1",
     "rxjs": "6.5.5",
     "rxjs-stream": "3.2.1",
@@ -57,12 +54,15 @@
   },
   "devDependencies": {
     "@types/jest": "26.0.0",
-    "grpc-tools": "1.9.0",
+    "google-protobuf": "^3.15.6",
+    "grpc-tools": "1.10.0",
     "jest": "26.0.1",
     "jest-extended": "0.11.5",
     "nodemon": "2.0.4",
-    "protobufjs": "6.9.0",
-    "ts-protoc-gen": "0.12.0"
+    "pbf": "^3.2.1",
+    "protobufjs": "6.10.2",
+    "protocol-buffers-schema": "^3.5.1",
+    "ts-protoc-gen": "0.14.0"
   },
   "jest": {
     "testEnvironment": "node",
