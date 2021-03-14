@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "1.2.11",
-    "bl": "4.0.2",
+    "bl": "4.0.3",
     "camelcase": "6.0.0",
     "del": "5.1.0",
     "dot-prop": "5.2.0",
